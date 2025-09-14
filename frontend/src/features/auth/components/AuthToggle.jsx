@@ -1,16 +1,13 @@
-import React from 'react';
-import './Auth.css';
+import "./Auth.css";
+import { useTranslation } from "react-i18next";
 
 const AuthToggle = ({ isLogin, onToggle }) => {
+  const { t } = useTranslation();
   return (
     <p className="auth-toggle-text">
-      {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
-      <button 
-        type="button" 
-        onClick={onToggle} 
-        className="auth-toggle-btn"
-      >
-        {isLogin ? "Sign up" : "Sign in"}
+      {isLogin ? t("auth.dontHaveAccount") : t("auth.alreadyHaveAccount")}{" "}
+      <button type="button" onClick={onToggle} className="auth-toggle-btn">
+        {isLogin ? t("auth.signUp") : t("auth.signIn")}
       </button>
     </p>
   );

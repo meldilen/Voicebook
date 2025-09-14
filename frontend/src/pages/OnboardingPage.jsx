@@ -4,22 +4,13 @@ import WaveAnimation from "../features/recordings/components/WaveAnimation";
 import Header from "../features/Header/Header";
 import "./OnboardingPage.css";
 import RecordingCard from "../features/recordings/components/RecordingCard";
-
-const prompts = [
-  "How was your day?",
-  "What did you feel today?",
-  "What made you happy or upset?",
-  "What are you thinking about right now?",
-  "What events were important to you today?",
-  "Is there anything you'd like to let go of?",
-  "What are you proud of today?",
-  "What caused you stress or anxiety?",
-];
+import { useTranslation } from "react-i18next";
 
 function OnboardingPage() {
   const [isRecording, setIsRecording] = useState(false);
   const [analysisResult, setAnalysisResult] = useState(null);
   const [currentPrompt, setCurrentPrompt] = useState("");
+  const { t } = useTranslation();
 
   const scrollToRecord = (e) => {
     e.preventDefault();
@@ -33,9 +24,10 @@ function OnboardingPage() {
   };
 
   useEffect(() => {
+    const prompts = t("onboarding.prompts", { returnObjects: true });
     const randomIndex = Math.floor(Math.random() * prompts.length);
     setCurrentPrompt(prompts[randomIndex]);
-  }, []);
+  }, [t]);
 
   return (
     <div className="container">
@@ -47,61 +39,46 @@ function OnboardingPage() {
       <div className="gradient-ball-5"></div>
 
       <header className="main-header">
-        <p className="logo0">Understand your emotions with every word.</p>
-        <h1 className="logo">Your AI Voice Diary</h1>
-        <p className="subtitle">
-          listens, analyzes your tone, and helps you reflect on your feelings
-          over time.
-        </p>
+        <p className="logo0">{t("onboarding.tagline")}</p>
+        <h1 className="logo">{t("onboarding.title")}</h1>
+        <p className="subtitle">{t("onboarding.subtitle")}</p>
       </header>
 
       <section className="features">
         <div className="card">
-          <h3>Voice Journaling</h3>
-          <p>Just talk—no typing needed.</p>
-          <p>
-            Record your thoughts in seconds, anytime. VoiceDiary captures your
-            tone, pace, and emotions naturally.
-          </p>
+          <h3>{t("onboarding.features.journaling.title")}</h3>
+          <p>{t("onboarding.features.journaling.subtitle")}</p>
+          <p>{t("onboarding.features.journaling.description")}</p>{" "}
         </div>
         <div className="card">
-          <h3>Emotion Analysis</h3>
-          <p>Understand how you truly feel.</p>
-          <p>
-            AI detects sadness, stress, joy, and more— then summarizes your
-            emotional state.
-          </p>
+          <h3>{t("onboarding.features.analysis.title")}</h3>
+          <p>{t("onboarding.features.analysis.subtitle")}</p>
+          <p>{t("onboarding.features.analysis.description")}</p>{" "}
         </div>
         <div className="card">
-          <h3>Mood Calendar</h3>
-          <p>See patterns over time.</p>
-          <p>
-            Color days highlight your emotional trends. Tap any date to revisit
-            past reflections.
-          </p>
+          <h3>{t("onboarding.features.calendar.title")}</h3>
+          <p>{t("onboarding.features.calendar.subtitle")}</p>
+          <p>{t("onboarding.features.calendar.description")}</p>{" "}
         </div>
       </section>
 
       <div className="cta-button">
         <button className="try-now-btn" onClick={scrollToRecord}>
-          Get started
+          {t("onboarding.cta")}
         </button>
       </div>
 
       <section className="try-block">
         <div className="Instr">
-          <h2>Try It Now — No Signup Needed</h2>
-          <p>
-            Get gentle, actionable suggestions. Based on your entries,
-            VoiceDiary offers self-care tips or prompts for deeper reflection.
-          </p>
+          <h2>{t("onboarding.trySection.title")}</h2>
+          <p>{t("onboarding.trySection.description")}</p>
         </div>
         <div className="how-works">
-          <h2>How Voice Diary works?</h2>
-          <h4>Record</h4>
-          <p>Speak freely about your day, thoughts, or worries</p>
-          <h4>Analyze</h4>
-          <p>We detect emotions, key topics, and mood trends.</p>
+          <h2>{t("onboarding.howItWorks.title")}</h2>
+          <h4>{t("onboarding.howItWorks.record.title")}</h4>
+          <p>{t("onboarding.howItWorks.record.description")}</p>{" "}
+          <h4>{t("onboarding.howItWorks.analyze.title")}</h4>
+          <p>{t("onboarding.howItWorks.analyze.description")}</p>{" "}
         </div>
       </section>
 

@@ -11,8 +11,11 @@ import { useNavigate } from "react-router-dom";
 import { useGetConsecutiveDaysQuery } from "../recordings/recordingsApi";
 import { selectCurrentUser } from "../auth/authSlice";
 import { useSelector } from "react-redux";
+import { useTranslation } from "react-i18next";
+import LanguageSwitcher from "../../app/LanguageSwitcher";
 
 function Header({ onCalendarToggle }) {
+  const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
   const isHomePage = location.pathname === "/homepage";
@@ -20,9 +23,7 @@ function Header({ onCalendarToggle }) {
 
   const currentUser = useSelector(selectCurrentUser);
 
-  const {
-    data: streakData,
-  } = useGetConsecutiveDaysQuery(currentUser?.ID, {
+  const { data: streakData } = useGetConsecutiveDaysQuery(currentUser?.ID, {
     skip: !currentUser?.ID,
   });
 
@@ -35,6 +36,8 @@ function Header({ onCalendarToggle }) {
       }`}
     >
       <div className="header-content">
+        <LanguageSwitcher />
+        
         {isHomePage || isJournalPage ? (
           <div className="home-header-nav">
             <div className="nav-group left-group">
@@ -42,20 +45,20 @@ function Header({ onCalendarToggle }) {
                 <div
                   className="nav-box calendar"
                   onClick={() => onCalendarToggle()}
-                  title="Calendar"
+                  title={t("header.calendar")}
                 >
                   <FaCalendarAlt className="icon" />
-                  <span className="nav-label">Calendar</span>
+                  <span className="nav-label">{t("header.calendar")}</span>
                 </div>
               )}
 
               <div
                 className="nav-box profile"
                 onClick={() => navigate("/profile")}
-                title="Profile"
+                title={t("header.profile")}
               >
                 <FaUser className="icon" />
-                <span className="nav-label">Profile</span>
+                <span className="nav-label">{t("header.profile")}</span>
               </div>
             </div>
 
@@ -65,25 +68,25 @@ function Header({ onCalendarToggle }) {
                 onClick={() =>
                   navigate(isJournalPage ? "/homepage" : "/journal")
                 }
-                title={isJournalPage ? "Home" : "Journal"}
+                title={isJournalPage ? t("header.record") : t("header.journal")}
               >
                 {isJournalPage ? (
                   <>
                     <FaMicrophone className="icon" />
-                    <span className="nav-label">Record</span>
+                    <span className="nav-label">{t("header.record")}</span>
                   </>
                 ) : (
                   <>
                     <FaBook className="icon" />
-                    <span className="nav-label">Journal</span>
+                    <span className="nav-label">{t("header.journal")}</span>
                   </>
                 )}
               </div>
 
-              <div className="nav-box progress" title="Progress">
+              <div className="nav-box progress" title={t("header.progress")}>
                 <div className="progress-content">
                   <FaChartLine className="icon" />
-                  <span className="progress-text">Day </span>
+                  <span className="progress-text">{t("header.day")} </span>
                   {streakDays > 0 && (
                     <span className="streak-badge">{streakDays}🔥</span>
                   )}
@@ -94,11 +97,11 @@ function Header({ onCalendarToggle }) {
         ) : (
           <div className="auth-buttons">
             <Link to="/login" className="login-btn">
-              <span className="login-text">Login</span>
+              <span className="login-text">{t("header.login")}</span>
               <FaUser className="login-icon" />
             </Link>
             <Link to="/signup" className="signup-btn">
-              Sign Up
+              {t("header.signUp")}
             </Link>
           </div>
         )}

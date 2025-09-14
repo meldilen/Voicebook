@@ -18,6 +18,7 @@
   justify-content: space-between;
   width: 100%;
   align-items: center;
+  position: relative;
 }
 
 .nav-group {
@@ -148,6 +149,13 @@
   animation: none;
 }
 
+.language-switcher-container {
+  position: absolute;
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
 @media (max-width: 768px) {
   .auth-buttons {
     gap: 10px;
@@ -198,6 +206,15 @@
     display: inline;
     font-size: 0.8rem;
     padding: 1px 4px;
+  }
+  .language-switcher-container {
+    position: static;
+    transform: none;
+    margin-right: 10px;
+  }
+  
+  .home-header-nav {
+    justify-content: center;
   }
 }
 
