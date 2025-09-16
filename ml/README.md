@@ -215,7 +215,7 @@ With this fusion approach, we approximate human ability 👤🧩 to interpret mi
 This method improves emotion recognition accuracy 📈 by capturing subtle interactions between voice and text signals, reflecting complex human emotional expression 🌈✨.
 
 ![Emotion Similarity Matrix](emotion_sim_matrix.png "Similarity Matrix")
-![Emotion Similarity Matrix](pic.png "Similarity Matrix")
+![Emotion Similarity Matrix](pic.jpeg "Similarity Matrix")
 
 ## 🔮 Future Plans
 
