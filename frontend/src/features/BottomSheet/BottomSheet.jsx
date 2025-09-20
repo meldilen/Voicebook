@@ -31,6 +31,8 @@ const BottomSheet = ({ isOpen, onClose, onOpen, children }) => {
     if (point === 'full') {
       updateSheetHeight(windowHeight);
       if (onOpen) onOpen();
+    } else if (point === 'peek') {
+      updateSheetHeight(40);
     } else {
       updateSheetHeight(0);
       if (onClose) onClose();
@@ -75,22 +77,37 @@ const BottomSheet = ({ isOpen, onClose, onOpen, children }) => {
     const windowHeight = window.innerHeight;
     
     const openThreshold = windowHeight * 0.5;
+    const peekThreshold = 30; // Минимальная высота для возврата в peek состояние
     
     if (currentHeight > openThreshold) {
       snapToPoint('full');
+    } else if (currentHeight > peekThreshold) {
+      snapToPoint('peek');
     } else {
       snapToPoint('closed');
     }
   }, [isMobile, snapToPoint]);
 
+  // Автоматически показываем peek состояние на мобильных устройствах
+  useEffect(() => {
+    if (isMobile) {
+      const timer = setTimeout(() => {
+        snapToPoint('peek');
+      }, 1000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [isMobile, snapToPoint]);
 
   useEffect(() => {
     if (isOpen) {
       snapToPoint('full');
+    } else if (isMobile) {
+      snapToPoint('peek');
     } else {
       snapToPoint('closed');
     }
-  }, [isOpen, snapToPoint]);
+  }, [isOpen, isMobile, snapToPoint]);
 
   if (!isMobile && !isOpen) return null;
 
