@@ -4,7 +4,8 @@ import { store } from "./app/store";
 import { useState } from "react";
 import OnboardingPage from "./pages/OnboardingPage";
 import AuthPage from "./pages/AuthPage";
-import HomePage from "./pages/HomePage";
+import HomePage from "./pages/NewHomePage";
+// import HomePage from "./pages/HomePage";
 import ProfilePage from "./pages/ProfilePage";
 import SettingsPage from "./pages/SettingsPage";
 import ProtectedRoute from "./app/ProtectedRoute";
@@ -29,13 +30,14 @@ return (
               </div>
             )}
             <Routes>
-              <Route path="/" element={<Navigate to="/onboarding" replace />} />
+              <Route path="/" element={<Navigate to="/homepage" replace />} />
+              <Route path="/homepage" element={<HomePage />} />
               <Route path="/onboarding" element={<OnboardingPage />} />
               <Route path="/login" element={<AuthPage />} />
               <Route path="/signup" element={<AuthPage />} />
               
               <Route element={<ProtectedRoute />}>
-                <Route path="/homepage" element={<HomePage />} />
+                {/* <Route path="/homepage" element={<HomePage />} /> */}
                 <Route path="/profile" element={<ProfilePage />} />
                 <Route path="/profile/settings" element={<SettingsPage />} />
                 <Route path="/journal" element={<JournalPage />} />

@@ -34,7 +34,7 @@ function HomePage() {
     const randomIndex = Math.floor(Math.random() * prompts.length);
     setCurrentPrompt(prompts[randomIndex]);
     
-    // Хоткей для открытия bottom sheet на десктопе
+    // Хоткей ctr + b для открытия bottom sheet на десктопе
     const handleKeyPress = (e) => {
       if (e.key === 'b' && e.ctrlKey) {
         setIsBottomSheetOpen(prev => !prev);
@@ -44,6 +44,10 @@ function HomePage() {
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, []);
+
+  const handleBottomSheetToggle = () => {
+    setIsBottomSheetOpen(prev => !prev);
+  };
 
   useEffect(() => {
     if (analysisResult && resultRef.current) {
@@ -90,6 +94,9 @@ function HomePage() {
 
       <Header
         onCalendarToggle={() => setShowCalendar(!showCalendar)}
+        availableRecordings={5}
+        emocoinsBalance={150}
+        onBottomSheetToggle={handleBottomSheetToggle}
       />
 
       <div className="home-content">
