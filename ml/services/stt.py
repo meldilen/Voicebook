@@ -90,14 +90,10 @@ def transcribe_audio(iam_token: str, local_file_path: str) -> str:
     """
     Основная функция: загружает файл, запускает распознавание и возвращает текст.
     """
-    print("[INFO] Загружаю файл в Object Storage...")
     audio_uri = upload_to_bucket(local_file_path)
 
-    print("[INFO] Отправляю на распознавание...")
     operation_id = start_transcription(iam_token, audio_uri)
 
-    print("[INFO] Жду результат...")
     transcript = get_transcription_result(iam_token, operation_id)
 
-    print("[INFO] Готово!")
     return transcript

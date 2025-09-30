@@ -19,22 +19,22 @@ def process_audio(audio_path: str):
 
     # транскрибация и эмоции аудио
     transcript = transcribe_audio(iam_token, audio_path)
-    print(transcript)
+    # print(transcript)
     audio_emotion = emotion_model.get_emotion(audio_path)
-    print(audio_emotion)
+    # print(audio_emotion)
 
     # запросы к GPT
     insights_prompt = load_prompt("ml/prompts/insights.txt")
     summary_prompt = load_prompt("ml/prompts/summary.txt")
 
     insights_json = call_gpt(transcript, insights_prompt, "yandexgpt", iam_token)
-    print(insights_json)
+    # print(insights_json)
     summary = call_gpt(transcript, summary_prompt, "yandexgpt-lite", iam_token)
-    print(summary)
+    # print(summary)
 
     # оркестрация эмоций
     text_emotion = json.loads(insights_json)["emotion"]
-    print(text_emotion)
+    # print(text_emotion)
     final_emotion = combine_emotions(audio_emotion, text_emotion)
 
     return {
