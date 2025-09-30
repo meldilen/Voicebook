@@ -1,0 +1,54 @@
+2025-09-30 13:54:58,367 - __main__ - INFO - Starting audio analysis process
+2025-09-30 13:55:14,741 - __main__ - INFO - Starting audio transcription
+2025-09-30 13:55:24,152 - __main__ - INFO - Audio transcription completed
+2025-09-30 13:55:24,153 - __main__ - INFO - Starting audio emotion analysis
+2025-09-30 13:55:44,212 - __main__ - INFO - Audio emotion analysis completed
+2025-09-30 13:55:44,216 - __main__ - INFO - Calling GPT for insights analysis
+2025-09-30 13:55:48,010 - __main__ - INFO - GPT insights analysis completed
+2025-09-30 13:55:48,011 - __main__ - INFO - Calling GPT for summary generation
+2025-09-30 13:55:49,035 - __main__ - INFO - GPT summary generation completed
+2025-09-30 13:55:49,036 - __main__ - INFO - Combining audio and text emotions
+2025-09-30 13:55:49,036 - __main__ - INFO - Emotions combined successfully
+2025-09-30 13:55:49,036 - __main__ - INFO - Audio analysis process completed successfully
+2025-09-30 15:03:15,923 - __main__ - INFO - Starting async audio analysis process
+2025-09-30 15:03:37,968 - __main__ - INFO - Starting async audio analysis process
+2025-09-30 15:03:50,606 - __main__ - INFO - Starting parallel audio processing
+2025-09-30 15:04:10,301 - __main__ - ERROR - Async audio analysis process failed
+Traceback (most recent call last):
+  File "c:\Users\Джамиля\Documents\project file\uni\summer2\Voicebook\ml\main.py", line 58, in process_audio
+    "transcript_length": len(transcript),
+                         ^^^^^^^^^^^^^^^
+TypeError: object of type 'coroutine' has no len()
+2025-09-30 15:11:30,512 - __main__ - INFO - Starting async audio analysis process
+2025-09-30 15:11:31,319 - __main__ - ERROR - Async audio analysis process failed
+Traceback (most recent call last):
+  File "c:\Users\Джамиля\Documents\project file\uni\summer2\Voicebook\ml\main.py", line 27, in process_audio
+    iam_token = await get_iam_token()
+                ^^^^^^^^^^^^^^^^^^^^^
+TypeError: object str can't be used in 'await' expression
+2025-09-30 15:13:01,607 - __main__ - INFO - Starting async audio analysis process
+2025-09-30 15:13:02,346 - __main__ - ERROR - Async audio analysis process failed
+Traceback (most recent call last):
+  File "c:\Users\Джамиля\Documents\project file\uni\summer2\Voicebook\ml\main.py", line 27, in process_audio
+    iam_token = await get_iam_token()
+                ^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Джамиля\Documents\project file\uni\summer2\Voicebook\ml\utils.py", line 31, in get_iam_token
+    return await resp.json()["iamToken"]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: object str can't be used in 'await' expression
+2025-09-30 15:20:21,526 - __main__ - INFO - Starting async audio analysis process
+2025-09-30 15:20:21,962 - __main__ - ERROR - Async audio analysis process failed
+Traceback (most recent call last):
+  File "c:\Users\Джамиля\Documents\project file\uni\summer2\Voicebook\ml\main.py", line 28, in process_audio
+    iam_token = await get_iam_token()  # No more asyncio.to_thread needed!
+                ^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Джамиля\Documents\project file\uni\summer2\Voicebook\ml\utils.py", line 31, in get_iam_token
+    if resp.status_code != 200:
+       ^^^^^^^^^^^^^^^^
+AttributeError: 'ClientResponse' object has no attribute 'status_code'
+2025-09-30 15:24:02,065 - __main__ - INFO - Starting async audio analysis process
+2025-09-30 15:24:11,321 - __main__ - INFO - Starting parallel audio processing
+2025-09-30 15:24:23,334 - __main__ - INFO - Parallel audio processing completed
+2025-09-30 15:24:23,337 - __main__ - INFO - Starting parallel GPT calls
+2025-09-30 15:24:26,739 - __main__ - INFO - Parallel GPT calls completed
+2025-09-30 15:24:26,740 - __main__ - INFO - Async audio analysis process completed successfully
