@@ -40,7 +40,7 @@ func (h *RecordHandler) UploadRecord(c *gin.Context) {
 	log.Printf("UploadRecord: received request")
 
 	userIDStr := c.PostForm("userID")
-	userID , err := strconv.Atoi(userIDStr)
+	userID, err := strconv.Atoi(userIDStr)
 	if err != nil {
 		log.Printf("UploadRecord: invalid userID %s, error: %v", userIDStr, err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
@@ -66,7 +66,14 @@ func (h *RecordHandler) UploadRecord(c *gin.Context) {
 	result, err := h.svc.GetFullAnalysis(c.Request.Context(), buf.Bytes())
 	if err != nil {
 		log.Printf("UploadRecord: failed to analyze audio, error: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to analyze audio"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to analyze audio: " + err.Error()})
+		return
+	}
+
+	// ADDED: Check if result is nil
+	if result == nil {
+		log.Printf("UploadRecord: ML service returned nil result")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "ML service returned empty response"})
 		return
 	}
 

@@ -1,4 +1,5 @@
 # stt.py
+import os
 import time
 import uuid
 import requests
@@ -48,7 +49,7 @@ def start_transcription(iam_token: str, audio_uri: str) -> str:
                 "model": "general",
                 "profanityFilter": False,
                 "literature_text": True,
-                "audioEncoding": "OGG_OPUS",
+                "audioEncoding": "LINEAR16_PCM",  # Changed from OGG_OPUS
             }
         },
         "audio": {"uri": f"https://{audio_uri}"},
@@ -56,9 +57,22 @@ def start_transcription(iam_token: str, audio_uri: str) -> str:
 
     headers = {"Authorization": f"Bearer {iam_token}"}
     resp = requests.post(STT_URL, headers=headers, json=payload)
-    resp.raise_for_status()
+    
+    # Better error handling
+    if resp.status_code != 200:
+        error_detail = resp.text
+        logger.error(f"Yandex STT API error {resp.status_code}: {error_detail}")
+        
+        # Try to parse error for better message
+        try:
+            error_json = resp.json()
+            error_detail = error_json.get('error', {}).get('message', error_detail)
+        except:
+            pass
+            
+        raise RuntimeError(f"Yandex STT API error: {error_detail}")
+        
     return resp.json()["id"]
-
 
 def get_transcription_result(iam_token: str, operation_id: str, poll_interval: int = 5) -> str:
     """
@@ -90,10 +104,72 @@ def transcribe_audio(iam_token: str, local_file_path: str) -> str:
     """
     Основная функция: загружает файл, запускает распознавание и возвращает текст.
     """
-    audio_uri = upload_to_bucket(local_file_path)
-
-    operation_id = start_transcription(iam_token, audio_uri)
-
-    transcript = get_transcription_result(iam_token, operation_id)
-
-    return transcript
+    try:
+        print(f"=== STARTING TRANSCRIPTION ===")
+        print(f"Audio file: {local_file_path}")
+        print(f"File exists: {os.path.exists(local_file_path)}")
+        
+        if os.path.exists(local_file_path):
+            file_size = os.path.getsize(local_file_path)
+            print(f"File size: {file_size} bytes")
+        else:
+            return "File not found"
+        
+        # Upload to bucket
+        print("Uploading to Yandex Object Storage...")
+        audio_uri = upload_to_bucket(local_file_path)
+        print(f"Uploaded to: {audio_uri}")
+        
+        # Start transcription
+        print("Starting transcription...")
+        operation_id = start_transcription(iam_token, audio_uri)
+        print(f"Operation ID: {operation_id}")
+        
+        # Get result
+        print("Waiting for transcription result...")
+        transcript = get_transcription_result(iam_token, operation_id)
+        print(f"Raw transcript: '{transcript}'")
+        
+        if transcript and transcript.strip():
+            return transcript
+        else:
+            print("WARNING: Empty transcript received")
+            return "Речь не распознана. Возможно, аудио слишком тихое или содержит только шум."
+        
+    except Exception as e:
+        print(f"TRANSCRIPTION ERROR: {e}")
+        import traceback
+        traceback.print_exc()
+        return f"Ошибка распознавания: {str(e)}"
+    
+def analyze_audio_file(file_path: str):
+    """Analyze audio file properties"""
+    try:
+        import librosa
+        import soundfile as sf
+        
+        print(f"=== AUDIO FILE ANALYSIS ===")
+        print(f"File: {file_path}")
+        
+        # Get file info
+        if os.path.exists(file_path):
+            file_size = os.path.getsize(file_path)
+            print(f"Size: {file_size} bytes")
+        
+        # Try to read with soundfile
+        try:
+            audio_sf, sr_sf = sf.read(file_path)
+            print(f"SoundFile: shape={audio_sf.shape}, sr={sr_sf}, dtype={audio_sf.dtype}")
+        except Exception as e:
+            print(f"SoundFile read failed: {e}")
+        
+        # Try to read with librosa
+        try:
+            audio_lib, sr_lib = librosa.load(file_path, sr=None)
+            print(f"Librosa: shape={audio_lib.shape}, sr={sr_lib}, dtype={audio_lib.dtype}")
+            print(f"Audio duration: {len(audio_lib)/sr_lib:.2f} seconds")
+        except Exception as e:
+            print(f"Librosa read failed: {e}")
+            
+    except Exception as e:
+        print(f"Audio analysis failed: {e}")

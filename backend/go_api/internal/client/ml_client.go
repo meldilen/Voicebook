@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"mime/multipart"
@@ -32,7 +33,8 @@ func CallMLService(ctx context.Context, mlURL string, fileBytes []byte) (*Analys
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 	
-	part, err := writer.CreateFormFile("audio", "audio.wav")
+	// CHANGE: Use "file" instead of "audio" to match ML service expectation
+	part, err := writer.CreateFormFile("file", "audio.wav")
 	if err != nil {
 		log.Printf("CallMLService: failed to create form file, error: %v", err)
 		return nil, err
@@ -60,7 +62,7 @@ func CallMLService(ctx context.Context, mlURL string, fileBytes []byte) (*Analys
 
 	// Create client with timeout
 	client := &http.Client{
-		Timeout: 60 * time.Second, // ML processing can take time
+		Timeout: 60 * time.Second,
 	}
 
 	// Send request
@@ -73,10 +75,11 @@ func CallMLService(ctx context.Context, mlURL string, fileBytes []byte) (*Analys
 	
 	log.Printf("CallMLService: received response with status code %d", resp.StatusCode)
 
+	// Handle non-200 responses
 	if resp.StatusCode != http.StatusOK {
 		bodyBytes, _ := io.ReadAll(resp.Body)
 		log.Printf("CallMLService: ML service returned error: %s", string(bodyBytes))
-		return nil, err
+		return nil, fmt.Errorf("ML service error: %s", string(bodyBytes))
 	}
 
 	// Decode JSON response
