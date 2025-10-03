@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useEffect } from "react";
 import {
   FaMicrophone,
   FaPause,
@@ -12,9 +12,7 @@ import "./AudioRecorder.css";
 import useAudioRecorder from "../hooks/useAudioRecorder";
 
 const AudioRecorder = ({ setIsRecording, onRecordingStart, onResult }) => {
-  const micIconRef = useRef(null);
-
-  const [showTooltip, setShowTooltip] = useState(false);
+  const particlesRef = useRef(null);
 
   const {
     isRecording,
@@ -36,42 +34,86 @@ const AudioRecorder = ({ setIsRecording, onRecordingStart, onResult }) => {
     stopRecording,
   } = useAudioRecorder({ setIsRecording, onRecordingStart, onResult });
 
+  useEffect(() => {
+    const container = particlesRef.current;
+    if (!container) return;
+
+    const createParticle = () => {
+      const particle = document.createElement("div");
+      const particleType = Math.floor(Math.random() * 6) + 1;
+
+      particle.className = "floating-particle";
+      particle.setAttribute("data-type", particleType.toString());
+
+      const size = Math.random() * 4 + 1;
+      const opacity = Math.random() * 0.3 + 0.1;
+
+      particle.style.cssText = `
+      width: ${size}px;
+      height: ${size}px;
+      opacity: ${opacity};
+      left: ${Math.random() * 100}%;
+      top: 100vh; /* Начинать снизу экрана */
+      background: ${
+        Math.random() > 0.5
+          ? "rgba(60, 96, 101, 0.76)"
+          : "rgba(199, 193, 249, 0.83)"
+      };
+      animation-delay: ${Math.random() * 2}s;
+    `;
+
+      container.appendChild(particle);
+
+      setTimeout(() => {
+        if (particle.parentNode) {
+          particle.parentNode.removeChild(particle);
+        }
+      }, 40000);
+    };
+
+    for (let i = 0; i < 20; i++) {
+      createParticle();
+    }
+
+    const interval = setInterval(createParticle, 800);
+
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div className="audio-recorder-wrapper">
+      <div ref={particlesRef} className="floating-particles-container"></div>
+
       <div className="audio-recorder-container">
         {permission === "denied" && (
-          <div className="permission-denied-banner">
-            <FaExclamationTriangle className="warning-icon" />
-            <span>
-              Microphone access is blocked. Please enable it in your browser
-              settings.
-            </span>
+          <div className="notification-banner warning">
+            <FaExclamationTriangle className="banner-icon warning" />
+            <div className="banner-content">
+              <div className="banner-title">Microphone Access Blocked</div>
+              <div className="banner-message">
+                Please enable microphone access in your browser settings to use
+                this feature.
+              </div>
+            </div>
           </div>
         )}
 
         <div
-          className={`recorder-circle ${isRecording ? "recording" : ""} ${
-            isPaused ? "is-paused" : ""
-          } ${permission === "denied" ? "disabled" : ""}`}
-          onMouseEnter={() => setShowTooltip(true)}
-          onMouseLeave={() => setShowTooltip(false)}
+          className={`voice-recorder ${isRecording ? "recording" : ""} ${
+            isPaused ? "paused" : ""
+          }`}
         >
-          {showTooltip && (
-            <div
-              className={`tooltip ${isRecording ? "recording-tooltip" : ""}`}
-            >
-              {isRecording ? "Click to stop" : "Click to record"}
-            </div>
-          )}
           <button
-            className="main-record-button"
+            className="voice-button"
             onClick={handleMainButtonClick}
             aria-label={isRecording ? "Stop recording" : "Start recording"}
-            disabled={permission === "denied" || isActionInProgress}
+            disabled={
+              permission === "denied" ||
+              isActionInProgress ||
+              (audioBlob && !isRecording)
+            }
           >
-            {isRecording ? <div className="pulse-animation"></div> : null}
-            <FaMicrophone className="mic-icon" ref={micIconRef} />
+            <FaMicrophone className="voice-icon" />
           </button>
         </div>
 
@@ -99,19 +141,10 @@ const AudioRecorder = ({ setIsRecording, onRecordingStart, onResult }) => {
 
         {isLoading && (
           <div className="loading-state">
-            <div className="dots-loading">
-              <div
-                className="dot"
-                style={{ "--delay": "0s", "--color": "#653c45" }}
-              ></div>
-              <div
-                className="dot"
-                style={{ "--delay": "0.2s", "--color": "#7a4b56" }}
-              ></div>
-              <div
-                className="dot"
-                style={{ "--delay": "0.4s", "--color": "#cac1f9" }}
-              ></div>
+            <div className="gentle-loading">
+              <div className="loading-circle"></div>
+              <div className="loading-circle"></div>
+              <div className="loading-circle"></div>
             </div>
             <p className="analysis-note">
               Voice recording is being analyzed...
@@ -150,24 +183,27 @@ const AudioRecorder = ({ setIsRecording, onRecordingStart, onResult }) => {
         )}
 
         {showDeleteConfirm && (
-          <div className="delete-confirmation">
-            <p>Are you sure you want to delete this recording?</p>
-            <div className="confirmation-buttons">
-              <button
-                className="confirm-button confirm-delete"
-                onClick={cancelRecording}
-              >
-                Yes, delete
-              </button>
-              <button
-                className="confirm-button cancel-delete"
-                onClick={handleDeleteCancel}
-              >
-                No, keep it
-              </button>
-            </div>
-          </div>
-        )}
+  <div className="delete-confirmation">
+    <div className="confirmation-text">
+      <h3>Delete Recording?</h3>
+      <p>This action cannot be undone. The recording will be permanently deleted.</p>
+    </div>
+    <div className="confirmation-buttons">
+      <button
+        className="btn btn-secondary"
+        onClick={handleDeleteCancel}
+      >
+        Cancel
+      </button>
+      <button
+        className="btn btn-danger"
+        onClick={cancelRecording}
+      >
+        Delete
+      </button>
+    </div>
+  </div>
+)}
       </div>
     </div>
   );

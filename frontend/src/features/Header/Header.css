@@ -18,6 +18,7 @@
   justify-content: space-between;
   width: 100%;
   align-items: center;
+  position: relative;
 }
 
 .nav-group {
@@ -58,8 +59,8 @@
 }
 
 .progress-text {
-  font-size: 0.9rem;
-  font-weight: 500;
+  font-size: 1rem;
+  font-weight: 600;
   flex-shrink: 0;
 }
 
@@ -180,6 +181,13 @@
     display: none;
   }
 
+  .mobile-value {
+    display: inline !important;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-left: 4px;
+  }
+
   .nav-box {
     padding: 8px;
     min-width: fit-content;
@@ -198,6 +206,18 @@
     display: inline;
     font-size: 0.8rem;
     padding: 1px 4px;
+  }
+  
+  .home-header-nav {
+    justify-content: space-between;
+  }
+
+  .nav-group.left-group {
+    justify-content: flex-start;
+  }
+
+  .nav-group.right-group {
+    justify-content: flex-end;
   }
 }
 

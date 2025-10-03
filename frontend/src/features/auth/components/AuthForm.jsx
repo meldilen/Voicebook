@@ -3,6 +3,7 @@ import "./Auth.css";
 import ErrorIcon from "./ErrorIcon";
 import HintIcon from "./HintIcon";
 import PasswordInput from "./PasswordInput";
+import { useTranslation } from "react-i18next";
 
 const AuthForm = ({ isLogin, onSubmit, authError }) => {
   const [formData, setFormData] = useState({
@@ -16,45 +17,47 @@ const AuthForm = ({ isLogin, onSubmit, authError }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [showRepeatPassword, setShowRepeatPassword] = useState(false);
 
+  const { t } = useTranslation();
+
   const validateForm = useCallback(() => {
     const newErrors = {};
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (!formData.email) {
-      newErrors.email = "Email is required";
+      newErrors.email = t("auth.errors.emailRequired");
     } else if (!emailRegex.test(formData.email)) {
-      newErrors.email = "Please enter a valid email (e.g., user@example.com)";
+      newErrors.email = t("auth.errors.emailInvalid");
     }
 
     if (!isLogin) {
       if (!formData.username) {
-        newErrors.username = "Username is required";
+        newErrors.username = t("auth.errors.usernameRequired");
       } else if (formData.username.length < 3) {
-        newErrors.username = "Username should be at least 3 characters";
+        newErrors.username = t("auth.errors.usernameShort");
       }
     }
 
     if (!formData.password) {
-      newErrors.password = "Password is required";
+      newErrors.password = t("auth.errors.passwordRequired");
     } else if (formData.password.length < 6) {
-      newErrors.password = "Password should be at least 6 characters";
+      newErrors.password = t("auth.errors.passwordShort");
     } else if (!/[A-Z]/.test(formData.password)) {
-      newErrors.password = "Add at least one uppercase letter";
+      newErrors.password = t("auth.errors.passwordUppercase");
     } else if (!/\d/.test(formData.password)) {
-      newErrors.password = "Add at least one number";
+      newErrors.password = t("auth.errors.passwordNumber");
     }
 
     if (!isLogin) {
       if (!formData.repeatPassword) {
-        newErrors.repeatPassword = "Please confirm your password";
+        newErrors.repeatPassword = t("auth.errors.repeatPasswordRequired");
       } else if (formData.password !== formData.repeatPassword) {
-        newErrors.repeatPassword = "Passwords don't match";
+        newErrors.repeatPassword = t("auth.errors.passwordsDontMatch");
       }
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  }, [formData, isLogin]);
+  }, [formData, isLogin, t]);
 
   useEffect(() => {
     if (Object.keys(touched).length > 0) {
@@ -127,12 +130,12 @@ const AuthForm = ({ isLogin, onSubmit, authError }) => {
         </div>
       )}
       <div className={`form-group ${hasError("email") ? "has-error" : ""}`}>
-        <label htmlFor="email">Your email</label>
+        <label htmlFor="email">{t("auth.email")}</label>
         <input
           id="email"
           name="email"
           type="email"
-          placeholder="Enter your email"
+          placeholder={t("auth.emailPlaceholder")}
           value={formData.email}
           onChange={handleChange}
           onBlur={handleBlur}
@@ -151,12 +154,12 @@ const AuthForm = ({ isLogin, onSubmit, authError }) => {
         <div
           className={`form-group ${hasError("username") ? "has-error" : ""}`}
         >
-          <label htmlFor="username">Username</label>
+          <label htmlFor="username">{t("auth.username")}</label>
           <input
             id="username"
             name="username"
             type="text"
-            placeholder="Choose a username"
+            placeholder={t("auth.usernamePlaceholder")}
             value={formData.username}
             onChange={handleChange}
             onBlur={handleBlur}
@@ -175,7 +178,7 @@ const AuthForm = ({ isLogin, onSubmit, authError }) => {
       )}
 
       <div className={`form-group ${hasError("password") ? "has-error" : ""}`}>
-        <label htmlFor="password">Password</label>
+        <label htmlFor="password">{t("auth.password")}</label>
         <PasswordInput
           id="password"
           name="password"
@@ -183,7 +186,7 @@ const AuthForm = ({ isLogin, onSubmit, authError }) => {
           onChange={handleChange}
           onBlur={handleBlur}
           onKeyDown={handleKeyDown}
-          placeholder="Enter your password"
+          placeholder={t("auth.passwordPlaceholder")}
           showPassword={showPassword}
           togglePasswordVisibility={() => setShowPassword(!showPassword)}
           errorId="password-error"
@@ -197,9 +200,7 @@ const AuthForm = ({ isLogin, onSubmit, authError }) => {
           !isLogin && (
             <div className="password-hint">
               <HintIcon />
-              <span>
-                At least 6 characters with one number and uppercase letter
-              </span>
+              <span>{t("auth.hints.passwordHint")}</span>
             </div>
           )
         )}
@@ -211,7 +212,7 @@ const AuthForm = ({ isLogin, onSubmit, authError }) => {
             hasError("repeatPassword") ? "has-error" : ""
           }`}
         >
-          <label htmlFor="repeatPassword">Repeat password</label>
+          <label htmlFor="repeatPassword">{t("auth.repeatPassword")}</label>
           <PasswordInput
             id="repeatPassword"
             name="repeatPassword"
@@ -219,7 +220,7 @@ const AuthForm = ({ isLogin, onSubmit, authError }) => {
             onChange={handleChange}
             onBlur={handleBlur}
             onKeyDown={handleKeyDown}
-            placeholder="Repeat your password"
+            placeholder={t().auth.repeatPasswordPlaceholder}
             showPassword={showRepeatPassword}
             togglePasswordVisibility={() =>
               setShowRepeatPassword(!showRepeatPassword)
@@ -236,7 +237,7 @@ const AuthForm = ({ isLogin, onSubmit, authError }) => {
       )}
 
       <button type="submit" className="auth-submit-btn">
-        {isLogin ? "Sign in" : "Sign up"}
+        {isLogin ? t("auth.signIn") : t("auth.signUp")}
       </button>
     </form>
   );
