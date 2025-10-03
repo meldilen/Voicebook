@@ -77,10 +77,26 @@ func (h *RecordHandler) UploadRecord(c *gin.Context) {
 		return
 	}
 
+	// Initialize safe defaults for result fields
+	emotion := "neutral"
+	if result.Emotion != "" {
+		emotion = result.Emotion
+	}
+
+	summary := ""
+	if result.Summary != "" {
+		summary = result.Summary
+	}
+
+	text := ""
+	if result.Text != "" {
+		text = result.Text
+	}
+
 	// Save record in DB
 	var recordID int
 	if userID != -1 {
-		recordID, err = h.svc.SaveRecord(c.Request.Context(), userID, result.Emotion, result.Summary)
+		recordID, err = h.svc.SaveRecord(c.Request.Context(), userID, emotion, summary)
 		if err != nil {
 			log.Printf("UploadRecord: failed to save record, error: %v", err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save record"})
@@ -105,9 +121,9 @@ func (h *RecordHandler) UploadRecord(c *gin.Context) {
 	response := gin.H{
 		"user_id": userID,
 		"record_id": recordID,
-		"emotion": result.Emotion,
-		"summary": result.Summary,
-		"text": result.Text,
+		"emotion": emotion,
+		"summary": summary,
+		"text": text,
 	}
 
 	// Add insights to response if available
@@ -201,6 +217,17 @@ func (h *RecordHandler) GetRecordAnalysis(c *gin.Context) {
 		return
 	}
 
+	// ADDED: Safe handling of record fields
+	emotion := "neutral"
+	if record.Emotion != "" {
+		emotion = record.Emotion
+	}
+
+	summary := ""
+	if record.Summary != "" {
+		summary = record.Summary
+	}
+
 	var insightsMap map[string]interface{}
 	if record.Insights.Valid && record.Insights.String != "" {
 		if err := json.Unmarshal([]byte(record.Insights.String), &insightsMap); err != nil {
@@ -214,8 +241,8 @@ func (h *RecordHandler) GetRecordAnalysis(c *gin.Context) {
 		"record_id":    record.ID,
 		"user_id":     record.UserID,
 		"record_date":  record.RecordDate,
-		"emotion":      record.Emotion,
-		"summary":      record.Summary,
+		"emotion":      emotion,
+		"summary":      summary,
 		"feedback":     record.Feedback,
 	}
 
@@ -267,23 +294,36 @@ func (h *RecordHandler) GetRecordInsights(c *gin.Context) {
 		return
 	}
 
+	// ADDED: Safe handling of nil result
+	if result == nil {
+		log.Printf("GetRecordInsights: ML service returned nil result")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "ML service returned empty response"})
+		return
+	}
+
+	// ADDED: Safe handling of nil Insights
+	insights := result.Insights
+	if insights == nil {
+		log.Printf("GetRecordInsights: insights is nil, using empty map")
+		insights = make(map[string]interface{})
+	}
+
 	// Save insights if recordID is provided and valid
 	if input.RecordID != -1 && input.RecordID > 0 { 
-		insightsBytes, err := json.Marshal(result.Insights)
+		insightsBytes, err := json.Marshal(insights)
 		if err != nil {
 			log.Printf("GetRecordInsights: failed to marshal insights, error: %v", err)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to process insights"})
-			return
-		}
-		
-		err = h.svc.SaveInsights(c.Request.Context(), input.RecordID, string(insightsBytes)) 
-		if err != nil {
-			log.Printf("GetRecordInsights: failed to save insights, error: %v", err)
-			// Don't return error here, just log it and continue
+			// Don't return error here, just log it and continue with response
+		} else {
+			err = h.svc.SaveInsights(c.Request.Context(), input.RecordID, string(insightsBytes)) 
+			if err != nil {
+				log.Printf("GetRecordInsights: failed to save insights, error: %v", err)
+				// Don't return error here, just log it and continue
+			}
 		}
 	}
 
-	c.JSON(http.StatusOK, gin.H{"insights": result.Insights})
+	c.JSON(http.StatusOK, gin.H{"insights": insights})
 	log.Println("GetRecordInsights: analysis completed successfully")
 }
 

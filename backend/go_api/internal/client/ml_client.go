@@ -13,11 +13,11 @@ import (
 )
 
 type AnalysisResult struct {
-	Emotion   string         `json:"emotion"`
-	Summary   string         `json:"summary"`
-	Text      string         `json:"transcript"`
-	Insights  map[string]any `json:"insights"`
-	Transcript string        `json:"transcript"`
+	Emotion    string         `json:"emotion"`
+	Summary    string         `json:"summary"`
+	Text       string         `json:"text"`
+	Insights   map[string]any `json:"insights"`
+	Transcript string         `json:"transcript"`
 }
 
 type CombinedData struct {
@@ -26,15 +26,23 @@ type CombinedData struct {
 }
 
 // CallMLService sends audio file to ML service for processing
+// CallMLService sends audio file to ML service for processing
 func CallMLService(ctx context.Context, mlURL string, fileBytes []byte) (*AnalysisResult, error) {
-	log.Printf("CallMLService: sending audio to ML service at %s", mlURL)
+    // Generate a default filename with .ogg extension
+    filename := "audio_" + time.Now().Format("20060102_150405") + ".ogg"
+    return CallMLServiceWithFilename(ctx, mlURL, fileBytes, filename)
+}
+
+// CallMLServiceWithFilename sends audio file to ML service with specific filename
+func CallMLServiceWithFilename(ctx context.Context, mlURL string, fileBytes []byte, filename string) (*AnalysisResult, error) {
+	log.Printf("CallMLService: sending audio to ML service at %s, file size: %d bytes", mlURL, len(fileBytes))
 
 	// Create a new multipart writer
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 	
-	// CHANGE: Use "file" instead of "audio" to match ML service expectation
-	part, err := writer.CreateFormFile("file", "audio.wav")
+	// Use the provided filename
+	part, err := writer.CreateFormFile("file", filename)
 	if err != nil {
 		log.Printf("CallMLService: failed to create form file, error: %v", err)
 		return nil, err
@@ -49,7 +57,7 @@ func CallMLService(ctx context.Context, mlURL string, fileBytes []byte) (*Analys
 		log.Printf("CallMLService: failed to close writer, error: %v", err)
 		return nil, err
 	}
-	log.Printf("CallMLService: created multipart form with audio file")
+	log.Printf("CallMLService: created multipart form with audio file: %s", filename)
 
 	// Create HTTP POST request to process_audio endpoint
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, mlURL+"/process_audio", body)
@@ -58,11 +66,10 @@ func CallMLService(ctx context.Context, mlURL string, fileBytes []byte) (*Analys
 		return nil, err
 	}
 	req.Header.Set("Content-Type", writer.FormDataContentType())
-	log.Printf("CallMLService: set request headers")
 
 	// Create client with timeout
 	client := &http.Client{
-		Timeout: 60 * time.Second,
+		Timeout: 120 * time.Second, // Increased timeout for audio processing
 	}
 
 	// Send request
@@ -89,9 +96,11 @@ func CallMLService(ctx context.Context, mlURL string, fileBytes []byte) (*Analys
 		return nil, err
 	}
 	
-	// Map transcript to text for backward compatibility
+	// Ensure both text and transcript fields are populated
 	if result.Text == "" && result.Transcript != "" {
 		result.Text = result.Transcript
+	} else if result.Transcript == "" && result.Text != "" {
+		result.Transcript = result.Text
 	}
 	
 	log.Printf("CallMLService: successfully processed audio, emotion: %s, summary length: %d, transcript length: %d", 
