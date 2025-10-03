@@ -6,7 +6,6 @@ import aiofiles
 from config import SERVICE_ACCOUNT_ID, KEY_ID, PRIVATE_KEY
 
 async def get_iam_token() -> str:
-    """Асинхронная генерация IAM токена"""
     now = int(time.time())
     payload = {
         "aud": "https://iam.api.cloud.yandex.net/iam/v1/tokens",
@@ -36,6 +35,5 @@ async def get_iam_token() -> str:
 
 
 async def load_prompt(path: str) -> str:
-    """Асинхронная загрузка промпта из файла"""
     async with aiofiles.open(path, "r", encoding="utf-8") as f:
         return (await f.read()).strip()

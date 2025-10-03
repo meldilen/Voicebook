@@ -23,9 +23,8 @@ async def process_audio(audio_path: str) -> Dict[str, Any]:
     logger.info("Starting async audio analysis process", extra={"audio_path": audio_path})
     
     try:
-        # Get IAM token - now truly async
         logger.debug("Retrieving IAM token")
-        iam_token = await get_iam_token()  # No more asyncio.to_thread needed!
+        iam_token = await get_iam_token() 
         logger.debug("IAM token retrieved successfully")
 
         # Initialize emotion model (CPU-bound, run in thread)
@@ -37,7 +36,7 @@ async def process_audio(audio_path: str) -> Dict[str, Any]:
         logger.info("Starting parallel audio processing")
         
         # Both are properly async now
-        transcript_task = transcribe_audio(iam_token, audio_path)  # Already async
+        transcript_task = transcribe_audio(iam_token, audio_path) 
         emotion_task = asyncio.to_thread(emotion_model.get_emotion, audio_path)
         
         transcript, audio_emotion = await asyncio.gather(
@@ -60,10 +59,9 @@ async def process_audio(audio_path: str) -> Dict[str, Any]:
                        "audio_emotion": audio_emotion
                    })
 
-        # Load prompts asynchronously - now truly async
         logger.debug("Loading GPT prompts asynchronously")
-        insights_prompt_task = load_prompt("ml/prompts/insights.txt")  # Already async
-        summary_prompt_task = load_prompt("ml/prompts/summary.txt")    # Already async
+        insights_prompt_task = load_prompt("ml/prompts/insights.txt")  
+        summary_prompt_task = load_prompt("ml/prompts/summary.txt")   
         
         insights_prompt, summary_prompt = await asyncio.gather(
             insights_prompt_task,
@@ -71,10 +69,10 @@ async def process_audio(audio_path: str) -> Dict[str, Any]:
         )
         logger.debug("GPT prompts loaded successfully")
 
-        # Parallel: Get insights AND summary from GPT - now truly async
+        # Parallel: Get insights AND summary from GPT 
         logger.info("Starting parallel GPT calls")
-        insights_task = call_gpt(transcript, insights_prompt, "yandexgpt", iam_token)  # Already async
-        summary_task = call_gpt(transcript, summary_prompt, "yandexgpt-lite", iam_token)  # Already async
+        insights_task = call_gpt(transcript, insights_prompt, "yandexgpt", iam_token) 
+        summary_task = call_gpt(transcript, summary_prompt, "yandexgpt-lite", iam_token) 
         
         insights_json, summary = await asyncio.gather(
             insights_task,
