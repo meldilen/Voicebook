@@ -6,10 +6,11 @@ import {
   useGetMeQuery,
 } from "../features/auth/authApi";
 import { useDispatch, useSelector } from "react-redux";
-import { setCredentials, setError} from "../features/auth/authSlice";
+import { setCredentials, setError } from "../features/auth/authSlice";
 import "./AuthPage.css";
 import AuthForm from "../features/auth/components/AuthForm";
 import AuthToggle from "../features/auth/components/AuthToggle";
+import { useTranslation } from "react-i18next";
 
 function AuthPage() {
   const location = useLocation();
@@ -22,6 +23,8 @@ function AuthPage() {
   const [login] = useLoginMutation();
 
   const isLogin = location.pathname === "/login";
+
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (user) {
@@ -85,9 +88,9 @@ function AuthPage() {
   return (
     <div className="auth">
       <div className="gradient-ball" />
-<div className="gradient-ball-2" />
-<div className="gradient-ball-3" />
-<div className="gradient-ball-4" />
+      <div className="gradient-ball-2" />
+      <div className="gradient-ball-3" />
+      <div className="gradient-ball-4" />
       <div className="auth-left">
         <button
           className="back-button"
@@ -111,7 +114,7 @@ function AuthPage() {
           </svg>
         </button>
         <h2 className={isLogin ? "login-title" : "signup-title"}>
-          {isLogin ? "Sign in" : "Sign up"}
+          {isLogin ? t("auth.signIn") : t("auth.signUp")}
         </h2>
         <AuthForm
           isLogin={isLogin}

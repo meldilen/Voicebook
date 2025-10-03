@@ -1,0 +1,89 @@
+{
+  "auth": {
+    "email": "Your email",
+    "emailPlaceholder": "Enter your email",
+    "username": "Username",
+    "usernamePlaceholder": "Choose a username",
+    "password": "Password",
+    "passwordPlaceholder": "Enter your password",
+    "repeatPassword": "Repeat password",
+    "repeatPasswordPlaceholder": "Repeat your password",
+    "signIn": "Sign in",
+    "signUp": "Sign up",
+    "dontHaveAccount": "Don't have an account?",
+    "alreadyHaveAccount": "Already have an account?",
+    "errors": {
+      "emailRequired": "Email is required",
+      "emailInvalid": "Please enter a valid email (e.g., user@example.com)",
+      "usernameRequired": "Username is required",
+      "usernameShort": "Username should be at least 3 characters",
+      "passwordRequired": "Password is required",
+      "passwordShort": "Password should be at least 6 characters",
+      "passwordUppercase": "Add at least one uppercase letter",
+      "passwordNumber": "Add at least one number",
+      "repeatPasswordRequired": "Please confirm your password",
+      "passwordsDontMatch": "Passwords don't match"
+    },
+    "hints": {
+      "passwordHint": "At least 6 characters with one number and uppercase letter"
+    }
+  },
+  "header": {
+    "calendar": "Calendar",
+    "profile": "Profile",
+    "record": "Record",
+    "journal": "Journal",
+    "progress": "Progress",
+    "day": "Day",
+    "login": "Login",
+    "signUp": "Sign Up"
+  },
+  "onboarding": {
+    "tagline": "Understand your emotions with every word",
+    "title": "Your AI Voice Diary",
+    "subtitle": "listens, analyzes your tone, and helps you reflect on your feelings over time",
+    "features": {
+      "journaling": {
+        "title": "Voice Journaling",
+        "subtitle": "Just talk—no typing needed.",
+        "description": "Record your thoughts in seconds, anytime. VoiceDiary captures your tone, pace, and emotions naturally."
+      },
+      "analysis": {
+        "title": "Emotion Analysis",
+        "subtitle": "Understand how you truly feel.",
+        "description": "AI detects sadness, stress, joy, and more— then summarizes your emotional state."
+      },
+      "calendar": {
+        "title": "Mood Calendar",
+        "subtitle": "See patterns over time.",
+        "description": "Color days highlight your emotional trends. Tap any date to revisit past reflections."
+      }
+    },
+    "cta": "Get started",
+    "trySection": {
+      "title": "Try It Now — No Signup Needed",
+      "description": "Get gentle, actionable suggestions. Based on your entries, VoiceDiary offers self-care tips or prompts for deeper reflection."
+    },
+    "howItWorks": {
+      "title": "How Voice Diary works?",
+      "record": {
+        "title": "Record",
+        "description": "Speak freely about your day, thoughts, or worries"
+      },
+      "analyze": {
+        "title": "Analyze",
+        "description": "We detect emotions, key topics, and mood trends"
+      }
+    },
+    "prompts": [
+      "How was your day?",
+      "What did you feel today?",
+      "What made you happy or upset?",
+      "What are you thinking about right now?",
+      "What events were important to you today?",
+      "Is there anything you'd like to let go of?",
+      "What are you proud of today?",
+      "What caused you stress or anxiety?"
+    ]
+  }
+}
