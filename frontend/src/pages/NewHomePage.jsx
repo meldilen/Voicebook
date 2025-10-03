@@ -6,6 +6,7 @@ import FeedbackWidget from "../features/recordings/components/FeedbackWidget";
 import Calendar from "../features/calendar/components/MoodCalendar";
 import Header from "../features/Header/Header";
 import BottomSheet from "../features/BottomSheet/BottomSheet";
+import BottomSheetNavigator from "../features/BottomSheet/BottomSheetNavigator";
 import "./NewHomePage.css";
 import { useSetRecordingFeedbackMutation } from "../features/recordings/recordingsApi";
 
@@ -26,27 +27,45 @@ function HomePage() {
   const [analysisResult, setAnalysisResult] = useState(null);
   const [showFeedback, setShowFeedback] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
-  const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
+  const [bottomSheetState, setBottomSheetState] = useState("peek");
   const resultRef = useRef(null);
   const [setFeedback] = useSetRecordingFeedbackMutation();
 
   useEffect(() => {
     const randomIndex = Math.floor(Math.random() * prompts.length);
     setCurrentPrompt(prompts[randomIndex]);
-    
+
     // Хоткей ctr + b для открытия bottom sheet на десктопе
     const handleKeyPress = (e) => {
-      if (e.key === 'b' && e.ctrlKey) {
-        setIsBottomSheetOpen(prev => !prev);
+      if (e.key === "b" && e.ctrlKey) {
+        setBottomSheetState((prev) => {
+          if (prev === "peek" || prev === "closed") {
+            return "full";
+          } else {
+            return "peek";
+          }
+        });
       }
     };
-    
-    window.addEventListener('keydown', handleKeyPress);
-    return () => window.removeEventListener('keydown', handleKeyPress);
+
+    window.addEventListener("keydown", handleKeyPress);
+    return () => window.removeEventListener("keydown", handleKeyPress);
   }, []);
 
   const handleBottomSheetToggle = () => {
-    setIsBottomSheetOpen(prev => !prev);
+    if (bottomSheetState === "peek" || bottomSheetState === "closed") {
+      setBottomSheetState("full");
+    } else {
+      setBottomSheetState("peek");
+    }
+  };
+
+  const handleBottomSheetClose = () => {
+    setBottomSheetState("closed");
+  };
+
+  const handleBottomSheetOpen = () => {
+    setBottomSheetState("full");
   };
 
   useEffect(() => {
@@ -126,14 +145,15 @@ function HomePage() {
       )}
 
       <BottomSheet
-        isOpen={isBottomSheetOpen}
-        onClose={() => setIsBottomSheetOpen(false)}
-        onOpen={() => setIsBottomSheetOpen(true)}
+        isOpen={bottomSheetState === "full"}
+        isPeek={bottomSheetState === "peek"}
+        onClose={handleBottomSheetClose}
+        onOpen={handleBottomSheetOpen}
+        onTogglePeek={() =>
+          setBottomSheetState(bottomSheetState === "peek" ? "full" : "peek")
+        }
       >
-        <div className="bottom-sheet-content">
-          <h3>Your Records</h3>
-          <p>Here will be your recording history and additional features</p>
-        </div>
+        <BottomSheetNavigator />
       </BottomSheet>
 
       {showCalendar && (
