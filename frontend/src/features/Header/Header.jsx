@@ -7,6 +7,7 @@ import {
   FaBook,
   FaBars,
   FaCoins,
+  FaTrophy,
 } from "react-icons/fa";
 import "./Header.css";
 import { useNavigate } from "react-router-dom";
@@ -29,6 +30,7 @@ function Header({
 
   const isHomePage = location.pathname === "/homepage";
   const isJournalPage = location.pathname === "/journal";
+  const isAchievementsPage = location.pathname === "/achievements";
 
   const currentUser = useSelector(selectCurrentUser);
 
@@ -49,14 +51,119 @@ function Header({
     return () => window.removeEventListener("resize", checkIsMobile);
   }, []);
 
+  const renderDesktopLeftGroup = () => {
+    if (isHomePage) {
+      return (
+        <>
+          <div
+            className="nav-box achievements"
+            onClick={() => navigate("/achievements")}
+            title={t("header.achievements")}
+          >
+            <FaTrophy className="icon" />
+            <span className="nav-label">Достижения</span>
+          </div>
+          <div
+            className="nav-box profile"
+            onClick={() => navigate("/profile")}
+            title={t("header.profile")}
+          >
+            <FaUser className="icon" />
+            <span className="nav-label">{t("header.profile")}</span>
+          </div>
+          <div
+            className="nav-box calendar"
+            onClick={() => onCalendarToggle()}
+            title={t("header.calendar")}
+          >
+            <FaCalendarAlt className="icon" />
+            <span className="nav-label">{t("header.calendar")}</span>
+          </div>
+          <div
+            className="nav-box home"
+            onClick={() => navigate("/journal")}
+            title={t("header.journal")}
+          >
+            <FaBook className="icon" />
+            <span className="nav-label">{t("header.journal")}</span>
+          </div>
+        </>
+      );
+    }
+
+    if (isJournalPage) {
+      return (
+        <>
+          <div
+            className="nav-box achievements"
+            onClick={() => navigate("/achievements")}
+            title={t("header.achievements")}
+          >
+            <FaTrophy className="icon" />
+            <span className="nav-label">Достижения</span>
+          </div>
+          <div
+            className="nav-box profile"
+            onClick={() => navigate("/profile")}
+            title={t("header.profile")}
+          >
+            <FaUser className="icon" />
+            <span className="nav-label">{t("header.profile")}</span>
+          </div>
+          <div
+            className="nav-box home"
+            onClick={() => navigate("/homepage")}
+            title={t("header.record")}
+          >
+            <FaMicrophone className="icon" />
+            <span className="nav-label">{t("header.record")}</span>
+          </div>
+        </>
+      );
+    }
+
+    if (isAchievementsPage) {
+      return (
+        <>
+          <div
+            className="nav-box home"
+            onClick={() => navigate("/homepage")}
+            title={t("header.record")}
+          >
+            <FaMicrophone className="icon" />
+            <span className="nav-label">{t("header.record")}</span>
+          </div>
+          <div
+            className="nav-box profile"
+            onClick={() => navigate("/profile")}
+            title={t("header.profile")}
+          >
+            <FaUser className="icon" />
+            <span className="nav-label">{t("header.profile")}</span>
+          </div>
+          <div
+            className="nav-box home"
+            onClick={() => navigate("/journal")}
+            title={t("header.journal")}
+          >
+            <FaBook className="icon" />
+            <span className="nav-label">{t("header.journal")}</span>
+          </div>
+        </>
+      );
+    }
+
+    return null;
+  };
+
   return (
     <header
       className={`sticky-header ${
-        isHomePage || isJournalPage ? "transparent" : ""
+        isHomePage || isJournalPage || isAchievementsPage ? "transparent" : ""
       }`}
     >
       <div className="header-content">
-        {isHomePage || isJournalPage ? (
+        {isHomePage || isJournalPage || isAchievementsPage ? (
           <div className={`home-header-nav ${isMobile ? "mobile-nav" : ""}`}>
             {isMobile ? (
               <>
@@ -100,47 +207,7 @@ function Header({
             ) : (
               <>
                 <div className="nav-group left-group">
-                  {isHomePage && (
-                    <div
-                      className="nav-box calendar"
-                      onClick={() => onCalendarToggle()}
-                      title={t("header.calendar")}
-                    >
-                      <FaCalendarAlt className="icon" />
-                      <span className="nav-label">{t("header.calendar")}</span>
-                    </div>
-                  )}
-
-                  <div
-                    className="nav-box profile"
-                    onClick={() => navigate("/profile")}
-                    title={t("header.profile")}
-                  >
-                    <FaUser className="icon" />
-                    <span className="nav-label">{t("header.profile")}</span>
-                  </div>
-
-                  <div
-                    className="nav-box home"
-                    onClick={() =>
-                      navigate(isJournalPage ? "/homepage" : "/journal")
-                    }
-                    title={
-                      isJournalPage ? t("header.record") : t("header.journal")
-                    }
-                  >
-                    {isJournalPage ? (
-                      <>
-                        <FaMicrophone className="icon" />
-                        <span className="nav-label">{t("header.record")}</span>
-                      </>
-                    ) : (
-                      <>
-                        <FaBook className="icon" />
-                        <span className="nav-label">{t("header.journal")}</span>
-                      </>
-                    )}
-                  </div>
+                  {renderDesktopLeftGroup()}
                 </div>
 
                 <div className="nav-group right-group">

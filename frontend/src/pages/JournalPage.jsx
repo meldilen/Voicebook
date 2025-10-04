@@ -32,20 +32,18 @@ function JournalPage() {
   };
 
   const toggleExpandRecord = useCallback((recordId) => {
-    setExpandedRecord(prev => prev === recordId ? null : recordId);
+    setExpandedRecord((prev) => (prev === recordId ? null : recordId));
   }, []);
 
   if (isLoading || isFetching) {
     return (
-      
       <>
-      
         <Header />
         <div className="journal-page loading">
-        <div className="gradient-ball"></div>
-<div className="gradient-ball-2"></div>
-<div className="gradient-ball-3"></div>
-<div className="gradient-ball-4"></div>
+          <div className="gradient-ball"></div>
+          <div className="gradient-ball-2"></div>
+          <div className="gradient-ball-3"></div>
+          <div className="gradient-ball-4"></div>
           <div className="dots-loading">
             <div
               className="dot"
@@ -99,7 +97,7 @@ function JournalPage() {
           onLimitChange={handleLimitChange}
         />
 
-        <RecordingsList 
+        <RecordingsList
           recordings={recordings}
           expandedRecord={expandedRecord}
           toggleExpandRecord={toggleExpandRecord}

@@ -1,10 +1,8 @@
 .filter-controls {
   display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  gap: 32px;
+  flex-direction: column;
+  gap: 25px;
   margin: 50px auto;
-  flex-wrap: wrap;
   padding: 24px 28px;
   border-radius: 20px;
   background: linear-gradient(145deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
@@ -18,6 +16,47 @@
   transition: all 0.3s ease;
   position: relative;
   z-index: 1;
+}
+
+.quick-filters {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.quick-filter-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 8px 16px;
+  color: #ccc;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.quick-filter-btn:hover {
+  background: rgba(138, 43, 226, 0.1);
+  border-color: rgba(138, 43, 226, 0.3);
+  color: #e0c8ff;
+  transform: translateY(-1px);
+}
+
+.quick-filter-btn.active {
+  background: rgba(138, 43, 226, 0.2);
+  border-color: rgba(138, 43, 226, 0.4);
+  color: #e0c8ff;
+}
+
+.filter-main-controls {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 24px;
+  flex-wrap: wrap;
 }
 
 .datepicker-wrapper {
@@ -205,10 +244,152 @@
   color: #f1f1f1;
 }
 
-@media (max-width: 600px) {
+.reset-filters-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  padding: 10px 20px;
+  color: #f1f1f1;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  height: fit-content;
+  margin-bottom: 6px;
+}
+
+.reset-filters-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.select-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.custom-select {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  padding: 10px 14px;
+  color: #f1f1f1;
+  font-size: 0.95rem;
+  width: 100%;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  user-select: none;
+}
+
+.custom-select:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.custom-select.open {
+  border-color: #8a2be2;
+  box-shadow: 0 0 8px rgba(138, 43, 226, 0.4);
+}
+
+.select-arrow {
+  margin-left: 8px;
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 6px solid #f1f1f1;
+  transition: transform 0.2s ease;
+}
+
+.custom-select.open .select-arrow {
+  transform: rotate(180deg);
+}
+
+.custom-options {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background: linear-gradient(145deg, rgba(30,30,30,0.95), rgba(20,20,20,0.95));
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 12px;
+  padding: 6px 0;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  z-index: 20;
+  animation: fadeInUp 0.2s ease-out;
+}
+
+.custom-option {
+  padding: 10px 14px;
+  color: #f1f1f1;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.custom-option:hover {
+  background: rgba(138, 43, 226, 0.25);
+  color: #e0c8ff;
+}
+
+.custom-option.active {
+  background: linear-gradient(135deg, #8a2be2, #6a19c9);
+  color: #fff;
+  font-weight: 500;
+}
+
+
+@media (max-width: 768px) {
   .filter-controls {
-    flex-direction: column;
     gap: 15px;
+    padding: 20px;
+    margin: 30px auto;
+  }
+
+  .filter-main-controls {
+    flex-direction: column;
     align-items: center;
+    gap: 15px;
+  }
+
+  .filter-group {
+    min-width: 200px;
+    width: 100%;
+  }
+
+  .reset-filters-btn {
+    width: 100%;
+    margin-top: 10px;
+  }
+
+  .quick-filters {
+    gap: 8px;
+  }
+
+  .quick-filter-btn {
+    padding: 6px 12px;
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .filter-controls {
+    padding: 16px;
+    margin: 20px auto;
+  }
+
+  .quick-filters {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .quick-filter-btn {
+    width: 140px;
   }
 }

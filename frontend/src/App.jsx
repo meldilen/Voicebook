@@ -11,6 +11,7 @@ import SettingsPage from "./pages/SettingsPage";
 import ProtectedRoute from "./app/ProtectedRoute";
 import InitializeAuth from "./features/auth/InitializeAuth";
 import JournalPage from "./pages/JournalPage"; 
+import AchievementsPage from "./pages/AchievementsPage";
 
 export default function App() {
   const [globalError, setGlobalError] = useState(null);
@@ -31,13 +32,16 @@ return (
             )}
             <Routes>
               <Route path="/" element={<Navigate to="/homepage" replace />} />
+              {/* <Route path="/" element={<Navigate to="/achievements" replace />} /> */}
               <Route path="/homepage" element={<HomePage />} />
               <Route path="/onboarding" element={<OnboardingPage />} />
               <Route path="/login" element={<AuthPage />} />
               <Route path="/signup" element={<AuthPage />} />
+              <Route path="/achievements" element={<AchievementsPage />} />
               
               <Route element={<ProtectedRoute />}>
                 {/* <Route path="/homepage" element={<HomePage />} /> */}
+                {/* <Route path="/achievements" element={<AchievementsPage />} /> */}
                 <Route path="/profile" element={<ProfilePage />} />
                 <Route path="/profile/settings" element={<SettingsPage />} />
                 <Route path="/journal" element={<JournalPage />} />
