@@ -45,12 +45,17 @@ func main() {
     AllowCredentials: true,
 }))
 
+	// Initialize services
 	recordHandler := handler.NewRecordHandler(db, cfg.MLServiceURL)
 	userService := service.NewUserService(db)
 	userHandler := handler.NewUserHandler(userService)
 	totalService := service.NewTotalService(db, cfg.MLServiceURL)
 	recordService := service.NewRecordService(db, cfg.MLServiceURL)
 	totalHandler := handler.NewTotalHandler(totalService, recordService)
+	
+	// Initialize achievements service and handler
+	achievementsService := service.NewAchievementsService(db)
+	achievementsHandler := handler.NewAchievementsHandler(achievementsService)
 
 	// User-related endpoints
 	userGroup := r.Group("/users")
@@ -76,10 +81,19 @@ func main() {
 		recordGroup.GET("/users/:userID/consecutive-days", recordHandler.GetConsecutiveRecordingDays)
 	}
 
+	// Total-related endpoints
 	totalGroup := r.Group("/totals")
 	{
     totalGroup.GET("/:userID", totalHandler.GetTotals)
     totalGroup.POST("/:userID/recalculate/:date", totalHandler.RecalculateTotal)
+	}
+
+	// Achievements-related endpoints
+	achievementsGroup := r.Group("/api/achievements")
+	achievementsGroup.Use(middleware.AuthMiddleware(userService))
+	{
+		achievementsGroup.GET("", achievementsHandler.GetAchievements)
+		achievementsGroup.POST("/:achievementID/progress", achievementsHandler.UpdateAchievementProgress)
 	}
 
 	r.GET("/swagger/*any",
