@@ -66,12 +66,13 @@ async def process_audio_endpoint(file: UploadFile = File(...)):
             result = process_audio(original_path)
             logger.info("Successfully processed audio file")
             
+            emotion = result.get("emotion") or result.get("final_emotion") or "neutral"
             # Format response for Go client
             response_data = {
                 "transcript": result.get("transcript", ""),
                 "text": result.get("transcript", ""),
                 "summary": result.get("summary", ""),
-                "emotion": result.get("final_emotion", "neutral"),
+                "emotion": emotion,
                 "insights": result.get("insights", {})
             }
             
