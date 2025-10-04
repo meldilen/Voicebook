@@ -26,6 +26,7 @@ const getRecordsByUserSQL = `
 	WHERE user_id = $1
 	ORDER BY record_date DESC
 `
+
 func SaveRecord(ctx context.Context, db *sql.DB, userID int, emotion string, summary string) (int, error) {
 	log.Printf("SaveRecord: saving record for userID %d with emotion %s", userID, emotion)
 
@@ -59,15 +60,15 @@ func SaveInsights(ctx context.Context, db *sql.DB, record_id int, insights strin
 		log.Printf("SaveInsights: failed to save record, error: %v", err)
 		return err
 	}
-    rowsAffected, err := res.RowsAffected()
-    if err != nil {
-        log.Printf("SaveInsights: failed to get rows affected for record %d", record_id)
-        return err
-    }
-    if rowsAffected == 0 {
-        log.Printf("SaveInsights: no record found with ID %d", record_id)
-        return sql.ErrNoRows
-    }
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		log.Printf("SaveInsights: failed to get rows affected for record %d", record_id)
+		return err
+	}
+	if rowsAffected == 0 {
+		log.Printf("SaveInsights: no record found with ID %d", record_id)
+		return sql.ErrNoRows
+	}
 
 	log.Printf("SaveInsights: successfully saved insights for recordID %d", record_id)
 	return nil
@@ -121,173 +122,148 @@ func GetRecordByID(ctx context.Context, db *sql.DB, recordID int) (*Record, erro
 }
 
 func GetLatestRecords(ctx context.Context, db *sql.DB, userID int, limit int) ([]Record, error) {
-    query := `SELECT * FROM record WHERE user_id = $1 ORDER BY record_date DESC`
-    var rows *sql.Rows
-    var err error
-    
-    if limit > 0 {
-        query += ` LIMIT $2`
-        rows, err = db.QueryContext(ctx, query, userID, limit)
-    } else {
-        rows, err = db.QueryContext(ctx, query, userID)
-    }
+	query := `SELECT record_id, user_id, record_date, emotion, summary, feedback, insights FROM record WHERE user_id = $1 ORDER BY record_date DESC`
+	var rows *sql.Rows
+	var err error
+	
+	if limit > 0 {
+		query += ` LIMIT $2`
+		rows, err = db.QueryContext(ctx, query, userID, limit)
+	} else {
+		rows, err = db.QueryContext(ctx, query, userID)
+	}
 
-    if err != nil {
-        return nil, err
-    }
-    defer rows.Close()
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
 
-    var records []Record
-    for rows.Next() {
-        var record Record
-        err := rows.Scan(&record.ID, &record.UserID, &record.RecordDate, &record.Emotion, &record.Summary, &record.Feedback, &record.Insights)
-        if err != nil {
-            return nil, err
-        }
-        records = append(records, record)
-    }
+	var records []Record
+	for rows.Next() {
+		var record Record
+		err := rows.Scan(&record.ID, &record.UserID, &record.RecordDate, &record.Emotion, &record.Summary, &record.Feedback, &record.Insights)
+		if err != nil {
+			return nil, err
+		}
+		records = append(records, record)
+	}
 
-    return records, nil
-}
-
-func GetRecordsStartingFromDate(ctx context.Context, db *sql.DB, userID int, date time.Time, limit int) ([]Record, error) {
-    query := `SELECT * FROM record WHERE user_id = $1 AND record_date >= $2 ORDER BY record_date DESC`
-    if limit > 0 {
-        query += ` LIMIT $3`
-    }
-
-    rows, err := db.QueryContext(ctx, query, userID, date, limit)
-    if err != nil {
-        return nil, err
-    }
-    defer rows.Close()
-
-    var records []Record
-    for rows.Next() {
-        var record Record
-        err := rows.Scan(&record.ID, &record.UserID, &record.RecordDate, &record.Emotion, &record.Summary, &record.Feedback, &record.Insights)
-        if err != nil {
-            return nil, err
-        }
-        records = append(records, record)
-    }
-
-    return records, nil
+	return records, nil
 }
 
 func GetRecordsByDate(ctx context.Context, db *sql.DB, userID int, date time.Time, limit int) ([]Record, error) {
-    startOfDay := time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, date.Location())
-    endOfDay := startOfDay.Add(24 * time.Hour)
+	startOfDay := time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, date.Location())
+	endOfDay := startOfDay.Add(24 * time.Hour)
 
-    query := `SELECT * FROM record WHERE user_id = $1 AND record_date >= $2 AND record_date < $3 ORDER BY record_date DESC`
-    if limit > 0 {
-        query += ` LIMIT $4`
-    }
+	query := `SELECT record_id, user_id, record_date, emotion, summary, feedback, insights FROM record WHERE user_id = $1 AND record_date >= $2 AND record_date < $3 ORDER BY record_date DESC`
+	if limit > 0 {
+		query += ` LIMIT $4`
+	}
 
-    var rows *sql.Rows
-    var err error
-    
-    if limit > 0 {
-        rows, err = db.QueryContext(ctx, query, userID, startOfDay, endOfDay, limit)
-    } else {
-        rows, err = db.QueryContext(ctx, query, userID, startOfDay, endOfDay)
-    }
+	var rows *sql.Rows
+	var err error
+	
+	if limit > 0 {
+		rows, err = db.QueryContext(ctx, query, userID, startOfDay, endOfDay, limit)
+	} else {
+		rows, err = db.QueryContext(ctx, query, userID, startOfDay, endOfDay)
+	}
 
-    if err != nil {
-        return nil, err
-    }
-    defer rows.Close()
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
 
-    var records []Record
-    for rows.Next() {
-        var record Record
-        err := rows.Scan(&record.ID, &record.UserID, &record.RecordDate, &record.Emotion, &record.Summary, &record.Feedback, &record.Insights)
-        if err != nil {
-            return nil, err
-        }
-        records = append(records, record)
-    }
+	var records []Record
+	for rows.Next() {
+		var record Record
+		err := rows.Scan(&record.ID, &record.UserID, &record.RecordDate, &record.Emotion, &record.Summary, &record.Feedback, &record.Insights)
+		if err != nil {
+			return nil, err
+		}
+		records = append(records, record)
+	}
 
-    return records, nil
+	return records, nil
 }
 
 func DeleteRecordByID(ctx context.Context, db *sql.DB, recordID int) error {
-    log.Printf("DeleteRecordByID: deleting record with ID %d", recordID)
-    query := `DELETE FROM record WHERE record_id = $1`
-    res, err := db.ExecContext(ctx, query, recordID)
-    if err != nil {
-        log.Printf("DeleteRecordByID: failed to delete record %d, error: %v", recordID, err)
-        return err
-    }
-    rowsAffected, err := res.RowsAffected()
-    if err != nil {
-        log.Printf("DeleteRecordByID: failed to get rows affected for record %d, error: %v", recordID, err)
-        return err
-    }
-    if rowsAffected == 0 {
-        log.Printf("DeleteRecordByID: no record found with ID %d", recordID)
-        return sql.ErrNoRows
-    }
-    log.Printf("DeleteRecordByID: successfully deleted record %d", recordID)
-    return nil
+	log.Printf("DeleteRecordByID: deleting record with ID %d", recordID)
+	query := `DELETE FROM record WHERE record_id = $1`
+	res, err := db.ExecContext(ctx, query, recordID)
+	if err != nil {
+		log.Printf("DeleteRecordByID: failed to delete record %d, error: %v", recordID, err)
+		return err
+	}
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		log.Printf("DeleteRecordByID: failed to get rows affected for record %d, error: %v", recordID, err)
+		return err
+	}
+	if rowsAffected == 0 {
+		log.Printf("DeleteRecordByID: no record found with ID %d", recordID)
+		return sql.ErrNoRows
+	}
+	log.Printf("DeleteRecordByID: successfully deleted record %d", recordID)
+	return nil
 }
 
 func UpdateRecordFeedback(ctx context.Context, db *sql.DB, recordID int, feedback int) error {
-    log.Printf("UpdateRecordFeedback: updating feedback for record ID %d", recordID)
-    query := `UPDATE record SET feedback = $1 WHERE record_id = $2`
-    res, err := db.ExecContext(ctx, query, feedback, recordID)
-    if err != nil {
-        log.Printf("UpdateRecordFeedback: failed to update feedback for record %d, error: %v", recordID, err)
-        return err
-    }
-    rowsAffected, err := res.RowsAffected()
-    if err != nil {
-        log.Printf("UpdateRecordFeedback: failed to get rows affected for record %d, error: %v", recordID, err)
-        return err
-    }
-    if rowsAffected == 0 {
-        log.Printf("UpdateRecordFeedback: no record found with ID %d", recordID)
-        return sql.ErrNoRows
-    }
-    log.Printf("UpdateRecordFeedback: successfully updated feedback for record %d", recordID)
-    return nil
+	log.Printf("UpdateRecordFeedback: updating feedback for record ID %d", recordID)
+	query := `UPDATE record SET feedback = $1 WHERE record_id = $2`
+	res, err := db.ExecContext(ctx, query, feedback, recordID)
+	if err != nil {
+		log.Printf("UpdateRecordFeedback: failed to update feedback for record %d, error: %v", recordID, err)
+		return err
+	}
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		log.Printf("UpdateRecordFeedback: failed to get rows affected for record %d, error: %v", recordID, err)
+		return err
+	}
+	if rowsAffected == 0 {
+		log.Printf("UpdateRecordFeedback: no record found with ID %d", recordID)
+		return sql.ErrNoRows
+	}
+	log.Printf("UpdateRecordFeedback: successfully updated feedback for record %d", recordID)
+	return nil
 }
 
 func UpdateRecordEmotion(ctx context.Context, db *sql.DB, recordID int, emotion string) error {
-    query := `UPDATE record SET emotion = $1 WHERE record_id = $2`
-    res, err := db.ExecContext(ctx, query, emotion, recordID)
-    if err != nil {
-        return err
-    }
-    if rows, _ := res.RowsAffected(); rows == 0 {
-        return sql.ErrNoRows
-    }
-    return nil
+	query := `UPDATE record SET emotion = $1 WHERE record_id = $2`
+	res, err := db.ExecContext(ctx, query, emotion, recordID)
+	if err != nil {
+		return err
+	}
+	if rows, _ := res.RowsAffected(); rows == 0 {
+		return sql.ErrNoRows
+	}
+	return nil
 }
 
 func GetConsecutiveRecordingDays(ctx context.Context, db *sql.DB, userID int) (int, error) {
-    query := `
-        WITH dates AS (
-            SELECT DISTINCT DATE(record_date) as day 
-            FROM record 
-            WHERE user_id = $1
-            ORDER BY day DESC
-        ),
-        grouped_dates AS (
-            SELECT 
-                day,
-                day - ROW_NUMBER() OVER (ORDER BY day) * INTERVAL '1 day' as grp
-            FROM dates
-        )
-        SELECT COUNT(*) as consecutive_days
-        FROM grouped_dates
-        WHERE grp = (SELECT grp FROM grouped_dates LIMIT 1)
-    `
-    
-    var count int
-    err := db.QueryRowContext(ctx, query, userID).Scan(&count)
-    if err != nil {
-        return 0, fmt.Errorf("failed to get consecutive days: %w", err)
-    }
-    return count, nil
+	query := `
+		WITH dates AS (
+			SELECT DISTINCT DATE(record_date) as day 
+			FROM record 
+			WHERE user_id = $1
+			ORDER BY day DESC
+		),
+		grouped_dates AS (
+			SELECT 
+				day,
+				day - ROW_NUMBER() OVER (ORDER BY day) * INTERVAL '1 day' as grp
+			FROM dates
+		)
+		SELECT COUNT(*) as consecutive_days
+		FROM grouped_dates
+		WHERE grp = (SELECT grp FROM grouped_dates LIMIT 1)
+	`
+	
+	var count int
+	err := db.QueryRowContext(ctx, query, userID).Scan(&count)
+	if err != nil {
+		return 0, fmt.Errorf("failed to get consecutive days: %w", err)
+	}
+	return count, nil
 }

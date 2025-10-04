@@ -4,3 +4,10 @@ venv/
 
 # Machine learning testing outputs
 ml/outputs/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.python-version
