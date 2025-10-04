@@ -10,6 +10,7 @@
     "@testing-library/dom": "^10.4.0",
     "@use-gesture/react": "^10.3.1",
     "@vkontakte/icons": "^3.17.1",
+    "@vkontakte/vk-bridge": "^2.15.9",
     "@vkontakte/vkui": "^7.7.0",
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0",

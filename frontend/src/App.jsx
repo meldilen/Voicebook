@@ -12,6 +12,7 @@ import ProtectedRoute from "./app/ProtectedRoute";
 import InitializeAuth from "./features/auth/InitializeAuth";
 import JournalPage from "./pages/JournalPage"; 
 import AchievementsPage from "./pages/AchievementsPage";
+import PayPage from "./pages/PayPage"; 
 
 export default function App() {
   const [globalError, setGlobalError] = useState(null);
@@ -45,6 +46,7 @@ return (
                 <Route path="/profile" element={<ProfilePage />} />
                 <Route path="/profile/settings" element={<SettingsPage />} />
                 <Route path="/journal" element={<JournalPage />} />
+                <Route path="/pay" element={<PayPage />} />
               </Route>
 
               <Route path="*" element={
