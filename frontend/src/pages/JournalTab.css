@@ -15,14 +15,14 @@
 }
 
 .journal-header h1 {
-  font-size: 1.8rem;
+  font-size: 40px;
   margin-bottom: 0.5rem;
   font-weight: 600;
   color: white;
 }
 
 .journal-header p {
-  font-size: 1rem;
+  font-size: 19px;
   color: #aaa;
   line-height: 1.4;
 }
@@ -102,6 +102,87 @@
   }
 }
 
+.active-filters {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin: 20px auto;
+  max-width: 90%;
+  animation: fadeInUp 0.3s ease;
+}
+
+.filter-tag {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(138, 43, 226, 0.2);
+  border: 1px solid rgba(138, 43, 226, 0.4);
+  border-radius: 20px;
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  color: #e0c8ff;
+  transition: all 0.2s ease;
+}
+
+.filter-tag:hover {
+  background: rgba(138, 43, 226, 0.25);
+  transform: translateY(-1px);
+}
+
+.filter-tag button {
+  background: none;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  font-size: 1.1rem;
+  line-height: 1;
+  padding: 0;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.filter-tag button:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.1);
+}
+
+.results-counter {
+  text-align: center;
+  color: #aaa;
+  font-size: 0.9rem;
+  margin: 10px 0 20px;
+  font-style: italic;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @media (max-width: 768px) {
   .journal-header {
     margin-bottom: 1rem;
@@ -130,6 +211,16 @@
     height: 150px;
     padding: 0 16px;
   }
+
+  .active-filters {
+    margin: 15px auto;
+    max-width: 95%;
+  }
+
+  .filter-tag {
+    font-size: 0.8rem;
+    padding: 5px 10px;
+  }
 }
 
 @media (max-width: 380px) {
@@ -157,5 +248,14 @@
   .dots-loading .dot {
     width: 8px;
     height: 8px;
+  }
+
+  .active-filters {
+    gap: 8px;
+  }
+
+  .filter-tag {
+    font-size: 0.75rem;
+    padding: 4px 8px;
   }
 }

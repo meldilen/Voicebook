@@ -34,6 +34,11 @@ function JournalTab() {
     setExpandedRecord(prev => prev === recordId ? null : recordId);
   }, []);
 
+  const removeDateFilter = () => setDateFilter("");
+  const removeLimitFilter = () => setLimitFilter(0);
+
+  const hasActiveFilters = dateFilter || limitFilter > 0;
+
   if (isLoading || isFetching) {
     return (
       <div className="journal-tab loading">
@@ -78,6 +83,31 @@ function JournalTab() {
         onDateChange={handleDateChange}
         onLimitChange={handleLimitChange}
       />
+
+      {hasActiveFilters && (
+        <div className="active-filters">
+          {dateFilter && (
+            <span className="filter-tag">
+              Date: {dateFilter}
+              <button onClick={removeDateFilter}>×</button>
+            </span>
+          )}
+          {limitFilter > 0 && (
+            <span className="filter-tag">
+              Limit: {limitFilter} records
+              <button onClick={removeLimitFilter}>×</button>
+            </span>
+          )}
+        </div>
+      )}
+
+      {recordings.length > 0 && (
+        <div className="results-counter">
+          Showing {recordings.length} recording{recordings.length !== 1 ? 's' : ''}
+          {dateFilter && ` for ${dateFilter}`}
+          {limitFilter > 0 && ` (limited to ${limitFilter})`}
+        </div>
+      )}
 
       <RecordingsList 
         recordings={recordings}

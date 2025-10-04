@@ -88,7 +88,6 @@ const BottomSheetNavigator = () => {
         </div>
       </div>
 
-      {/* Animated Content Area */}
       <div className="tab-content">
         <div className="content-background">
           <div className="background-blob blob-1"></div>
