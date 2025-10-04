@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import AchievementCard from "../features/achievements/components/AchievementCard";
 import "./AchievementsPage.css";
+import Header from "../features/Header/Header";
 
 const achievementsData = [
   {
@@ -153,6 +154,7 @@ function AchievementsPage() {
 
   return (
     <div className="achievements-page">
+      <Header />
       <div className="gradient-ball"></div>
       <div className="gradient-ball-2"></div>
       <div className="gradient-ball-3"></div>
