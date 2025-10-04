@@ -21,3 +21,4 @@ export const coinsSlice = createSlice({
 export const { addCoins, setCoins } = coinsSlice.actions;
 export const selectCoinsBalance = (state) => state.coins.balance;
 export default coinsSlice.reducer;
+//
