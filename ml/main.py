@@ -15,13 +15,13 @@ logger = logging.getLogger(__name__)
 def process_audio(audio_path: str):
     iam_token = get_iam_token()
 
-    emotion_model = EmotionRecognitionModel()
+    # emotion_model = EmotionRecognitionModel()
 
     # транскрибация и эмоции аудио
     transcript = transcribe_audio(iam_token, audio_path)
     print(f"Transcript: {transcript}")
-    audio_emotion = emotion_model.get_emotion(audio_path)
-    print(f"Audio emotion: {audio_emotion}")
+    # audio_emotion = emotion_model.get_emotion(audio_path)
+    # print(f"Audio emotion: {audio_emotion}")
 
     # Get the base directory
     import os
@@ -46,13 +46,15 @@ def process_audio(audio_path: str):
 
     # оркестрация эмоций
     text_emotion = json.loads(insights_json)["emotion"]
-    final_emotion = combine_emotions(audio_emotion, text_emotion)
+    # final_emotion = combine_emotions(audio_emotion, text_emotion)
+
+    print(insights_json)
 
     return {
         "transcript": transcript,
         "summary": summary,
-        "emotion": final_emotion,
-        "insights": json.loads(insights_json)
+        "emotion": text_emotion,
+        "insights": json.loads(insights_json)["insights"]
     }
 
 

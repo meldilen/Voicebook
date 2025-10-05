@@ -219,14 +219,11 @@ def start_transcription(iam_token: str, audio_uri: str) -> str:
 
 
 def get_transcription_result(iam_token: str, operation_id: str, poll_interval: int = 5) -> str:
-    """
-    Ожидает завершения распознавания и возвращает текст.
-    """
     headers = {"Authorization": f"Bearer {iam_token}"}
     url = f"{OPERATION_URL}/{operation_id}"
 
     attempts = 0
-    max_attempts = 60  # 5 minutes max
+    max_attempts = 60
     
     while attempts < max_attempts:
         resp = requests.get(url, headers=headers)
@@ -237,12 +234,22 @@ def get_transcription_result(iam_token: str, operation_id: str, poll_interval: i
             if "response" in data:
                 chunks = data["response"].get("chunks", [])
                 text_parts = []
+                
+                # ПРОСТОЙ ФИКС: Берем только первый чанк или объединяем уникальные
+                seen_texts = set()
+                
                 for ch in chunks:
                     alt = ch.get("alternatives", [])
                     if alt:
-                        text_parts.append(alt[0].get("text", ""))
+                        chunk_text = alt[0].get("text", "").strip()
+                        # Добавляем только если не видели похожий текст
+                        if chunk_text and not any(chunk_text in seen or seen in chunk_text for seen in seen_texts):
+                            text_parts.append(chunk_text)
+                            seen_texts.add(chunk_text)
+                
                 transcript = " ".join(text_parts)
                 print(f"Transcription completed: '{transcript}'")
+                print(f"DEBUG: Original chunks: {len(chunks)}, Final parts: {len(text_parts)}")
                 return transcript
             else:
                 error_msg = data.get("error", {}).get("message", "Unknown error")
