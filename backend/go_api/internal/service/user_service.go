@@ -63,3 +63,8 @@ func (s *UserService) DeleteUserAccount(ctx context.Context, userID int) error {
     }
     return nil
 }
+
+// Add to service/user_service.go
+func (s *UserService) DB() *sql.DB {
+	return s.db
+}

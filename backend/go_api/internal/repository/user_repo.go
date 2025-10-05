@@ -6,6 +6,7 @@ import (
 	"log"
 	"strconv"
 	"strings"
+	"time"
 
 	_ "github.com/lib/pq"
 )
@@ -192,4 +193,77 @@ func DeleteUserAndData(ctx context.Context, db *sql.DB, userID int) error {
     }
 
     return tx.Commit()
+}
+
+// Add to repository/user_repo.go
+
+type VKUser struct {
+	ID        int       `db:"id"`
+	VKUserID  int       `db:"vk_user_id"`
+	Coins     int       `db:"coins"`
+	CreatedAt time.Time `db:"created_at"`
+}
+
+// CreateVKUser creates a new VK user
+func CreateVKUser(ctx context.Context, db *sql.DB, vkUserID int, initialCoins int) (int, error) {
+	log.Printf("CreateVKUser: creating VK user with ID %d", vkUserID)
+
+	query := `
+		INSERT INTO vk_user (vk_user_id, coins)
+		VALUES ($1, $2)
+		RETURNING id
+	`
+	var userID int
+	err := db.QueryRowContext(ctx, query, vkUserID, initialCoins).Scan(&userID)
+	if err != nil {
+		log.Printf("CreateVKUser: failed to create VK user: %v", err)
+		return 0, err
+	}
+
+	log.Printf("CreateVKUser: successfully created VK user with ID %d", userID)
+	return userID, nil
+}
+
+// GetVKUserByVKID finds user by VK user ID
+func GetVKUserByVKID(ctx context.Context, db *sql.DB, vkUserID int) (*VKUser, error) {
+	log.Printf("GetVKUserByVKID: fetching VK user with ID %d", vkUserID)
+
+	query := `
+		SELECT id, vk_user_id, coins, created_at
+		FROM vk_user
+		WHERE vk_user_id = $1
+	`
+	var user VKUser
+	err := db.QueryRowContext(ctx, query, vkUserID).Scan(&user.ID, &user.VKUserID, &user.Coins, &user.CreatedAt)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			log.Printf("GetVKUserByVKID: VK user not found with ID %d", vkUserID)
+			return nil, nil
+		}
+		log.Printf("GetVKUserByVKID: failed to fetch VK user: %v", err)
+		return nil, err
+	}
+
+	log.Printf("GetVKUserByVKID: successfully fetched VK user with ID %d", user.ID)
+	return &user, nil
+}
+
+// GetVKUserByID finds user by internal ID
+func GetVKUserByID(ctx context.Context, db *sql.DB, userID int) (*VKUser, error) {
+	log.Printf("GetVKUserByID: fetching VK user with internal ID %d", userID)
+
+	query := `
+		SELECT id, vk_user_id, coins, created_at
+		FROM vk_user
+		WHERE id = $1
+	`
+	var user VKUser
+	err := db.QueryRowContext(ctx, query, userID).Scan(&user.ID, &user.VKUserID, &user.Coins, &user.CreatedAt)
+	if err != nil {
+		log.Printf("GetVKUserByID: failed to fetch VK user: %v", err)
+		return nil, err
+	}
+
+	log.Printf("GetVKUserByID: successfully fetched VK user with VK ID %d", user.VKUserID)
+	return &user, nil
 }

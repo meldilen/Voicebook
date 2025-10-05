@@ -20,9 +20,18 @@ import (
 )
 
 func main() {
-	if err := godotenv.Load(); err != nil {
-    	log.Println("No .env file found, using existing environment")
-    }
+	envPaths := []string{".env", "../.env", "../../.env"}
+	var envLoaded bool
+	for _, path := range envPaths {
+		if err := godotenv.Load(path); err == nil {
+			log.Printf("Loaded .env from %s", path)
+			envLoaded = true
+			break
+		}
+	}
+	if !envLoaded {
+		log.Println("No .env file found, using existing environment")
+	}
 	cfg := config.Load()
 
 	db, err := sql.Open("postgres", cfg.DatabaseURL)
@@ -51,6 +60,16 @@ func main() {
 	totalService := service.NewTotalService(db, cfg.MLServiceURL)
 	recordService := service.NewRecordService(db, cfg.MLServiceURL)
 	totalHandler := handler.NewTotalHandler(totalService, recordService)
+
+	// Initialize VK auth handler
+	vkAuthHandler := handler.NewVKAuthHandler(userService)
+
+	// VK Auth endpoints
+	vkGroup := r.Group("/api/vk")
+	{
+		vkGroup.POST("/auth", vkAuthHandler.VKAuth)
+	}
+
 
 	// User-related endpoints
 	userGroup := r.Group("/users")
