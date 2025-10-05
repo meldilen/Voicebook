@@ -6,6 +6,7 @@ WORKDIR /app
 # Copy package files and install dependencies
 COPY frontend/package*.json ./
 RUN npm install --legacy-peer-deps
+RUN chmod -R +x /app/node_modules/.bin/
 
 # Copy the rest of the frontend source code
 COPY frontend/ .
