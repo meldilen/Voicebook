@@ -3,9 +3,8 @@ import { Provider } from "react-redux";
 import { store } from "./app/store";
 import { useState } from "react";
 import OnboardingPage from "./pages/OnboardingPage";
-import AuthPage from "./pages/AuthPage";
+// import AuthPage from "./pages/AuthPage";
 import HomePage from "./pages/NewHomePage";
-// import HomePage from "./pages/HomePage";
 import ProfilePage from "./pages/ProfilePage";
 import SettingsPage from "./pages/SettingsPage";
 import ProtectedRoute from "./app/ProtectedRoute";
@@ -13,11 +12,12 @@ import InitializeAuth from "./features/auth/InitializeAuth";
 import JournalPage from "./pages/JournalPage"; 
 import AchievementsPage from "./pages/AchievementsPage";
 import PayPage from "./pages/PayPage"; 
+import AuthError from "./pages/AuthError";
 
 export default function App() {
   const [globalError, setGlobalError] = useState(null);
 
-return (
+  return (
     <Provider store={store}>
       <Router basename="/">
         <InitializeAuth />
@@ -33,24 +33,21 @@ return (
             )}
             <Routes>
               <Route path="/" element={<Navigate to="/homepage" replace />} />
-              {/* <Route path="/" element={<Navigate to="/achievements" replace />} /> */}
-              <Route path="/homepage" element={<HomePage />} />
-              <Route path="/onboarding" element={<OnboardingPage />} />
-              <Route path="/login" element={<AuthPage />} />
-              <Route path="/signup" element={<AuthPage />} />
-              <Route path="/achievements" element={<AchievementsPage />} />
               
               <Route element={<ProtectedRoute />}>
-                {/* <Route path="/homepage" element={<HomePage />} /> */}
-                {/* <Route path="/achievements" element={<AchievementsPage />} /> */}
+                <Route path="/homepage" element={<HomePage />} />
+                <Route path="/onboarding" element={<OnboardingPage />} />
+                <Route path="/achievements" element={<AchievementsPage />} />
                 <Route path="/profile" element={<ProfilePage />} />
                 <Route path="/profile/settings" element={<SettingsPage />} />
                 <Route path="/journal" element={<JournalPage />} />
                 <Route path="/pay" element={<PayPage />} />
               </Route>
 
+              <Route path="/auth-error" element={<AuthError />} />
+
               <Route path="*" element={
-                <Navigate to="/onboarding" replace state={{ from: '404-redirect' }} />
+                <Navigate to="/homepage" replace state={{ from: '404-redirect' }} />
               } />
             </Routes>
           </main>

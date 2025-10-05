@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
-import { initVK } from "../utils/vkInit";
+import { initVK } from "../../vk/vkInit";
 import { useVkAuthMutation } from "./authApi";
 import { setVKCredentials, logout } from "./authSlice";
 

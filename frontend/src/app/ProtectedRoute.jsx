@@ -26,7 +26,7 @@
 import { useEffect, useState } from "react";
 import { Navigate, Outlet } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { initVK } from "../utils/vkInit";
+import { initVK } from "../vk/vkInit";
 import { useVkAuthMutation } from "../features/auth/authApi";
 import { setVKCredentials } from "../features/auth/authSlice";
 
