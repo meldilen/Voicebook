@@ -20,9 +20,19 @@ import (
 )
 
 func main() {
-	if err := godotenv.Load(); err != nil {
-    	log.Println("No .env file found, using existing environment")
-    }
+	envPaths := []string{".env", "../.env", "../../.env"}
+	var envLoaded bool
+	for _, path := range envPaths {
+		if err := godotenv.Load(path); err == nil {
+			log.Printf("Loaded .env from %s", path)
+			envLoaded = true
+			break
+		}
+	}
+	if !envLoaded {
+		log.Println("No .env file found, using existing environment")
+	}
+
 	cfg := config.Load()
 
 	db, err := sql.Open("postgres", cfg.DatabaseURL)
@@ -45,12 +55,17 @@ func main() {
     AllowCredentials: true,
 }))
 
+	// Initialize services
 	recordHandler := handler.NewRecordHandler(db, cfg.MLServiceURL)
 	userService := service.NewUserService(db)
 	userHandler := handler.NewUserHandler(userService)
 	totalService := service.NewTotalService(db, cfg.MLServiceURL)
 	recordService := service.NewRecordService(db, cfg.MLServiceURL)
 	totalHandler := handler.NewTotalHandler(totalService, recordService)
+	
+	// Initialize achievements service and handler
+	achievementsService := service.NewAchievementsService(db)
+	achievementsHandler := handler.NewAchievementsHandler(achievementsService)
 
 	// User-related endpoints
 	userGroup := r.Group("/users")
@@ -62,6 +77,7 @@ func main() {
 		userGroup.GET("/:userID/records", recordHandler.GetRecords)
 		userGroup.PATCH("/me", middleware.AuthMiddleware(userService), userHandler.UpdateProfile)
 		userGroup.DELETE("/me", middleware.AuthMiddleware(userService), userHandler.DeleteAccount)
+		userGroup.GET("/:userID/consecutive-days", recordHandler.GetConsecutiveRecordingDays) // MOVED HERE
 	}
 
 	// Record-related endpoints
@@ -73,20 +89,36 @@ func main() {
 		recordGroup.DELETE("/:recordID", recordHandler.DeleteRecord)
 		recordGroup.POST("/:recordID/feedback", recordHandler.SetRecordFeedback)
 		recordGroup.PATCH("/:recordID/emotion", recordHandler.UpdateEmotion)
-		recordGroup.GET("/users/:userID/consecutive-days", recordHandler.GetConsecutiveRecordingDays)
 	}
 
+	// Total-related endpoints
 	totalGroup := r.Group("/totals")
 	{
-    totalGroup.GET("/:userID", totalHandler.GetTotals)
-    totalGroup.POST("/:userID/recalculate/:date", totalHandler.RecalculateTotal)
+		totalGroup.GET("/:userID", totalHandler.GetTotals)
+		totalGroup.POST("/:userID/recalculate/:date", totalHandler.RecalculateTotal)
+	}
+
+	// Achievements-related endpoints
+	achievementsGroup := r.Group("/api/achievements")
+	achievementsGroup.Use(middleware.AuthMiddleware(userService))
+	{
+		achievementsGroup.GET("", achievementsHandler.GetAchievements)
+		achievementsGroup.POST("/:achievementID/progress", achievementsHandler.UpdateAchievementProgress)
 	}
 
 	r.GET("/swagger/*any",
-    ginSwagger.WrapHandler(swaggerFiles.Handler, 
-        ginSwagger.URL("/swagger/doc.json"),
-    ),
-)
+		ginSwagger.WrapHandler(swaggerFiles.Handler,
+			ginSwagger.URL("/swagger/doc.json"),
+		),
+	)
+
+	// Health check endpoint
+	r.GET("/health", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"status":  "healthy",
+			"service": "VoiceDiary API",
+		})
+	})
 
 	log.Printf("Starting server on port %s\n", cfg.ListenAddr)
 	if err := r.Run(cfg.ListenAddr); err != nil {

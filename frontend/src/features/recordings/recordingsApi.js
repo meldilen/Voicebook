@@ -21,11 +21,11 @@ export const recordingsApi = createApi({
       }),
       invalidatesTags: ["Recordings"],
       transformResponse: (response) => {
-        // console.log("[UPLOAD RECORDING] Server response:", response);
+        console.log("[UPLOAD RECORDING] Server response:", response);
         return response;
       },
       transformErrorResponse: (response) => {
-        // console.error("[UPLOAD RECORDING] Server error:", response);
+        console.error("[UPLOAD RECORDING] Server error:", response);
         return response;
       },
     }),

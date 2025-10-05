@@ -30,6 +30,7 @@ function RecordingCard({ result }) {
             {title === "Emotional Analysis" && "🧠"}
             {title === "Physical Response" && "💪"}
             {title === "Coping Strategies" && "🛡️"}
+            {title === "Support" && "🤝"}
             {title === "Recommendations" && "💡"}
           </span>
           {title}
@@ -95,9 +96,9 @@ function RecordingCard({ result }) {
           {renderInsightSection(
             "Physical Response",
             result.insights.physical_reaction,
-            (reaction) => (
+            (support) => (
               <div className="physical-response">
-                <p>{capitalizeFirst(reaction) || "No physical reaction data available"}</p>
+                <p>{capitalizeFirst(support) || "No supprotive advice available"}</p>
               </div>
             )
           )}
@@ -120,6 +121,16 @@ function RecordingCard({ result }) {
                 )}
               </div>
             </div>
+          )}
+
+          {renderInsightSection(
+            "Support",
+            result.insights.support,
+            (reaction) => (
+              <div className="physical-response">
+                <p>{capitalizeFirst(reaction) || "No physical reaction data available"}</p>
+              </div>
+            )
           )}
 
           {result.insights.recommendations?.length > 0 && (

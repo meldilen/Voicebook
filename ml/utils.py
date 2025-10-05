@@ -1,11 +1,10 @@
-# utils.py
 import time
 import jwt
-import aiohttp
-import aiofiles
+import requests
 from config import SERVICE_ACCOUNT_ID, KEY_ID, PRIVATE_KEY
 
-async def get_iam_token() -> str:
+def get_iam_token() -> str:
+    """Синхронная генерация IAM токена"""
     now = int(time.time())
     payload = {
         "aud": "https://iam.api.cloud.yandex.net/iam/v1/tokens",
@@ -21,19 +20,18 @@ async def get_iam_token() -> str:
         headers={"kid": KEY_ID}
     )
 
-    async with aiohttp.ClientSession() as session:
-        async with session.post(
-            "https://iam.api.cloud.yandex.net/iam/v1/tokens",
-            json={"jwt": encoded_jwt},
-            timeout=10
-        ) as resp:
-            if resp.status != 200:
-                raise RuntimeError(f"IAM error {resp.status}: {await resp.text()}")
-            
-            data = await resp.json()
-            return data["iamToken"]
+    resp = requests.post(
+        "https://iam.api.cloud.yandex.net/iam/v1/tokens",
+        json={"jwt": encoded_jwt},
+        timeout=10
+    )
+    if resp.status_code != 200:
+        raise RuntimeError(f"IAM error {resp.status_code}: {resp.text}")
+
+    return resp.json()["iamToken"]
 
 
-async def load_prompt(path: str) -> str:
-    async with aiofiles.open(path, "r", encoding="utf-8") as f:
-        return (await f.read()).strip()
+def load_prompt(path: str) -> str:
+    """Загрузка промпта из файла"""
+    with open(path, "r", encoding="utf-8") as f:
+        return f.read().strip()

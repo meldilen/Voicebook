@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"database/sql"
+
 	"github.com/IU-Capstone-Project-2025/VoiceDiary/backend/go_api/internal/repository"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -29,8 +30,12 @@ func (s *UserService) GetUserByLogin(ctx context.Context, login string) (*reposi
 	return repository.GetUserByLogin(ctx, s.db, login)
 }
 
+func (s *UserService) GetUserByID(ctx context.Context, userID int) (*repository.User, error) {
+	return repository.GetUserByID(ctx, s.db, userID)
+}
+
 func (s *UserService) SaveSession(ctx context.Context, userID int, token string) error {
-    return repository.SaveSession(ctx, s.db, userID, token)
+	return repository.SaveSession(ctx, s.db, userID, token)
 }
 
 func (s *UserService) GetUserBySession(ctx context.Context, token string) (*repository.User, error) {
@@ -42,24 +47,21 @@ func (s *UserService) DeleteSession(ctx context.Context, token string) error {
 }
 
 func (s *UserService) UpdateUserProfile(ctx context.Context, userID int, login, password, nickname string) error {
-    var hashedPassword string
-    if password != "" {
-        hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-        if err != nil {
-            return err
-        }
-        hashedPassword = string(hash)
-    }
-    return repository.UpdateUserProfile(ctx, s.db, userID, login, hashedPassword, nickname)
+	var hashedPassword string
+	if password != "" {
+		hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+		if err != nil {
+			return err
+		}
+		hashedPassword = string(hash)
+	}
+	return repository.UpdateUserProfile(ctx, s.db, userID, login, hashedPassword, nickname)
 }
 
 func (s *UserService) UserExists(ctx context.Context, login string) (bool, error) {
-    return repository.UserExists(ctx, s.db, login)
+	return repository.UserExists(ctx, s.db, login)
 }
 
 func (s *UserService) DeleteUserAccount(ctx context.Context, userID int) error {
-    if err := repository.DeleteUserAndData(ctx, s.db, userID); err != nil {
-        return err
-    }
-    return nil
+	return repository.DeleteUserAndData(ctx, s.db, userID)
 }
