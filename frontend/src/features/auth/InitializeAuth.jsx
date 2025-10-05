@@ -1,21 +1,35 @@
 import { useEffect } from "react";
-import { useGetMeQuery } from "./authApi";
 import { useDispatch } from "react-redux";
-import { setCredentials, logout } from "./authSlice";
+import { initVK } from "../utils/vkInit";
+import { useVkAuthMutation } from "./authApi";
+import { setVKCredentials, logout } from "./authSlice";
 
 const InitializeAuth = () => {
-  const { data, error } = useGetMeQuery(undefined, {
-    refetchOnMountOrArgChange: true,
-  });
   const dispatch = useDispatch();
+  const [vkAuth] = useVkAuthMutation();
 
   useEffect(() => {
-    if (data) {
-      dispatch(setCredentials({ user: data }));
-    } else if (error) {
-      dispatch(logout());
-    }
-  }, [data, error, dispatch]);
+    const initialize = async () => {
+      try {
+        const vkData = await initVK();
+        const authResponse = await vkAuth({
+          vkUserId: vkData.user.id,
+          launchParams: vkData.launchParams
+        }).unwrap();
+        
+        dispatch(setVKCredentials({
+          user: authResponse.user,
+          token: 'vk-auth',
+          launchParams: vkData.launchParams
+        }));
+      } catch (error) {
+        console.error('Auth initialization failed:', error);
+        dispatch(logout());
+      }
+    };
+
+    initialize();
+  }, [dispatch, vkAuth]);
 
   return null;
 };

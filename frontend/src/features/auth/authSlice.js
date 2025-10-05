@@ -12,6 +12,13 @@ const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
+    setVKCredentials: (state, action) => {
+      state.user = action.payload.user;
+      state.token = action.payload.token;
+      state.launchParams = action.payload.launchParams;
+      state.isAuthenticated = true;
+      state.error = null;
+    },
     setCredentials: (state, action) => {
       state.user = action.payload.user;
       state.token = action.payload.token || 'existing';
@@ -56,7 +63,7 @@ const authSlice = createSlice({
   },
 });
 
-export const { setCredentials, updateUser, logout, setError } = authSlice.actions;
+export const { setVKCredentials, setCredentials, updateUser, logout, setError } = authSlice.actions;
 
 export const selectCurrentUser = (state) => state.auth.user;
 export const selectAuthError = (state) => state.auth.error;

@@ -12,6 +12,16 @@ export const authApi = createApi({
     },
   }),
   endpoints: (builder) => ({
+    vkAuth: builder.mutation({
+      query: (vkData) => ({
+        url: API_CONFIG.ENDPOINTS.VK.AUTH,
+        method: "POST",
+        body: vkData,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }),
+    }),
     register: builder.mutation({
       query: (credentials) => ({
         url: API_CONFIG.ENDPOINTS.AUTH.REGISTER,
@@ -137,6 +147,7 @@ export const authApi = createApi({
 });
 
 export const {
+  useVkAuthMutation,
   useRegisterMutation,
   useLoginMutation,
   useGetMeQuery,

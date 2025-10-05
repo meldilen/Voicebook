@@ -84,6 +84,34 @@ app.post('/purchase', (req, res) => {
   }
 });
 
+app.post('/auth/vk', async (req, res) => {
+  const { vk_id, first_name, last_name, photo, vk_token } = req.body;
+  
+  try {
+    // Здесь можно проверить VK токен через VK API
+    // И найти/создать пользователя в базе
+    
+    if (!users[vk_id]) {
+      users[vk_id] = { 
+        coins: 0,
+        vk_id,
+        first_name,
+        last_name,
+        photo,
+        created_at: new Date().toISOString()
+      };
+    }
+    
+    res.json({ 
+      user: users[vk_id],
+      is_new: false // или true если создан новый
+    });
+    
+  } catch (error) {
+    console.error('VK auth error:', error);
+    res.status(500).json({ error: 'VK authentication failed' });
+  }
+});
 
 app.get('/balance/:user_id', (req, res) => {
   const userId = req.params.user_id;
