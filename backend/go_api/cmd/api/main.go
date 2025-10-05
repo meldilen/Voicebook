@@ -64,10 +64,18 @@ func main() {
 	// Initialize VK auth handler
 	vkAuthHandler := handler.NewVKAuthHandler(userService)
 
-	// VK Auth endpoints
+	// Initialize VK payments handler
+	vkPaymentsHandler := handler.NewVKPaymentsHandler(userService)
+
+	// VK endpoints group
 	vkGroup := r.Group("/api/vk")
 	{
+		// VK Auth
 		vkGroup.POST("/auth", vkAuthHandler.VKAuth)
+		
+		// VK Payments
+		vkGroup.POST("/payments", vkPaymentsHandler.HandlePayments)
+		vkGroup.GET("/balance/:userID", vkPaymentsHandler.GetUserBalance)
 	}
 
 

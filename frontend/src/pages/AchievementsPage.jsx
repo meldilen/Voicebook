@@ -3,129 +3,12 @@ import AchievementCard from "../features/achievements/components/AchievementCard
 import "./AchievementsPage.css";
 import Header from "../features/Header/Header";
 
-const achievementsData = [
-  {
-    id: 1,
-    title: "Первый шаг",
-    description: "Сделал первую голосовую запись в дневнике",
-    icon: "🎤",
-    category: "voice",
-    categoryIcon: "🎤",
-    rarity: "common",
-    unlocked: true,
-    progress: 1,
-    required: 1,
-    dateUnlocked: "2025-01-15",
-  },
-  {
-    id: 2,
-    title: "7 дней подряд",
-    description: "Вел голосовой дневник неделю без пропусков",
-    icon: "🔥",
-    category: "regularity",
-    categoryIcon: "📅",
-    rarity: "rare",
-    unlocked: true,
-    progress: 7,
-    required: 7,
-    dateUnlocked: "2025-01-21",
-  },
-  {
-    id: 3,
-    title: "Месячный марафон",
-    description: "30 дней ведения голосового дневника",
-    icon: "🏆",
-    category: "regularity",
-    categoryIcon: "📅",
-    rarity: "epic",
-    unlocked: true,
-    progress: 30,
-    required: 30,
-    dateUnlocked: "2025-07-12",
-  },
-  {
-    id: 4,
-    title: "Радуга эмоций",
-    description: "Выразил 5 или более разных эмоций в записях",
-    icon: "🌈",
-    category: "variety",
-    categoryIcon: "🎭",
-    rarity: "rare",
-    unlocked: true,
-    progress: 5,
-    required: 5,
-    dateUnlocked: "2025-01-18",
-  },
-  {
-    id: 5,
-    title: "Взгляд в прошлое",
-    description: "Прослушал записи за другой день (месяц назад)",
-    icon: "🔍",
-    category: "reflection",
-    categoryIcon: "🤔",
-    rarity: "rare",
-    unlocked: false,
-    progress: 0,
-    required: 1,
-    dateUnlocked: null,
-  },
-  {
-    id: 6,
-    title: "Луч света",
-    description: "Серия из 5 позитивных записей после грустной",
-    icon: "✨",
-    category: "positivity",
-    categoryIcon: "😊",
-    rarity: "epic",
-    unlocked: false,
-    progress: 2,
-    required: 5,
-    dateUnlocked: null,
-  },
-  {
-    id: 7,
-    title: "Эмоциональный детектив",
-    description: "Проанализировал 50 различных записей",
-    icon: "🕵️",
-    category: "analysis",
-    categoryIcon: "📊",
-    rarity: "legendary",
-    unlocked: false,
-    progress: 32,
-    required: 50,
-    dateUnlocked: null,
-  },
-  {
-    id: 8,
-    title: "Голос сердца",
-    description: "Записал 100 минут размышлений",
-    icon: "💖",
-    category: "voice",
-    categoryIcon: "🎤",
-    rarity: "common",
-    unlocked: false,
-    progress: 45,
-    required: 100,
-    dateUnlocked: null,
-  },
-  {
-    id: 9,
-    title: "Сердечный друг",
-    description: "Поделился достижениями с друзьями",
-    icon: "💖",
-    category: "social",
-    rarity: "common",
-    unlocked: false,
-    progress: 0,
-    required: 1,
-    dateUnlocked: null,
-  },
-];
-
 function AchievementsPage() {
   const [filter, setFilter] = useState("all");
-  const [filteredAchievements, setFilteredAchievements] =
-    useState(achievementsData);
+  const [filteredAchievements, setFilteredAchievements] = useState([]);
+  const [achievementsData, setAchievementsData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const categories = [
     { id: "all", name: "Все", icon: "🌟" },
@@ -139,18 +22,73 @@ function AchievementsPage() {
   ];
 
   useEffect(() => {
-    let filtered = achievementsData;
+    fetchAchievements();
+  }, []);
 
+  useEffect(() => {
+    let filtered = achievementsData;
     if (filter !== "all") {
       filtered = filtered.filter((ach) => ach.category === filter);
     }
-
     setFilteredAchievements(filtered);
-  }, [filter]);
+  }, [filter, achievementsData]);
+
+  const fetchAchievements = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/achievements', {
+        credentials: 'include'
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch achievements');
+      }
+      
+      const data = await response.json();
+      setAchievementsData(data.achievements || []);
+    } catch (err) {
+      setError(err.message);
+      console.error('Error fetching achievements:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const unlockedCount = achievementsData.filter((ach) => ach.unlocked).length;
   const totalCount = achievementsData.length;
-  const completionPercentage = Math.round((unlockedCount / totalCount) * 100);
+  const completionPercentage = totalCount > 0 ? Math.round((unlockedCount / totalCount) * 100) : 0;
+
+  if (loading) {
+    return (
+      <div className="achievements-page">
+        <Header />
+        <div className="achievements-container">
+          <div className="loading-state">
+            <div className="loading-spinner"></div>
+            <p>Загрузка достижений...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="achievements-page">
+        <Header />
+        <div className="achievements-container">
+          <div className="error-state">
+            <div className="error-icon">⚠️</div>
+            <h3>Ошибка загрузки</h3>
+            <p>{error}</p>
+            <button onClick={fetchAchievements} className="retry-button">
+              Попробовать снова
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="achievements-page">

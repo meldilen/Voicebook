@@ -20,12 +20,17 @@ export default function TopUp() {
         setUserId(user.id);
 
         // Загружаем баланс с сервера
-        fetch(`/balance/${user.id}`)
+        fetch(`/api/vk/balance/${user.id}`)  // ← изменили URL
           .then(res => res.json())
           .then(data => {
             dispatch(setCoins(data.coins));
           });
-      })
+
+        // После покупки проверяем баланс
+        fetch(`/api/vk/balance/${userId}`)  // ← изменили URL
+          .then(res => res.json())
+          .then(data => dispatch(setCoins(data.coins)));
+              })
       .catch(err => console.error("Ошибка получения пользователя VK:", err));
   }, [dispatch]);
 

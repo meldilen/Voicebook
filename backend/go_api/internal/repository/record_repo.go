@@ -291,3 +291,55 @@ func GetConsecutiveRecordingDays(ctx context.Context, db *sql.DB, userID int) (i
     }
     return count, nil
 }
+
+// SaveRecordForVKUser saves record for VK user
+func SaveRecordForVKUser(ctx context.Context, db *sql.DB, vkUserID int, emotion string, summary string) (int, error) {
+    log.Printf("SaveRecordForVKUser: saving record for VK user ID %d with emotion %s", vkUserID, emotion)
+
+    query := `
+        INSERT INTO record (user_id, emotion, summary, user_type)
+        VALUES ($1, $2, $3, 'vk')
+        RETURNING record_id
+    `
+    var recordID int
+    err := db.QueryRowContext(ctx, query, vkUserID, emotion, summary).Scan(&recordID)
+    if err != nil {
+        log.Printf("SaveRecordForVKUser: failed to save record, error: %v", err)
+        return 0, err
+    }
+
+    log.Printf("SaveRecordForVKUser: successfully saved record with ID %d for VK user ID %d", recordID, vkUserID)
+    return recordID, nil
+}
+
+// GetRecordsByVKUser gets records for VK user
+func GetRecordsByVKUser(ctx context.Context, db *sql.DB, vkUserID int) ([]Record, error) {
+    log.Printf("GetRecordsByVKUser: fetching records for VK user ID %d", vkUserID)
+
+    query := `
+        SELECT record_id, user_id, record_date, emotion, summary, feedback, insights
+        FROM record
+        WHERE user_id = $1 AND user_type = 'vk'
+        ORDER BY record_date DESC
+    `
+    
+    rows, err := db.QueryContext(ctx, query, vkUserID)
+    if err != nil {
+        log.Printf("GetRecordsByVKUser: failed to fetch records for VK user ID %d, error: %v", vkUserID, err)
+        return nil, err
+    }
+    defer rows.Close()
+
+    var records []Record
+    for rows.Next() {
+        var r Record
+        if err := rows.Scan(&r.ID, &r.UserID, &r.RecordDate, &r.Emotion, &r.Summary, &r.Feedback, &r.Insights); err != nil {
+            log.Printf("GetRecordsByVKUser: failed to scan record for VK user ID %d, error: %v", vkUserID, err)
+            return nil, err
+        }
+        records = append(records, r)
+    }
+
+    log.Printf("GetRecordsByVKUser: successfully fetched %d records for VK user ID %d", len(records), vkUserID)
+    return records, nil
+}

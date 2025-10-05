@@ -1,9 +1,10 @@
 package handler
 
 import (
-    "encoding/json"
 	"bytes"
+	"context"
 	"database/sql"
+	"encoding/json"
 	"io"
 	"log"
 	"net/http"
@@ -12,17 +13,20 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"github.com/IU-Capstone-Project-2025/VoiceDiary/backend/go_api/internal/repository"
 	"github.com/IU-Capstone-Project-2025/VoiceDiary/backend/go_api/internal/service"
 )
 
 type RecordHandler struct {
 	svc *service.RecordService
+    db  *sql.DB
 }
 
-func NewRecordHandler(db  *sql.DB, mlURL string) *RecordHandler {
+func NewRecordHandler(db *sql.DB, mlURL string) *RecordHandler {
 	return &RecordHandler{
-  		svc: service.NewRecordService(db, mlURL),
- 	}
+		svc: service.NewRecordService(db, mlURL),
+		db:  db, // Сохраняем соединение с БД
+	}
 }
 
 // UploadRecord handles voice file upload, sends it to ML service, and saves record metadata.
@@ -39,17 +43,48 @@ func NewRecordHandler(db  *sql.DB, mlURL string) *RecordHandler {
 func (h *RecordHandler) UploadRecord(c *gin.Context) {
 	log.Printf("UploadRecord: received request")
 
-	userIDStr := c.PostForm("userID")
-	userID , err := strconv.Atoi(userIDStr)
-	if err != nil {
-		log.Printf("UploadRecord: invalid userID %s, error: %v", userIDStr, err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
-		return 
+	// Определяем тип пользователя из сессии/контекста
+	userObj, exists := c.Get("user")
+	if !exists {
+		// Если нет пользователя в контексте, пробуем получить из формы (для обратной совместимости)
+		userIDStr := c.PostForm("userID")
+		userID, err := strconv.Atoi(userIDStr)
+		if err != nil {
+			log.Printf("UploadRecord: invalid userID %s, error: %v", userIDStr, err)
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+			return 
+		}
+		
+		// Для обратной совместимости создаем временный контекст
+		userObj = &repository.User{ID: userID}
 	}
+
+	// Определяем тип пользователя и ID
+	var userID int
+	var userType string
+	var vkUserID int
+
+	switch user := userObj.(type) {
+	case *repository.User: // Обычный пользователь
+		userID = user.ID
+		userType = "regular"
+		log.Printf("UploadRecord: processing for regular user %d", userID)
+	case *repository.VKUser: // VK пользователь
+		userID = user.ID
+		userType = "vk"
+		vkUserID = user.VKUserID
+		log.Printf("UploadRecord: processing for VK user %d (VK ID: %d)", userID, vkUserID)
+	default:
+		log.Printf("UploadRecord: unknown user type: %T", userObj)
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unknown user type"})
+		return
+	}
+
+	// Получаем файл
 	file, _, err := c.Request.FormFile("file")
 	if err != nil {
 		log.Printf("UploadRecord: failed to get file from form, error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": "No file is recieved"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "No file is received"})
 		return 
 	}
 	defer file.Close()
@@ -70,31 +105,83 @@ func (h *RecordHandler) UploadRecord(c *gin.Context) {
 		return
 	}
 
-	// Save record in DB
+	// Save record in DB в зависимости от типа пользователя
 	var recordID int
 	if userID != -1 {
-        recordID, err = h.svc.SaveRecord(c.Request.Context(), userID, emotion, summary)
-        if err != nil {
-            log.Printf("UploadRecord: failed to save record, error: %v", err)
-            c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save record"})
-            return
-        }
-    } else {
-        recordID = -1
-    }
+		if userType == "vk" {
+			// Сохраняем запись для VK пользователя
+			recordID, err = h.svc.SaveRecordForVKUser(c.Request.Context(), userID, emotion, summary)
+		} else {
+			// Сохраняем запись для обычного пользователя
+			recordID, err = h.svc.SaveRecord(c.Request.Context(), userID, emotion, summary)
+		}
+		
+		if err != nil {
+			log.Printf("UploadRecord: failed to save record for %s user %d, error: %v", userType, userID, err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save record"})
+			return
+		}
 
-	c.JSON(http.StatusOK, gin.H{
+		// ✅ АВТОМАТИЧЕСКАЯ ПРОВЕРКА ДОСТИЖЕНИЙ ПОСЛЕ СОХРАНЕНИЯ ЗАПИСИ
+		go h.checkAchievementsAfterRecord(c.Request.Context(), userID, userType)
+	} else {
+		recordID = -1
+	}
+
+	// Формируем ответ
+	response := gin.H{
 		"user_id": userID,
 		"record_id": recordID,
 		"emotion": emotion,
 		"summary": summary,
 		"text": text,
-	})
+	}
 
-	log.Printf("UploadRecord: successfully processed record for user %d with ID %d", userID, recordID)
+	// Добавляем VK user ID в ответ если это VK пользователь
+	if userType == "vk" {
+		response["vk_user_id"] = vkUserID
+		response["user_type"] = "vk"
+	} else {
+		response["user_type"] = "regular"
+	}
+
+	c.JSON(http.StatusOK, response)
+
+	log.Printf("UploadRecord: successfully processed record for %s user %d with ID %d", userType, userID, recordID)
 }
 
+// checkAchievementsAfterRecord автоматически проверяет достижения после создания записи
+func (h *RecordHandler) checkAchievementsAfterRecord(ctx context.Context, userID int, userType string) {
+	log.Printf("checkAchievementsAfterRecord: checking achievements for %s user %d", userType, userID)
+	
+	// Создаем новый контекст с таймаутом для фоновой задачи
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
 
+	// Получаем сервис достижений через существующее соединение с БД
+	// Для этого нужно добавить поле db в RecordHandler
+	achievementsService := service.NewAchievementsService(h.db)
+	
+	// Получаем и рассчитываем достижения
+	achievements, err := achievementsService.GetUserAchievements(ctx, userID, userType)
+	if err != nil {
+		log.Printf("checkAchievementsAfterRecord: failed to get achievements for %s user %d: %v", userType, userID, err)
+		return
+	}
+
+	// Логируем разблокированные достижения
+	unlockedCount := 0
+	for _, achievement := range achievements {
+		if achievement.Unlocked {
+			unlockedCount++
+			log.Printf("checkAchievementsAfterRecord: %s user %d unlocked achievement: %s", 
+				userType, userID, achievement.Title)
+		}
+	}
+
+	log.Printf("checkAchievementsAfterRecord: completed for %s user %d, unlocked %d achievements", 
+		userType, userID, unlockedCount)
+}
 
 // GetRecords returns all records for a given user.
 // @Summary Get user records

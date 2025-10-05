@@ -267,3 +267,62 @@ func GetVKUserByID(ctx context.Context, db *sql.DB, userID int) (*VKUser, error)
 	log.Printf("GetVKUserByID: successfully fetched VK user with VK ID %d", user.VKUserID)
 	return &user, nil
 }
+
+
+// UpdateVKUserCoins updates user's coins balance
+func UpdateVKUserCoins(ctx context.Context, db *sql.DB, userID int, coins int) error {
+	log.Printf("UpdateVKUserCoins: updating coins for user %d to %d", userID, coins)
+
+	query := `
+		UPDATE vk_user 
+		SET coins = $1 
+		WHERE id = $2
+	`
+	_, err := db.ExecContext(ctx, query, coins, userID)
+	if err != nil {
+		log.Printf("UpdateVKUserCoins: failed to update user %d: %v", userID, err)
+		return err
+	}
+
+	log.Printf("UpdateVKUserCoins: successfully updated coins for user %d", userID)
+	return nil
+}
+
+// UpdateVKUserCoinsByVKID updates user's coins balance by VK user ID
+func UpdateVKUserCoinsByVKID(ctx context.Context, db *sql.DB, vkUserID int, coins int) error {
+	log.Printf("UpdateVKUserCoinsByVKID: updating coins for VK user %d to %d", vkUserID, coins)
+
+	query := `
+		UPDATE vk_user 
+		SET coins = $1 
+		WHERE vk_user_id = $2
+	`
+	_, err := db.ExecContext(ctx, query, coins, vkUserID)
+	if err != nil {
+		log.Printf("UpdateVKUserCoinsByVKID: failed to update VK user %d: %v", vkUserID, err)
+		return err
+	}
+
+	log.Printf("UpdateVKUserCoinsByVKID: successfully updated coins for VK user %d", vkUserID)
+	return nil
+}
+
+// Добавить в repository/user_repo.go
+func GetUserByID(ctx context.Context, db *sql.DB, userID int) (*User, error) {
+    log.Printf("GetUserByID: fetching user with ID %d", userID)
+
+    query := `
+        SELECT user_id, login, password, nickname, created_at
+        FROM "user"
+        WHERE user_id = $1
+    `
+    var user User
+    err := db.QueryRowContext(ctx, query, userID).Scan(&user.ID, &user.Login, &user.Password, &user.Nickname)
+    if err != nil {
+        log.Printf("GetUserByID: failed to fetch user with ID %d, error: %v", userID, err)
+        return nil, err
+    }
+
+    log.Printf("GetUserByID: successfully fetched user with ID %d", user.ID)
+    return &user, nil
+}
