@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   nginx:
     image: nginx:alpine
@@ -13,7 +11,7 @@ services:
       - ./nginx/ssl:/etc/ssl
     depends_on:
       - frontend
-      - go-api
+      - go_api
       - ml-service
     restart: unless-stopped
 
@@ -34,23 +32,23 @@ services:
       timeout: 5s
       retries: 5
 
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    environment:
-      - REACT_APP_go_api=https://localhost:8080
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
-    ports:
-      - "3000:3000"
-    command: npm start
-    depends_on:
-      - go-api
-    restart: unless-stopped
+  # frontend:
+  #   build:
+  #     context: ./frontend
+  #     dockerfile: Dockerfile
+  #   environment:
+  #     - REACT_APP_go_api=https://localhost:8080
+  #   volumes:
+  #     - ./frontend:/app
+  #     - /app/node_modules
+  #   ports:
+  #     - "3000:3000"
+  #   # command: npm start
+  #   depends_on:
+  #     - go_api
+  #   restart: unless-stopped
 
-  go-api:
+  go_api:
     build:
       context: ./backend/go_api
       dockerfile: Dockerfile
@@ -65,8 +63,9 @@ services:
       - ./backend/go_api:/app
     ports:
       - "8080:8080"
-    command: go run cmd/api/main.go
+    command: ./go_api   # ✅ run the built binary instead of 'go run'
     restart: unless-stopped
+
 
   ml-service:
     build:
