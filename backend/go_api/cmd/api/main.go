@@ -59,6 +59,10 @@ func main() {
 	recordService := service.NewRecordService(db, cfg.MLServiceURL)
 	totalHandler := handler.NewTotalHandler(totalService, recordService)
 
+	// Achievements
+	achievementsService := service.NewAchievementsService(db)
+	achievementsHandler := handler.NewAchievementsHandler(achievementsService)
+
 	// Initialize VK auth handler
 	vkAuthHandler := handler.NewVKAuthHandler(userService)
 
@@ -101,6 +105,13 @@ func main() {
 		recordGroup.POST("/:recordID/feedback", recordHandler.SetRecordFeedback)
 		recordGroup.PATCH("/:recordID/emotion", recordHandler.UpdateEmotion)
 		recordGroup.GET("/users/:userID/consecutive-days", recordHandler.GetConsecutiveRecordingDays)
+	}
+
+	// Achievements-related endpoints
+	achievementsGroup := apiGroup.Group("/achievements")
+	{
+		achievementsGroup.GET("", middleware.AuthMiddleware(userService), achievementsHandler.GetAchievements)
+		achievementsGroup.POST("/:achievementID/progress", middleware.AuthMiddleware(userService), achievementsHandler.UpdateAchievementProgress)
 	}
 
 	totalGroup := apiGroup.Group("/totals")
