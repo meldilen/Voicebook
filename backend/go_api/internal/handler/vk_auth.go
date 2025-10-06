@@ -1,50 +1,50 @@
 package handler
 
 import (
-	"context"
-	"crypto/hmac"
-	"crypto/sha256"
-	"encoding/base64"
-	"fmt"
-	"log"
-	"net/http"
-	"net/url"
-	"os"
-	"sort"
-	"strconv"
-	"strings"
-	"time"
+    "context"
+    "crypto/hmac"
+    "crypto/sha256"
+    "encoding/base64"
+    "fmt"
+    "log"
+    "net/http"
+    "net/url"
+    "os"
+    "sort"
+    "strconv"
+    "strings"
+    "time"
 
-	"github.com/IU-Capstone-Project-2025/VoiceDiary/backend/go_api/internal/repository"
-	"github.com/IU-Capstone-Project-2025/VoiceDiary/backend/go_api/internal/service"
-	"github.com/gin-gonic/gin"
+    "github.com/IU-Capstone-Project-2025/VoiceDiary/backend/go_api/internal/repository"
+    "github.com/IU-Capstone-Project-2025/VoiceDiary/backend/go_api/internal/service"
+    "github.com/gin-gonic/gin"
 )
 
 type VKAuthHandler struct {
-	userService *service.UserService
+    userService *service.UserService
 }
 
 func NewVKAuthHandler(userService *service.UserService) *VKAuthHandler {
-	return &VKAuthHandler{
-		userService: userService,
-	}
+    return &VKAuthHandler{
+        userService: userService,
+    }
 }
 
 type VKAuthRequest struct {
-	VKUserID     int                    `json:"vkUserId" binding:"required"`
-	LaunchParams map[string]interface{} `json:"launchParams" binding:"required"`
+    VKUserID     int                    `json:"vkUserId" binding:"required"`
+    LaunchParams map[string]interface{} `json:"launchParams" binding:"required"`
 }
 
 type VKAuthResponse struct {
-	Success bool    `json:"success"`
-	User    *VKUser `json:"user"`
+    Success bool    `json:"success"`
+    User    *VKUser `json:"user"`
 }
 
 type VKUser struct {
-	ID        int       `json:"id"`       // ← lowercase для фронтенда
-	VKUserID  int       `json:"vkUserId"` // ← добавил это поле
-	Coins     int       `json:"coins"`
-	CreatedAt time.Time `json:"createdAt"`
+    ID        int       `json:"id"`
+    VKUserID  int       `json:"vkUserId"`
+    Coins     int       `json:"coins"`
+    CreatedAt time.Time `json:"createdAt"`
 }
 
 // @Summary VK Mini Apps authentication
@@ -58,193 +58,214 @@ type VKUser struct {
 // @Failure 403 {object} map[string]string
 // @Router /api/vk/auth [post]
 func (h *VKAuthHandler) VKAuth(c *gin.Context) {
-	log.Printf("VKAuth: received request")
+    log.Printf("VKAuth: starting authentication process")
+    
+    var req VKAuthRequest
+    if err := c.ShouldBindJSON(&req); err != nil {
+        log.Printf("VKAuth: invalid request body: %v", err)
+        c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+        return
+    }
 
-	var req VKAuthRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		log.Printf("VKAuth: invalid request body: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
-		return
-	}
+    // Логируем полученные параметры
+    log.Printf("VKAuth: received VKUserID: %d", req.VKUserID)
+    log.Printf("VKAuth: received launch params count: %d", len(req.LaunchParams))
 
-	// Normalize launch params to strings (VK may send numbers/ints)
-	normalizedParams := normalizeLaunchParams(req.LaunchParams)
+    normalizedParams := normalizeLaunchParams(req.LaunchParams)
+    
+    // Логируем нормализованные параметры
+    log.Printf("VKAuth: normalized parameters:")
+    for k, v := range normalizedParams {
+        log.Printf("  %s: %s", k, v)
+    }
 
-	// Validate VK signature
-	if err := h.validateVKSignature(normalizedParams); err != nil {
-		log.Printf("VKAuth: signature validation failed: %v", err)
-		c.JSON(http.StatusForbidden, gin.H{"error": "Invalid signature"})
-		return
-	}
+    // Проверяем обязательные параметры
+    if err := h.validateRequiredParams(normalizedParams); err != nil {
+        log.Printf("VKAuth: missing required parameters: %v", err)
+        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+        return
+    }
 
-	// Verify user ID matches
-	launchUserID, err := strconv.Atoi(normalizedParams["vk_user_id"])
-	if err != nil || launchUserID != req.VKUserID {
-		log.Printf("VKAuth: user ID mismatch: request=%d, launch=%s", req.VKUserID, normalizedParams["vk_user_id"])
-		c.JSON(http.StatusBadRequest, gin.H{"error": "User ID mismatch"})
-		return
-	}
+    // Validate VK signature
+    if err := h.validateVKSignature(normalizedParams); err != nil {
+        log.Printf("VKAuth: signature validation failed: %v", err)
+        c.JSON(http.StatusForbidden, gin.H{"error": "Invalid signature"})
+        return
+    }
 
-	// Check timestamp (not older than 10 minutes)
-	if err := h.validateTimestamp(normalizedParams["vk_ts"]); err != nil {
-		log.Printf("VKAuth: timestamp validation failed: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Expired timestamp"})
-		return
-	}
+    // Verify user ID matches
+    launchUserID, err := strconv.Atoi(normalizedParams["vk_user_id"])
+    if err != nil || launchUserID != req.VKUserID {
+        log.Printf("VKAuth: user ID mismatch: request=%d, launch=%s", req.VKUserID, normalizedParams["vk_user_id"])
+        c.JSON(http.StatusBadRequest, gin.H{"error": "User ID mismatch"})
+        return
+    }
 
-	// Find or create user
-	user, err := h.findOrCreateUser(c.Request.Context(), req.VKUserID)
-	if err != nil {
-		log.Printf("VKAuth: failed to find/create user: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to process user"})
-		return
-	}
+    // Check timestamp (not older than 10 minutes)
+    if err := h.validateTimestamp(normalizedParams["vk_ts"]); err != nil {
+        log.Printf("VKAuth: timestamp validation failed: %v", err)
+        c.JSON(http.StatusBadRequest, gin.H{"error": "Expired timestamp"})
+        return
+    }
 
-	response := VKAuthResponse{
-		Success: true,
-		User: &VKUser{
-			ID:        user.ID,
-			VKUserID:  user.VKUserID, // ← добавлено это поле
-			Coins:     user.Coins,
-			CreatedAt: user.CreatedAt,
-		},
-	}
+    // Find or create user
+    user, err := h.findOrCreateUser(c.Request.Context(), req.VKUserID)
+    if err != nil {
+        log.Printf("VKAuth: failed to find/create user: %v", err)
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to process user"})
+        return
+    }
 
-	c.JSON(http.StatusOK, response)
-	log.Printf("VKAuth: successfully authenticated user %d", req.VKUserID)
+    response := VKAuthResponse{
+        Success: true,
+        User: &VKUser{
+            ID:        user.ID,
+            VKUserID:  user.VKUserID,
+            Coins:     user.Coins,
+            CreatedAt: user.CreatedAt,
+        },
+    }
+
+    c.JSON(http.StatusOK, response)
+    log.Printf("VKAuth: successfully authenticated user %d", req.VKUserID)
 }
 
-// validateVKSignature validates VK Mini Apps signature
+// validateVKSignature validates VK Mini Apps signature according to official VK documentation
+// Official reference: https://dev.vk.com/mini-apps/overview#Параметры-запуска
 func (h *VKAuthHandler) validateVKSignature(launchParams map[string]string) error {
-	signature, exists := launchParams["sign"]
-	if !exists {
-		return fmt.Errorf("missing signature")
-	}
+    signature, exists := launchParams["sign"]
+    if !exists {
+        return fmt.Errorf("missing signature parameter")
+    }
 
-	// Include only parameters starting with "vk_" (VK spec), exclude "sign"
-	keys := make([]string, 0)
-	for k := range launchParams {
-		if k == "sign" {
-			continue
-		}
-		if strings.HasPrefix(k, "vk_") {
-			keys = append(keys, k)
-		}
-	}
-	sort.Strings(keys)
+    // Step 1: Extract only parameters starting with "vk_"
+    keys := make([]string, 0)
+    for k := range launchParams {
+        if k != "sign" && strings.HasPrefix(k, "vk_") {
+            keys = append(keys, k)
+        }
+    }
 
-	// Build query strings: raw and URL-encoded variants
-	buildQuery := func(encode bool) string {
-		parts := make([]string, 0, len(keys))
-		for _, k := range keys {
-			v := launchParams[k]
-			if encode {
-				// Use QueryEscape; if needed we can switch to PathEscape
-				v = url.QueryEscape(v)
-			}
-			parts = append(parts, fmt.Sprintf("%s=%s", k, v))
-		}
-		return strings.Join(parts, "&")
-	}
-	rawQuery := buildQuery(false)
-	encQuery := buildQuery(true)
+    // Step 2: Sort parameters alphabetically
+    sort.Strings(keys)
 
-	vkSecretKey := os.Getenv("VK_SECRET_KEY") // Ваш защищенный ключ
+    // Step 3: Build query string with URL-encoded values
+    queryParts := make([]string, 0, len(keys))
+    for _, k := range keys {
+        // URL encode parameter values according to VK specification
+        encodedValue := url.QueryEscape(launchParams[k])
+        queryParts = append(queryParts, fmt.Sprintf("%s=%s", k, encodedValue))
+    }
+    queryString := strings.Join(queryParts, "&")
 
-	// Calculate HMAC-SHA256 and encode as Base64 URL-safe without padding (VK spec)
-	computeSig := func(s string) string {
-		mac := hmac.New(sha256.New, []byte(vkSecretKey))
-		mac.Write([]byte(s))
-		return base64.RawURLEncoding.EncodeToString(mac.Sum(nil))
-	}
-	expectedRaw := computeSig(rawQuery)
-	if signature == expectedRaw {
-		return nil
-	}
-	expectedEnc := computeSig(encQuery)
-	if signature == expectedEnc {
-		return nil
-	}
-	log.Printf("VKAuth: signature mismatch. ExpectedRaw: %s, ExpectedEnc: %s, Got: %s", expectedRaw, expectedEnc, signature)
-	log.Printf("VKAuth: raw query: %s", rawQuery)
-	log.Printf("VKAuth: enc query: %s", encQuery)
-	return fmt.Errorf("signature mismatch")
+    // Get secret key from environment
+    vkSecretKey := os.Getenv("VK_SECRET_KEY")
+    if vkSecretKey == "" {
+        return fmt.Errorf("VK_SECRET_KEY environment variable not set")
+    }
 
-	return nil
+    // Step 4: Calculate HMAC-SHA256
+    mac := hmac.New(sha256.New, []byte(vkSecretKey))
+    mac.Write([]byte(queryString))
+    
+    // Step 5: Encode to Base64 URL-safe without padding
+    expectedSignature := base64.RawURLEncoding.EncodeToString(mac.Sum(nil))
+
+    // Step 6: Compare signatures (use constant-time comparison for security)
+    if !hmac.Equal([]byte(signature), []byte(expectedSignature)) {
+        log.Printf("VKAuth: SIGNATURE VALIDATION FAILED")
+        log.Printf("VKAuth: Query string used: %s", queryString)
+        log.Printf("VKAuth: Expected signature: %s", expectedSignature)
+        log.Printf("VKAuth: Received signature: %s", signature)
+        return fmt.Errorf("signature mismatch")
+    }
+
+    log.Printf("VKAuth: signature validation successful")
+    return nil
 }
 
-// normalizeLaunchParams converts mixed-type map values to their string representations.
-// VK Mini Apps may supply numeric values (e.g., vk_user_id, vk_ts) as numbers.
+// validateRequiredParams checks for required VK parameters
+func (h *VKAuthHandler) validateRequiredParams(launchParams map[string]string) error {
+    requiredParams := []string{"vk_user_id", "vk_app_id", "vk_ts", "sign"}
+    
+    for _, param := range requiredParams {
+        if _, exists := launchParams[param]; !exists {
+            return fmt.Errorf("missing required parameter: %s", param)
+        }
+    }
+    return nil
+}
+
+// normalizeLaunchParams converts mixed-type map values to their string representations
 func normalizeLaunchParams(raw map[string]interface{}) map[string]string {
-	result := make(map[string]string, len(raw))
-	for k, v := range raw {
-		switch val := v.(type) {
-		case string:
-			result[k] = val
-		case fmt.Stringer:
-			result[k] = val.String()
-		case int:
-			result[k] = strconv.Itoa(val)
-		case int32:
-			result[k] = strconv.FormatInt(int64(val), 10)
-		case int64:
-			result[k] = strconv.FormatInt(val, 10)
-		case float32:
-			// Avoid scientific notation and decimals for integers
-			result[k] = strconv.FormatInt(int64(val), 10)
-		case float64:
-			result[k] = strconv.FormatInt(int64(val), 10)
-		case bool:
-			if val {
-				result[k] = "1"
-			} else {
-				result[k] = "0"
-			}
-		default:
-			result[k] = fmt.Sprintf("%v", val)
-		}
-	}
-	return result
+    result := make(map[string]string, len(raw))
+    for k, v := range raw {
+        switch val := v.(type) {
+        case string:
+            result[k] = val
+        case fmt.Stringer:
+            result[k] = val.String()
+        case int:
+            result[k] = strconv.Itoa(val)
+        case int32:
+            result[k] = strconv.FormatInt(int64(val), 10)
+        case int64:
+            result[k] = strconv.FormatInt(val, 10)
+        case float32:
+            result[k] = strconv.FormatInt(int64(val), 10)
+        case float64:
+            result[k] = strconv.FormatInt(int64(val), 10)
+        case bool:
+            if val {
+                result[k] = "1"
+            } else {
+                result[k] = "0"
+            }
+        default:
+            result[k] = fmt.Sprintf("%v", val)
+        }
+    }
+    return result
 }
 
 // validateTimestamp checks if timestamp is not older than 10 minutes
 func (h *VKAuthHandler) validateTimestamp(timestampStr string) error {
-	timestamp, err := strconv.ParseInt(timestampStr, 10, 64)
-	if err != nil {
-		return fmt.Errorf("invalid timestamp format")
-	}
+    timestamp, err := strconv.ParseInt(timestampStr, 10, 64)
+    if err != nil {
+        return fmt.Errorf("invalid timestamp format")
+    }
 
-	// Check if timestamp is not older than 10 minutes
-	now := time.Now().Unix()
-	if now-timestamp > 600 { // 10 minutes in seconds
-		return fmt.Errorf("timestamp expired")
-	}
+    // Check if timestamp is not older than 10 minutes
+    now := time.Now().Unix()
+    if now-timestamp > 600 { // 10 minutes in seconds
+        return fmt.Errorf("timestamp expired")
+    }
 
-	return nil
+    return nil
 }
 
 // findOrCreateUser finds existing user or creates new one
 func (h *VKAuthHandler) findOrCreateUser(ctx context.Context, vkUserID int) (*repository.VKUser, error) {
-	// Try to find existing user
-	user, err := repository.GetVKUserByVKID(ctx, h.userService.DB(), vkUserID)
-	if err == nil && user != nil {
-		log.Printf("VKAuth: found existing user %d", vkUserID)
-		return user, nil
-	}
+    // Try to find existing user
+    user, err := repository.GetVKUserByVKID(ctx, h.userService.DB(), vkUserID)
+    if err == nil && user != nil {
+        log.Printf("VKAuth: found existing user %d", vkUserID)
+        return user, nil
+    }
 
-	// Create new user with initial coins
-	initialCoins := 100
-	userID, err := repository.CreateVKUser(ctx, h.userService.DB(), vkUserID, initialCoins)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create user: %w", err)
-	}
+    // Create new user with initial coins
+    initialCoins := 100
+    userID, err := repository.CreateVKUser(ctx, h.userService.DB(), vkUserID, initialCoins)
+    if err != nil {
+        return nil, fmt.Errorf("failed to create user: %w", err)
+    }
 
-	// Get the created user
-	user, err = repository.GetVKUserByID(ctx, h.userService.DB(), userID)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get created user: %w", err)
-	}
+    // Get the created user
+    user, err = repository.GetVKUserByID(ctx, h.userService.DB(), userID)
+    if err != nil {
+        return nil, fmt.Errorf("failed to get created user: %w", err)
+    }
 
-	log.Printf("VKAuth: created new user %d with %d coins", vkUserID, initialCoins)
-	return user, nil
+    log.Printf("VKAuth: created new user %d with %d coins", vkUserID, initialCoins)
+    return user, nil
 }
