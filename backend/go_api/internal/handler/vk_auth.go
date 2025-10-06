@@ -4,7 +4,7 @@ import (
 	"context"
 	"crypto/hmac"
 	"crypto/sha256"
-	"encoding/hex"
+	"encoding/base64"
 	"fmt"
 	"log"
 	"net/http"
@@ -120,34 +120,32 @@ func (h *VKAuthHandler) validateVKSignature(launchParams map[string]string) erro
 		return fmt.Errorf("missing signature")
 	}
 
-	// Remove sign parameter from validation
-	params := make(map[string]string)
-	for k, v := range launchParams {
-		if k != "sign" {
-			params[k] = v
+	// Include only parameters starting with "vk_" (VK spec), exclude "sign"
+	keys := make([]string, 0)
+	for k := range launchParams {
+		if k == "sign" {
+			continue
 		}
-	}
-
-	// Sort parameters by key
-	keys := make([]string, 0, len(params))
-	for k := range params {
-		keys = append(keys, k)
+		if strings.HasPrefix(k, "vk_") {
+			keys = append(keys, k)
+		}
 	}
 	sort.Strings(keys)
 
-	// Build query string
+	// Build query string without URL-encoding (VK spec)
 	var queryParts []string
 	for _, k := range keys {
-		queryParts = append(queryParts, fmt.Sprintf("%s=%s", k, params[k]))
+		queryParts = append(queryParts, fmt.Sprintf("%s=%s", k, launchParams[k]))
 	}
 	queryString := strings.Join(queryParts, "&")
 
 	vkSecretKey := os.Getenv("VK_SECRET_KEY") // Ваш защищенный ключ
 
-	// Calculate HMAC-SHA256
+	// Calculate HMAC-SHA256 and encode as Base64 URL-safe without padding (VK spec)
 	mac := hmac.New(sha256.New, []byte(vkSecretKey))
 	mac.Write([]byte(queryString))
-	expectedSignature := hex.EncodeToString(mac.Sum(nil))
+	sum := mac.Sum(nil)
+	expectedSignature := base64.RawURLEncoding.EncodeToString(sum)
 
 	if signature != expectedSignature {
 		log.Printf("VKAuth: signature mismatch. Expected: %s, Got: %s", expectedSignature, signature)
