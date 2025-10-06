@@ -63,6 +63,7 @@ async def process_audio_endpoint(file: UploadFile = File(...)):
             logger.info(f"Saved temporary file to: {original_path}")
             
             # Process audio (STT service will handle OGG conversion internally)
+            logger.info("Starting audio processing...")
             result = process_audio(original_path)
             logger.info("Successfully processed audio file")
             
@@ -96,6 +97,8 @@ async def process_audio_endpoint(file: UploadFile = File(...)):
             
     except Exception as e:
         logger.error(f"Error processing audio: {str(e)}", exc_info=True)
+        import traceback
+        logger.error(f"Full traceback: {traceback.format_exc()}")
         raise HTTPException(status_code=500, detail=f"Error processing audio: {str(e)}")
 
 @app.post("/analyze_text")
