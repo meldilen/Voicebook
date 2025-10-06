@@ -1,8 +1,10 @@
 import "./AchievementCard.css";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 function AchievementCard({ achievement }) {
   const [isFlipped, setIsFlipped] = useState(false);
+  const { t } = useTranslation();
   const isUnlocked = achievement.unlocked;
   const progressPercentage = Math.min(100, (achievement.progress / achievement.required) * 100);
   
@@ -28,11 +30,11 @@ function AchievementCard({ achievement }) {
 
   const getRarityLabel = () => {
     switch (achievement.rarity) {
-      case "common": return "Обычный";
-      case "rare": return "Редкий";
-      case "epic": return "Эпический";
-      case "legendary": return "Легендарный";
-      default: return "Обычный";
+      case "common": return t("achievements.rarity.common");
+      case "rare": return t("achievements.rarity.rare");
+      case "epic": return t("achievements.rarity.epic");
+      case "legendary": return t("achievements.rarity.legendary");
+      default: return t("achievements.rarity.common");
     }
   };
 

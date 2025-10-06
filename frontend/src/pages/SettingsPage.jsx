@@ -8,12 +8,14 @@ import {
 } from "../features/auth/authApi";
 import "./SettingsPage.css";
 import PasswordVisibilityIcon from "../features/auth/components/VisibilityIcon";
+import { useTranslation } from "react-i18next";
 
 const SettingsPage = () => {
   const navigate = useNavigate();
   const user = useSelector(selectCurrentUser);
   const [updateProfile, { isLoading }] = useUpdateProfileMutation();
   const { refetch } = useGetMeQuery();
+  const { t } = useTranslation();
 
   const [formData, setFormData] = useState({
     nickname: "",
@@ -43,15 +45,15 @@ const SettingsPage = () => {
 
     if (formData.newPassword) {
       if (formData.newPassword.length < 6) {
-        newErrors.newPassword = "Password should be at least 6 characters";
+        newErrors.newPassword = t("settings.errors.passwordShort");
       } else if (!/[A-Z]/.test(formData.newPassword)) {
-        newErrors.newPassword = "Add at least one uppercase letter";
+        newErrors.newPassword = t("settings.errors.passwordUppercase");
       } else if (!/\d/.test(formData.newPassword)) {
-        newErrors.newPassword = "Add at least one number";
+        newErrors.newPassword = t("settings.errors.passwordNumber");
       }
 
       if (formData.newPassword !== formData.confirmPassword) {
-        newErrors.confirmPassword = "Passwords don't match";
+        newErrors.confirmPassword = t("settings.errors.passwordsDontMatch");
       }
     }
 
@@ -65,6 +67,13 @@ const SettingsPage = () => {
       ...prev,
       [name]: value,
     }));
+    // Очищаем ошибки при изменении поля
+    if (errors[name]) {
+      setErrors(prev => ({ ...prev, [name]: "" }));
+    }
+    if (apiError) {
+      setApiError("");
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -87,9 +96,9 @@ const SettingsPage = () => {
       navigate("/profile");
     } catch (err) {
       console.error("Failed to update profile:", err);
-      let errorMessage = "Failed to update profile";
+      let errorMessage = t("settings.errors.updateFailed");
       if (err.data?.error?.includes("already in use")) {
-        errorMessage = "This login is already taken";
+        errorMessage = t("settings.errors.loginTaken");
       } else if (err.data?.error) {
         errorMessage = err.data.error;
       }
@@ -99,9 +108,20 @@ const SettingsPage = () => {
 
   const handleBack = () => navigate("/profile");
 
+  const handleAvatarChange = () => {
+    alert(t("settings.avatar.comingSoon"));
+  };
+
+  const getPasswordToggleLabel = (isVisible) => 
+    isVisible ? t("settings.buttons.hidePassword") : t("settings.buttons.showPassword");
+
   return (
     <div className="settings-page">
-      <button className="back-button" onClick={handleBack} aria-label="Go back">
+      <button 
+        className="back-button" 
+        onClick={handleBack} 
+        aria-label={t("profile.back")}
+      >
         <svg
           width="30"
           height="30"
@@ -121,8 +141,8 @@ const SettingsPage = () => {
 
       <div className="settings-container">
         <div className="settings-header">
-          <h1>Account Settings</h1>
-          <p>Manage your profile information</p>
+          <h1>{t("settings.title")}</h1>
+          <p>{t("settings.subtitle")}</p>
         </div>
 
         <form onSubmit={handleSubmit}>
@@ -139,11 +159,9 @@ const SettingsPage = () => {
                 <button
                   type="button"
                   className="avatar-edit-button"
-                  onClick={() =>
-                    alert("Avatar change functionality coming soon!")
-                  }
+                  onClick={handleAvatarChange}
                 >
-                  Change Photo
+                  {t("settings.avatar.changePhoto")}
                 </button>
               </div>
             </div>
@@ -171,7 +189,7 @@ const SettingsPage = () => {
 
             <div className="settings-form">
               <div className="form-group">
-                <label htmlFor="nickname">Nickname</label>
+                <label htmlFor="nickname">{t("settings.form.nickname")}</label>
                 <input
                   id="nickname"
                   name="nickname"
@@ -184,7 +202,7 @@ const SettingsPage = () => {
               </div>
 
               <div className="form-group">
-                <label htmlFor="login">Login</label>
+                <label htmlFor="login">{t("settings.form.login")}</label>
                 <input
                   id="login"
                   name="login"
@@ -197,12 +215,12 @@ const SettingsPage = () => {
               </div>
 
               <div className="form-group">
-                <label htmlFor="newPassword">New Password</label>
+                <label htmlFor="newPassword">{t("settings.form.newPassword")}</label>
                 <div className="password-input-wrapper">
                   <input
                     id="newPassword"
                     name="newPassword"
-                    placeholder="Enter new password"
+                    placeholder={t("settings.form.newPasswordPlaceholder")}
                     type={showPassword ? "text" : "password"}
                     value={formData.newPassword}
                     onChange={handleChange}
@@ -214,9 +232,7 @@ const SettingsPage = () => {
                     type="button"
                     className="password-toggle"
                     onClick={() => setShowPassword(!showPassword)}
-                    aria-label={
-                      showPassword ? "Hide password" : "Show password"
-                    }
+                    aria-label={getPasswordToggleLabel(showPassword)}
                   >
                     <PasswordVisibilityIcon visible={showPassword} />
                   </button>
@@ -229,12 +245,12 @@ const SettingsPage = () => {
               </div>
 
               <div className="form-group">
-                <label htmlFor="confirmPassword">Confirm Password</label>
+                <label htmlFor="confirmPassword">{t("settings.form.confirmPassword")}</label>
                 <div className="password-input-wrapper">
                   <input
                     id="confirmPassword"
                     name="confirmPassword"
-                    placeholder="Confirm new password"
+                    placeholder={t("settings.form.confirmPasswordPlaceholder")}
                     type={showConfirmPassword ? "text" : "password"}
                     value={formData.confirmPassword}
                     onChange={handleChange}
@@ -246,9 +262,7 @@ const SettingsPage = () => {
                     type="button"
                     className="password-toggle"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    aria-label={
-                      showConfirmPassword ? "Hide password" : "Show password"
-                    }
+                    aria-label={getPasswordToggleLabel(showConfirmPassword)}
                   >
                     <PasswordVisibilityIcon visible={showConfirmPassword} />
                   </button>
@@ -267,10 +281,10 @@ const SettingsPage = () => {
                   onClick={handleBack}
                   disabled={isLoading}
                 >
-                  Cancel
+                  {t("settings.buttons.cancel")}
                 </button>
                 <button type="submit" className="save-btn" disabled={isLoading}>
-                  {isLoading ? "Saving..." : "Save Changes"}
+                  {isLoading ? t("settings.buttons.saving") : t("settings.buttons.save")}
                 </button>
               </div>
             </div>

@@ -61,7 +61,7 @@ function Header({
             title={t("header.achievements")}
           >
             <FaTrophy className="icon" />
-            <span className="nav-label">Достижения</span>
+            <span className="nav-label">{t("header.achievements")}</span>
           </div>
           <div
             className="nav-box profile"
@@ -100,7 +100,7 @@ function Header({
             title={t("header.achievements")}
           >
             <FaTrophy className="icon" />
-            <span className="nav-label">Достижения</span>
+            <span className="nav-label">{t("header.achievements")}</span>
           </div>
           <div
             className="nav-box profile"
@@ -191,12 +191,12 @@ function Header({
                 </div>
 
                 <div className="nav-group right-group">
-                  <div className="nav-box" title="Баланс эмокоинов">
+                  <div className="nav-box" title={t("header.emocoinsBalance")}>
                     <FaCoins className="icon" />
                     <span className="mobile-value">{emocoinsBalance}</span>
                   </div>
 
-                  <div className="nav-box" title="Доступные записи">
+                  <div className="nav-box" title={t("header.availableRecordings")}>
                     <FaMicrophone className="icon" />
                     <span className="mobile-value">
                       {availableRecordings}/5
@@ -224,12 +224,12 @@ function Header({
                     </div>
                   </div>
 
-                  <div className="nav-box" title="Баланс эмокоинов">
+                  <div className="nav-box" title={t("header.emocoinsBalance")}>
                     <FaCoins className="icon" />
                     <span className="nav-label">{emocoinsBalance}</span>
                   </div>
 
-                  <div className="nav-box" title="Доступные записи">
+                  <div className="nav-box" title={t("header.availableRecordings")}>
                     <FaMicrophone className="icon" />
                     <span className="nav-label">{availableRecordings}/5</span>
                   </div>

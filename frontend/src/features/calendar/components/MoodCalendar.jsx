@@ -8,8 +8,7 @@ import DayPopup from "./DayPopup";
 import { MoodIcon } from "./MoodIcon";
 import { useGetTotalsQuery } from "../totalApi";
 import { useSelector } from "react-redux";
-
-const dayNames = ["M", "T", "W", "T", "F", "S", "S"];
+import { useTranslation } from "react-i18next";
 
 const Calendar = () => {
   const today = new Date();
@@ -17,6 +16,7 @@ const Calendar = () => {
   const [selectedDay, setSelectedDay] = useState(today.getDate());
   const [dailyData, setDailyData] = useState({});
   const [isLoading, setIsLoading] = useState(false);
+  const { t, i18n } = useTranslation();
 
   const userId = useSelector((state) => state.auth.user?.ID);
 
@@ -62,7 +62,9 @@ const Calendar = () => {
     ...Array.from({ length: daysInMonth }, (_, i) => i + 1),
   ];
 
-  const monthName = currentDate.toLocaleString("en-US", { month: "long" });
+  // Локализация названия месяца с большой буквы
+  const monthName = currentDate.toLocaleString(i18n.language, { month: "long" });
+  const capitalizedMonthName = monthName.charAt(0).toUpperCase() + monthName.slice(1);
 
   const handleDayClick = (day) => {
     if (day) {
@@ -93,17 +95,17 @@ const Calendar = () => {
           <button
             onClick={() => changeMonth(-1)}
             className="nav-button"
-            aria-label="Previous month"
+            aria-label={t("calendar.previousMonth")}
           >
             <FaChevronLeft />
           </button>
           <h2 className="month-year-display">
-            {monthName} {year}
+            {capitalizedMonthName} {year}
           </h2>
           <button
             onClick={() => changeMonth(1)}
             className="nav-button"
-            aria-label="Next month"
+            aria-label={t("calendar.nextMonth")}
           >
             <FaChevronRight />
           </button>
@@ -111,7 +113,7 @@ const Calendar = () => {
       </div>
 
       <div className="day-names">
-        {dayNames.map((name, i) => (
+        {t("calendar.dayNames", { returnObjects: true }).map((name, i) => (
           <div key={i} className="day-name">
             {name}
           </div>
@@ -147,7 +149,7 @@ const Calendar = () => {
       <DayPopup
         currentDayData={currentDayData}
         selectedDay={selectedDay}
-        monthName={monthName}
+        monthName={capitalizedMonthName}
         year={year}
       />
     </div>

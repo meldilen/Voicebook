@@ -2,10 +2,12 @@ import "./FilterControls.css";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { useCallback, useState, useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 
 function FilterControls({ dateFilter, limitFilter, onDateChange, onLimitChange }) {
   const [isOpen, setIsOpen] = useState(false);
   const selectRef = useRef(null);
+  const { t } = useTranslation();
 
   const handleDateChange = useCallback(
     (date) => {
@@ -37,7 +39,6 @@ function FilterControls({ dateFilter, limitFilter, onDateChange, onLimitChange }
     if (!dateFilter) return false;
 
     const today = new Date();
-    const filterDate = new Date(dateFilter);
 
     if (days === 0) {
       return today.toISOString().split("T")[0] === dateFilter;
@@ -51,10 +52,10 @@ function FilterControls({ dateFilter, limitFilter, onDateChange, onLimitChange }
   const hasActiveFilters = dateFilter || limitFilter > 0;
 
   const options = [
-    { value: 0, label: "All records" },
-    { value: 5, label: "5 records" },
-    { value: 10, label: "10 records" },
-    { value: 15, label: "15 records" },
+    { value: 0, label: t("filterControls.options.allRecords") },
+    { value: 5, label: t("filterControls.options.5records") },
+    { value: 10, label: t("filterControls.options.10records") },
+    { value: 15, label: t("filterControls.options.15records") },
   ];
 
   const selectedOption = options.find((o) => o.value === Number(limitFilter));
@@ -76,32 +77,32 @@ function FilterControls({ dateFilter, limitFilter, onDateChange, onLimitChange }
           className={`quick-filter-btn ${getQuickFilterActiveState(0) ? "active" : ""}`}
           onClick={() => handleQuickFilter(0)}
         >
-          Today
+          {t("filterControls.quickFilters.today")}
         </button>
         <button
           className={`quick-filter-btn ${getQuickFilterActiveState(7) ? "active" : ""}`}
           onClick={() => handleQuickFilter(7)}
         >
-          Last 7 days
+          {t("filterControls.quickFilters.last7days")}
         </button>
         <button
           className={`quick-filter-btn ${getQuickFilterActiveState(30) ? "active" : ""}`}
           onClick={() => handleQuickFilter(30)}
         >
-          Last 30 days
+          {t("filterControls.quickFilters.last30days")}
         </button>
       </div>
 
       <div className="filter-main-controls">
         <div className="filter-group">
-          <label htmlFor="date-filter">Filter by date:</label>
+          <label htmlFor="date-filter">{t("filterControls.labels.filterByDate")}</label>
           <div className="datepicker-wrapper">
             <DatePicker
               id="date-filter"
               selected={dateFilter ? new Date(dateFilter) : null}
               onChange={handleDateChange}
               dateFormat="yyyy-MM-dd"
-              placeholderText="Select date or use quick filters"
+              placeholderText={t("filterControls.placeholders.datePicker")}
               className="custom-datepicker-input"
               popperClassName="custom-datepicker-popper"
               popperPlacement="bottom-start"
@@ -112,13 +113,13 @@ function FilterControls({ dateFilter, limitFilter, onDateChange, onLimitChange }
         </div>
 
         <div className="filter-group">
-          <label htmlFor="limit-filter">Show last:</label>
+          <label htmlFor="limit-filter">{t("filterControls.labels.showLast")}</label>
           <div className="select-wrapper" ref={selectRef}>
             <div
               className={`custom-select ${isOpen ? "open" : ""}`}
               onClick={() => setIsOpen(!isOpen)}
             >
-              {selectedOption?.label || "Select..."}
+              {selectedOption?.label || t("filterControls.placeholders.select")}
               <span className="select-arrow"></span>
             </div>
             {isOpen && (
@@ -142,7 +143,7 @@ function FilterControls({ dateFilter, limitFilter, onDateChange, onLimitChange }
 
         {hasActiveFilters && (
           <button className="reset-filters-btn" onClick={handleReset}>
-            Clear All
+            {t("filterControls.buttons.clearAll")}
           </button>
         )}
       </div>

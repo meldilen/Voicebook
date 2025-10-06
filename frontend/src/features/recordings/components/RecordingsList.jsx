@@ -1,7 +1,10 @@
 import { memo } from "react";
 import RecordingListItem from "./RecordingListItem";
+import { useTranslation } from "react-i18next";
 
 const RecordingsList = memo(({ recordings, expandedRecord, toggleExpandRecord }) => {
+  const { t } = useTranslation();
+
   return (
     <div className="recordings-list">
       {recordings?.length > 0 ? (
@@ -15,7 +18,7 @@ const RecordingsList = memo(({ recordings, expandedRecord, toggleExpandRecord })
         ))
       ) : (
         <div className="no-records">
-          <p>No recordings found</p>
+          <p>{t("recordingsList.noRecords")}</p>
         </div>
       )}
     </div>
