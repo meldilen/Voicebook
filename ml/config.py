@@ -10,4 +10,3 @@ FOLDER_ID = os.getenv("FOLDER_ID")
 BUCKET_NAME = os.getenv("BUCKET_NAME")
 SECRET_KEY = os.getenv("SECRET_KEY")
 SECRET_KEY_ID = os.getenv("SECRET_KEY_ID")
-

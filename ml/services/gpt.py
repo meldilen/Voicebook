@@ -34,4 +34,8 @@ def call_gpt(text: str, prompt: str, model_name: str, iam_token: str) -> dict:
 
     response_text = resp.json()["result"]["alternatives"][0]["message"]["text"]
 
+<<<<<<< HEAD
     return response_text.replace("`", "")
+=======
+    return response_text.replace("`", "")
+>>>>>>> 15331349631a56ebf582f9d19122c5acbc2370d2

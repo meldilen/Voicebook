@@ -88,3 +88,8 @@ func (s *RecordService) UpdateEmotion(ctx context.Context, recordID int, emotion
 func (s *RecordService) GetConsecutiveRecordingDays(ctx context.Context, userID int) (int, error) {
 	return repository.GetConsecutiveRecordingDays(ctx, s.db, userID)
 }
+
+// SaveRecordForVKUser saves record for VK user
+func (s *RecordService) SaveRecordForVKUser(ctx context.Context, vkUserID int, emotion string, summary string) (int, error) {
+	return repository.SaveRecordForVKUser(ctx, s.db, vkUserID, emotion, summary)
+}

@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"log"
 	"net/http"
 	"strconv"
 
@@ -27,27 +28,42 @@ func NewAchievementsHandler(svc *service.AchievementsService) *AchievementsHandl
 // @Failure 400 {object} map[string]string
 // @Router /achievements [get]
 func (h *AchievementsHandler) GetAchievements(c *gin.Context) {
-	userObj, exists := c.Get("user")
-	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Not authorized"})
-		return
-	}
+    userObj, exists := c.Get("user")
+    if !exists {
+        c.JSON(http.StatusUnauthorized, gin.H{"error": "Not authorized"})
+        return
+    }
 
-	user, ok := userObj.(*repository.User)
-	if !ok {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Not authorized"})
-		return
-	}
+    // Автоматически определяем тип пользователя
+    var userID int
+    var userType string
+    
+    switch user := userObj.(type) {
+    case *repository.User: // Обычный пользователь (логин/пароль)
+        userID = user.ID
+        userType = "regular"
+        log.Printf("GetAchievements: regular user %d", userID)
+    case *repository.VKUser: // VK пользователь
+        userID = user.ID
+        userType = "vk" 
+        log.Printf("GetAchievements: VK user %d (VK ID: %d)", userID, user.VKUserID)
+    default:
+        log.Printf("GetAchievements: unknown user type: %T", userObj)
+        c.JSON(http.StatusUnauthorized, gin.H{"error": "Unknown user type"})
+        return
+    }
 
-	achievements, err := h.svc.GetUserAchievements(c.Request.Context(), user.ID)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get achievements"})
-		return
-	}
+    achievements, err := h.svc.GetUserAchievements(c.Request.Context(), userID, userType)
+    if err != nil {
+        log.Printf("GetAchievements: failed to get achievements for %s user %d: %v", userType, userID, err)
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get achievements"})
+        return
+    }
 
-	c.JSON(http.StatusOK, gin.H{
-		"achievements": achievements,
-	})
+    c.JSON(http.StatusOK, gin.H{
+        "achievements": achievements,
+        "userType": userType, // для дебага
+    })
 }
 
 // @Summary Update achievement progress
@@ -67,9 +83,19 @@ func (h *AchievementsHandler) UpdateAchievementProgress(c *gin.Context) {
 		return
 	}
 
-	user, ok := userObj.(*repository.User)
-	if !ok {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Not authorized"})
+	// Определяем тип пользователя
+	var userID int
+	var userType string
+	
+	switch user := userObj.(type) {
+	case *repository.User: // Обычный пользователь
+		userID = user.ID
+		userType = "regular"
+	case *repository.VKUser: // VK пользователь
+		userID = user.ID
+		userType = "vk"
+	default:
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unknown user type"})
 		return
 	}
 
@@ -88,7 +114,8 @@ func (h *AchievementsHandler) UpdateAchievementProgress(c *gin.Context) {
 		return
 	}
 
-	err = h.svc.UpdateAchievementProgress(c.Request.Context(), user.ID, achievementID, req.Progress)
+	// ✅ ИСПРАВЛЕНИЕ: Добавляем userType параметр
+	err = h.svc.UpdateAchievementProgress(c.Request.Context(), userID, achievementID, req.Progress, userType)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update achievement progress"})
 		return

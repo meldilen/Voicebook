@@ -32,7 +32,6 @@ func main() {
 	if !envLoaded {
 		log.Println("No .env file found, using existing environment")
 	}
-
 	cfg := config.Load()
 
 	db, err := sql.Open("postgres", cfg.DatabaseURL)
@@ -62,10 +61,24 @@ func main() {
 	totalService := service.NewTotalService(db, cfg.MLServiceURL)
 	recordService := service.NewRecordService(db, cfg.MLServiceURL)
 	totalHandler := handler.NewTotalHandler(totalService, recordService)
-	
-	// Initialize achievements service and handler
-	achievementsService := service.NewAchievementsService(db)
-	achievementsHandler := handler.NewAchievementsHandler(achievementsService)
+
+	// Initialize VK auth handler
+	vkAuthHandler := handler.NewVKAuthHandler(userService)
+
+	// Initialize VK payments handler
+	vkPaymentsHandler := handler.NewVKPaymentsHandler(userService)
+
+	// VK endpoints group
+	vkGroup := r.Group("/api/vk")
+	{
+		// VK Auth
+		vkGroup.POST("/auth", vkAuthHandler.VKAuth)
+		
+		// VK Payments
+		vkGroup.POST("/payments", vkPaymentsHandler.HandlePayments)
+		vkGroup.GET("/balance/:userID", vkPaymentsHandler.GetUserBalance)
+	}
+
 
 	// User-related endpoints
 	userGroup := r.Group("/users")
