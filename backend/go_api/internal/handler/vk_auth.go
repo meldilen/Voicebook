@@ -30,18 +30,18 @@ func NewVKAuthHandler(userService *service.UserService) *VKAuthHandler {
 }
 
 type VKAuthRequest struct {
-	VKUserID    int                    `json:"vkUserId" binding:"required"`
-	LaunchParams map[string]string     `json:"launchParams" binding:"required"`
+	VKUserID     int                    `json:"vkUserId" binding:"required"`
+	LaunchParams map[string]interface{} `json:"launchParams" binding:"required"`
 }
 
 type VKAuthResponse struct {
-	Success bool           `json:"success"`
-	User    *VKUser        `json:"user"`
+	Success bool    `json:"success"`
+	User    *VKUser `json:"user"`
 }
 
 type VKUser struct {
-	ID        int       `json:"id"`        // ← lowercase для фронтенда
-	VKUserID  int       `json:"vkUserId"`  // ← добавил это поле
+	ID        int       `json:"id"`       // ← lowercase для фронтенда
+	VKUserID  int       `json:"vkUserId"` // ← добавил это поле
 	Coins     int       `json:"coins"`
 	CreatedAt time.Time `json:"createdAt"`
 }
@@ -66,23 +66,26 @@ func (h *VKAuthHandler) VKAuth(c *gin.Context) {
 		return
 	}
 
+	// Normalize launch params to strings (VK may send numbers/ints)
+	normalizedParams := normalizeLaunchParams(req.LaunchParams)
+
 	// Validate VK signature
-	if err := h.validateVKSignature(req.LaunchParams); err != nil {
+	if err := h.validateVKSignature(normalizedParams); err != nil {
 		log.Printf("VKAuth: signature validation failed: %v", err)
 		c.JSON(http.StatusForbidden, gin.H{"error": "Invalid signature"})
 		return
 	}
 
 	// Verify user ID matches
-	launchUserID, err := strconv.Atoi(req.LaunchParams["vk_user_id"])
+	launchUserID, err := strconv.Atoi(normalizedParams["vk_user_id"])
 	if err != nil || launchUserID != req.VKUserID {
-		log.Printf("VKAuth: user ID mismatch: request=%d, launch=%s", req.VKUserID, req.LaunchParams["vk_user_id"])
+		log.Printf("VKAuth: user ID mismatch: request=%d, launch=%s", req.VKUserID, normalizedParams["vk_user_id"])
 		c.JSON(http.StatusBadRequest, gin.H{"error": "User ID mismatch"})
 		return
 	}
 
 	// Check timestamp (not older than 10 minutes)
-	if err := h.validateTimestamp(req.LaunchParams["vk_ts"]); err != nil {
+	if err := h.validateTimestamp(normalizedParams["vk_ts"]); err != nil {
 		log.Printf("VKAuth: timestamp validation failed: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Expired timestamp"})
 		return
@@ -139,7 +142,6 @@ func (h *VKAuthHandler) validateVKSignature(launchParams map[string]string) erro
 	}
 	queryString := strings.Join(queryParts, "&")
 
-
 	vkSecretKey := os.Getenv("VK_SECRET_KEY") // Ваш защищенный ключ
 
 	// Calculate HMAC-SHA256
@@ -154,6 +156,40 @@ func (h *VKAuthHandler) validateVKSignature(launchParams map[string]string) erro
 	}
 
 	return nil
+}
+
+// normalizeLaunchParams converts mixed-type map values to their string representations.
+// VK Mini Apps may supply numeric values (e.g., vk_user_id, vk_ts) as numbers.
+func normalizeLaunchParams(raw map[string]interface{}) map[string]string {
+	result := make(map[string]string, len(raw))
+	for k, v := range raw {
+		switch val := v.(type) {
+		case string:
+			result[k] = val
+		case fmt.Stringer:
+			result[k] = val.String()
+		case int:
+			result[k] = strconv.Itoa(val)
+		case int32:
+			result[k] = strconv.FormatInt(int64(val), 10)
+		case int64:
+			result[k] = strconv.FormatInt(val, 10)
+		case float32:
+			// Avoid scientific notation and decimals for integers
+			result[k] = strconv.FormatInt(int64(val), 10)
+		case float64:
+			result[k] = strconv.FormatInt(int64(val), 10)
+		case bool:
+			if val {
+				result[k] = "1"
+			} else {
+				result[k] = "0"
+			}
+		default:
+			result[k] = fmt.Sprintf("%v", val)
+		}
+	}
+	return result
 }
 
 // validateTimestamp checks if timestamp is not older than 10 minutes
