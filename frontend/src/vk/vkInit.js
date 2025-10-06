@@ -1,4 +1,5 @@
-import { bridge } from '@vkontakte/vk-bridge';
+import bridge from "@vkontakte/vk-bridge";
+
 
 export const initVK = async () => {
   try {
