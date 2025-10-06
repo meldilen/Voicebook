@@ -27,8 +27,4 @@ def combine_emotions(audio_emotion: str, text_emotion: str, weight_audio: float 
         text_score = similarity[text_emotion][target_emotion] * weight_text
         score[target_emotion] = audio_score + text_score
 
-<<<<<<< HEAD
     return max(score, key=score.get)
-=======
-    return max(score, key=score.get)
->>>>>>> 15331349631a56ebf582f9d19122c5acbc2370d2

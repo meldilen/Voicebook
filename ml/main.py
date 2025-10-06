@@ -2,8 +2,6 @@ import logging
 import json
 
 from services.stt import transcribe_audio
-from services.emotion_audio import EmotionRecognitionModel
-from services.emotion_utils import combine_emotions
 from services.gpt import call_gpt
 from config import FOLDER_ID
 from utils import get_iam_token, load_prompt

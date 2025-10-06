@@ -1,0 +1,12 @@
+# Ignore all node_modules directories
+**/node_modules
+
+# Ignore Python virtual environments
+**/venv
+
+# Ignore build outputs
+**/build
+**/dist
+
+# Ignore git directory
+.git

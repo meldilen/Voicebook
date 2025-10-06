@@ -3,7 +3,6 @@ package main
 import (
 	"database/sql"
 	"log"
-	"os"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -44,10 +43,9 @@ func main() {
 		log.Fatalf("Failed to ping the database: %v", err)
 	}
 
-	frontendURL := os.Getenv("FRONTEND")
 	r := gin.Default()
 	r.Use(cors.New(cors.Config{
-    AllowOrigins:     []string{frontendURL, "https://go_api", "http://178.205.96.163:8080", "http://178.205.96.163:3000", "https://178.205.96.163:3000", "https://178.205.96.163", "https://178.205.96.163:80", "https://178.205.96.163:443", "https://178.205.96.163:8080"},
+    AllowOrigins:     []string{"https://go_api", "http://localhost:8080", "http://localhost:3000", "https://localhost:443"},
     AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"},
     AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
     ExposeHeaders:    []string{"Content-Length"},

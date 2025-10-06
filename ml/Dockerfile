@@ -8,6 +8,7 @@ RUN apt-get update && apt-get install -y \
     libsndfile1 \
     libopus0 \
     libvorbis0a \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements first for better caching
