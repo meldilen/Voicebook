@@ -219,12 +219,9 @@ def start_transcription(iam_token: str, audio_uri: str) -> str:
 
 
 def get_transcription_result(iam_token: str, operation_id: str, poll_interval: int = 5) -> str:
-<<<<<<< HEAD
-=======
     """
     Ожидает завершения распознавания и возвращает текст.
     """
->>>>>>> 15331349631a56ebf582f9d19122c5acbc2370d2
     headers = {"Authorization": f"Bearer {iam_token}"}
     url = f"{OPERATION_URL}/{operation_id}"
 
@@ -241,27 +238,12 @@ def get_transcription_result(iam_token: str, operation_id: str, poll_interval: i
                 chunks = data["response"].get("chunks", [])
                 text_parts = []
                 
-<<<<<<< HEAD
-                # ПРОСТОЙ ФИКС: Берем только первый чанк или объединяем уникальные
-                seen_texts = set()
-                
-=======
                 # ПРОСТОЙ ФИКС: Убираем дублирующиеся чанки
->>>>>>> 15331349631a56ebf582f9d19122c5acbc2370d2
                 for ch in chunks:
                     alt = ch.get("alternatives", [])
                     if alt:
                         chunk_text = alt[0].get("text", "").strip()
-<<<<<<< HEAD
                         # Добавляем только если не видели похожий текст
-                        if chunk_text and not any(chunk_text in seen or seen in chunk_text for seen in seen_texts):
-                            text_parts.append(chunk_text)
-                            seen_texts.add(chunk_text)
-                
-                transcript = " ".join(text_parts)
-                print(f"Transcription completed: '{transcript}'")
-                print(f"DEBUG: Original chunks: {len(chunks)}, Final parts: {len(text_parts)}")
-=======
                         if chunk_text:
                             # Проверяем, не является ли этот текст дубликатом
                             is_duplicate = False
@@ -282,8 +264,6 @@ def get_transcription_result(iam_token: str, operation_id: str, poll_interval: i
                 
                 transcript = " ".join(text_parts)
                 print(f"Transcription completed: '{transcript}'")
->>>>>>> 15331349631a56ebf582f9d19122c5acbc2370d2
-                return transcript
             else:
                 error_msg = data.get("error", {}).get("message", "Unknown error")
                 raise RuntimeError(f"Ошибка распознавания: {error_msg}")
@@ -295,8 +275,6 @@ def get_transcription_result(iam_token: str, operation_id: str, poll_interval: i
     raise RuntimeError("Transcription timeout")
 
 
-<<<<<<< HEAD
-=======
 def are_texts_similar(text1: str, text2: str, similarity_threshold: float = 0.8) -> bool:
     """
     Проверяет, похожи ли два текста друг на друга.
@@ -313,8 +291,6 @@ def are_texts_similar(text1: str, text2: str, similarity_threshold: float = 0.8)
     similarity = len(common_words) / max(len(words1), len(words2))
     
     return similarity > similarity_threshold
-
->>>>>>> 15331349631a56ebf582f9d19122c5acbc2370d2
 def transcribe_audio(iam_token: str, local_file_path: str) -> str:
     """
     Основная функция: загружает файл, запускает распознавание и возвращает текст.

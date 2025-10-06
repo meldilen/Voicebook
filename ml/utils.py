@@ -34,8 +34,4 @@ def get_iam_token() -> str:
 def load_prompt(path: str) -> str:
     """Загрузка промпта из файла"""
     with open(path, "r", encoding="utf-8") as f:
-<<<<<<< HEAD
         return f.read().strip()
-=======
-        return f.read().strip()
->>>>>>> 15331349631a56ebf582f9d19122c5acbc2370d2

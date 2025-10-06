@@ -3,9 +3,9 @@ services:
     build:
       context: .
       dockerfile: nginx/Dockerfile
-    ports:
-      - "443:443"
-      - "80:80"
+#    ports:
+#      - "443:443"
+#      - "80:80"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
       - ./nginx/conf.d:/etc/nginx/conf.d
@@ -16,6 +16,9 @@ services:
       ml-service:
         condition: service_healthy
     restart: unless-stopped
+    networks:
+      - localnet
+      - shared
 
   postgres:
     image: postgres:15
@@ -31,6 +34,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - localnet
 
 
 
@@ -49,6 +54,8 @@ services:
       - ./backend/go_api:/app
     command: ./go_api   # ✅ run the built binary instead of 'go run'
     restart: unless-stopped
+    networks:
+      - localnet
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
       interval: 10s
@@ -70,6 +77,8 @@ services:
       - SECRET_KEY_ID=${SECRET_KEY_ID}
     volumes:
       - ./ml:/app
+    networks:
+      - localnet
     command: python ml_api.py
     restart: unless-stopped
     healthcheck:
@@ -80,3 +89,9 @@ services:
 
 volumes:
   postgres_data:
+
+networks:
+  shared:
+    external: true
+    name: my-shared-network
+  localnet:

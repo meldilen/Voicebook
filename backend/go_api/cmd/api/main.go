@@ -113,6 +113,14 @@ func main() {
     ),
 )
 
+	// Health check endpoint
+	r.GET("/health", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"status":  "healthy",
+			"service": "VoiceDiary API",
+		})
+	})
+
 	log.Printf("Starting server on port %s\n", cfg.ListenAddr)
 	if err := r.Run(cfg.ListenAddr); err != nil {
 		log.Fatalf("Failed to start server: %v", err)
