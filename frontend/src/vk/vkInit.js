@@ -2,14 +2,18 @@ import { bridge } from '@vkontakte/vk-bridge';
 
 export const initVK = async () => {
   try {
-    // Инициализируем VK Bridge
+    console.log("[vkInit] Initializing VK Bridge");
+    
     await bridge.send('VKWebAppInit');
+    console.log("[vkInit] VKWebAppInit successful");
     
-    // Получаем данные пользователя
+    console.log("[vkInit] Getting user info");
     const user = await bridge.send('VKWebAppGetUserInfo');
+    console.log("[vkInit] User info received:", { id: user.id, firstName: user.first_name });
     
-    // Получаем launch params для подписи
+    console.log("[vkInit] Getting launch params");
     const launchParams = await bridge.send('VKWebAppGetLaunchParams');
+    console.log("[vkInit] Launch params received");
     
     return {
       user,
@@ -17,7 +21,10 @@ export const initVK = async () => {
       isAuthenticated: true
     };
   } catch (error) {
-    console.error('VK init error:', error);
+    console.error('[vkInit] VK init error:', {
+      message: error.message,
+      code: error.code
+    });
     throw error;
   }
 };

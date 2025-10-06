@@ -39,32 +39,41 @@ const ProtectedRoute = () => {
   useEffect(() => {
     const initializeVKAuth = async () => {
       try {
-        // 1. Инициализируем VK
-        const vkData = await initVK();
+        console.log("[ProtectedRoute] Starting VK initialization");
         
-        // 2. Отправляем на бекенд для валидации
+        const vkData = await initVK();
+        console.log("[ProtectedRoute] VK init successful");
+        
+        console.log("[ProtectedRoute] Sending VK auth to backend");
         const authResponse = await vkAuth({
           vkUserId: vkData.user.id,
           launchParams: vkData.launchParams
         }).unwrap();
         
-        // 3. Сохраняем в Redux
+        console.log("[ProtectedRoute] Backend auth successful");
+        
         dispatch(setVKCredentials({
           user: {
             id: authResponse.user.id,
             vkUserId: authResponse.user.vkUserId,
             coins: authResponse.user.coins,
           },
-          token: 'vk-auth', // или JWT если бекенд возвращает
+          token: 'vk-auth',
           launchParams: vkData.launchParams
         }));
         
+        console.log("[ProtectedRoute] Redux state updated, setting authenticated");
         setIsAuthenticated(true);
       } catch (error) {
-        console.error('VK auth failed:', error);
+        console.error('[ProtectedRoute] VK auth failed:', {
+          message: error.message,
+          code: error.code,
+          status: error.status
+        });
         setIsAuthenticated(false);
       } finally {
         setIsLoading(false);
+        console.log("[ProtectedRoute] Loading completed, authenticated:", isAuthenticated);
       }
     };
 
@@ -72,6 +81,7 @@ const ProtectedRoute = () => {
   }, [dispatch, vkAuth]);
 
   if (isLoading) {
+    console.log("[ProtectedRoute] Rendering loading state");
     return (
       <div className="flex justify-center items-center min-h-screen">
         <div>Загрузка VK Mini App...</div>
@@ -79,6 +89,7 @@ const ProtectedRoute = () => {
     );
   }
 
+  console.log("[ProtectedRoute] Rendering route, authenticated:", isAuthenticated);
   return isAuthenticated ? <Outlet /> : <Navigate to="/auth-error" replace />;
 };
 

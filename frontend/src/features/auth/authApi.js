@@ -7,78 +7,125 @@ export const authApi = createApi({
     baseUrl: API_CONFIG.BASE_URL,
     credentials: "include",
     prepareHeaders: (headers, { getState }) => {
-      // console.log("Cookies:", document.cookie);
+      console.log("[authApi] Preparing headers, cookies present:", document.cookie.length > 0);
       return headers;
     },
   }),
   endpoints: (builder) => ({
     vkAuth: builder.mutation({
-      query: (vkData) => ({
-        url: API_CONFIG.ENDPOINTS.VK.AUTH,
-        method: "POST",
-        body: vkData,
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }),
-    }),
-    register: builder.mutation({
-      query: (credentials) => ({
-        url: API_CONFIG.ENDPOINTS.AUTH.REGISTER,
-        method: "POST",
-        body: credentials,
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }),
+      query: (vkData) => {
+        console.log("[authApi/vkAuth] Sending VK auth request:", {
+          vkUserId: vkData.vkUserId,
+          hasLaunchParams: !!vkData.launchParams
+        });
+        
+        return {
+          url: API_CONFIG.ENDPOINTS.VK.AUTH,
+          method: "POST",
+          body: vkData,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        };
+      },
       transformResponse: (response) => {
-        // console.log("[REGISTER] Server response:", response);
+        console.log("[authApi/vkAuth] Success response:", {
+          userId: response.user?.id,
+          vkUserId: response.user?.vkUserId
+        });
         return response;
       },
       transformErrorResponse: (response) => {
-        // console.error("[REGISTER] Server error:", response);
+        console.error("[authApi/vkAuth] Error response:", {
+          status: response.status,
+          data: response.data
+        });
+        return response;
+      },
+    }),
+    register: builder.mutation({
+      query: (credentials) => {
+        console.log("[authApi/register] Sending registration:", {
+          email: credentials.email ? "***" : "not provided",
+          username: credentials.username
+        });
+        
+        return {
+          url: API_CONFIG.ENDPOINTS.AUTH.REGISTER,
+          method: "POST",
+          body: credentials,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        };
+      },
+      transformResponse: (response) => {
+        console.log("[authApi/register] Success:", {
+          userId: response.user?.id,
+          email: response.user?.email ? "***" : "not provided"
+        });
+        return response;
+      },
+      transformErrorResponse: (response) => {
+        console.error("[authApi/register] Error:", {
+          status: response.status,
+          error: response.data
+        });
         return response;
       },
     }),
     login: builder.mutation({
-      query: (credentials) => ({
-        url: API_CONFIG.ENDPOINTS.AUTH.LOGIN,
-        method: "POST",
-        body: credentials,
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }),
+      query: (credentials) => {
+        console.log("[authApi/login] Sending login:", {
+          email: credentials.email ? "***" : "not provided",
+          hasPassword: !!credentials.password
+        });
+        
+        return {
+          url: API_CONFIG.ENDPOINTS.AUTH.LOGIN,
+          method: "POST",
+          body: credentials,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        };
+      },
       transformResponse: (response) => {
-        // console.log("[LOGIN] Success:", {
-        //   endpoint: API_CONFIG.ENDPOINTS.AUTH.LOGIN,
-        //   response,
-        // });
+        console.log("[authApi/login] Success:", {
+          endpoint: API_CONFIG.ENDPOINTS.AUTH.LOGIN,
+          userId: response.user?.id
+        });
         return response;
       },
       transformErrorResponse: (response) => {
-        // console.error("[LOGIN] Error:", {
-        //   endpoint: API_CONFIG.ENDPOINTS.AUTH.LOGIN,
-        //   status: response.status,
-        //   data: response.data,
-        // });
+        console.error("[authApi/login] Error:", {
+          endpoint: API_CONFIG.ENDPOINTS.AUTH.LOGIN,
+          status: response.status,
+          error: response.data
+        });
         return response;
       },
     }),
     getMe: builder.query({
-      query: () => ({
-        url: API_CONFIG.ENDPOINTS.AUTH.ME,
-        credentials: "include",
-      }),
+      query: () => {
+        console.log("[authApi/getMe] Fetching user data");
+        return {
+          url: API_CONFIG.ENDPOINTS.AUTH.ME,
+          credentials: "include",
+        };
+      },
       transformResponse: (response) => {
-        // console.log("[ME] User data:", response);
+        console.log("[authApi/getMe] User data received:", {
+          userId: response.id,
+          vkUserId: response.vkUserId
+        });
         return response;
       },
       transformErrorResponse: (response) => {
-        // console.error("[ME] Error fetching user:", {
-        //   status: response.status,
-        //   data: response.data,
-        // });
+        console.error("[authApi/getMe] Error fetching user:", {
+          status: response.status,
+          error: response.data
+        });
         return response;
       },
     }),
