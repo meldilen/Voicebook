@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"sort"
 	"strconv"
@@ -132,26 +133,42 @@ func (h *VKAuthHandler) validateVKSignature(launchParams map[string]string) erro
 	}
 	sort.Strings(keys)
 
-	// Build query string without URL-encoding (VK spec)
-	var queryParts []string
-	for _, k := range keys {
-		queryParts = append(queryParts, fmt.Sprintf("%s=%s", k, launchParams[k]))
+	// Build query strings: raw and URL-encoded variants
+	buildQuery := func(encode bool) string {
+		parts := make([]string, 0, len(keys))
+		for _, k := range keys {
+			v := launchParams[k]
+			if encode {
+				// Use QueryEscape; if needed we can switch to PathEscape
+				v = url.QueryEscape(v)
+			}
+			parts = append(parts, fmt.Sprintf("%s=%s", k, v))
+		}
+		return strings.Join(parts, "&")
 	}
-	queryString := strings.Join(queryParts, "&")
+	rawQuery := buildQuery(false)
+	encQuery := buildQuery(true)
 
 	vkSecretKey := os.Getenv("VK_SECRET_KEY") // Ваш защищенный ключ
 
 	// Calculate HMAC-SHA256 and encode as Base64 URL-safe without padding (VK spec)
-	mac := hmac.New(sha256.New, []byte(vkSecretKey))
-	mac.Write([]byte(queryString))
-	sum := mac.Sum(nil)
-	expectedSignature := base64.RawURLEncoding.EncodeToString(sum)
-
-	if signature != expectedSignature {
-		log.Printf("VKAuth: signature mismatch. Expected: %s, Got: %s", expectedSignature, signature)
-		log.Printf("VKAuth: query string: %s", queryString)
-		return fmt.Errorf("signature mismatch")
+	computeSig := func(s string) string {
+		mac := hmac.New(sha256.New, []byte(vkSecretKey))
+		mac.Write([]byte(s))
+		return base64.RawURLEncoding.EncodeToString(mac.Sum(nil))
 	}
+	expectedRaw := computeSig(rawQuery)
+	if signature == expectedRaw {
+		return nil
+	}
+	expectedEnc := computeSig(encQuery)
+	if signature == expectedEnc {
+		return nil
+	}
+	log.Printf("VKAuth: signature mismatch. ExpectedRaw: %s, ExpectedEnc: %s, Got: %s", expectedRaw, expectedEnc, signature)
+	log.Printf("VKAuth: raw query: %s", rawQuery)
+	log.Printf("VKAuth: enc query: %s", encQuery)
+	return fmt.Errorf("signature mismatch")
 
 	return nil
 }
