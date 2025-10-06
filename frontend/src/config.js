@@ -3,7 +3,7 @@ export const API_CONFIG = {
 
   ENDPOINTS: {
     VK: {
-      AUTH: '/api/vk/auth'
+      AUTH: '/vk/auth'
     },
     AUTH: {
       LOGIN: '/users/login',

@@ -66,7 +66,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { Provider } from "react-redux";
 import { store } from "./app/store";
-import { useState, useEffect } from "react"; // ✅ добавлен корректный импорт
+import { useState, useEffect } from "react";
 import OnboardingPage from "./pages/OnboardingPage";
 import HomePage from "./pages/NewHomePage";
 import ProfilePage from "./pages/ProfilePage";
@@ -77,7 +77,7 @@ import JournalPage from "./pages/JournalPage";
 import AchievementsPage from "./pages/AchievementsPage";
 import PayPage from "./pages/PayPage";
 import AuthError from "./pages/AuthError";
-import { initVK } from "./vk/vkInit"; // ✅ импорт VK Bridge инициализации
+import { initVK } from "./vk/vkInit";
 
 export default function App() {
   const [globalError, setGlobalError] = useState(null);
@@ -86,7 +86,7 @@ export default function App() {
     initVK().catch((err) => {
       console.error("VK init failed:", err);
     });
-  }, []); // ✅ добавлен правильный хук useEffect
+  }, []);
 
   return (
     <Provider store={store}>
