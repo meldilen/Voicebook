@@ -45,12 +45,12 @@ func main() {
 
 	r := gin.Default()
 	r.Use(cors.New(cors.Config{
-    AllowOrigins:     []string{"https://go_api", "http://localhost:8080", "http://localhost:3000", "https://localhost:443"},
-    AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"},
-    AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
-    ExposeHeaders:    []string{"Content-Length"},
-    AllowCredentials: true,
-}))
+		AllowOrigins:     []string{"https://go_api", "http://localhost:8080", "http://localhost:3000", "https://localhost:443"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+	}))
 
 	recordHandler := handler.NewRecordHandler(db, cfg.MLServiceURL)
 	userService := service.NewUserService(db)
@@ -65,20 +65,22 @@ func main() {
 	// Initialize VK payments handler
 	vkPaymentsHandler := handler.NewVKPaymentsHandler(userService)
 
+	// Group all API routes under /api
+	apiGroup := r.Group("/api")
+
 	// VK endpoints group
-	vkGroup := r.Group("/api/vk")
+	vkGroup := apiGroup.Group("/vk")
 	{
 		// VK Auth
 		vkGroup.POST("/auth", vkAuthHandler.VKAuth)
-		
+
 		// VK Payments
 		vkGroup.POST("/payments", vkPaymentsHandler.HandlePayments)
 		vkGroup.GET("/balance/:userID", vkPaymentsHandler.GetUserBalance)
 	}
 
-
 	// User-related endpoints
-	userGroup := r.Group("/users")
+	userGroup := apiGroup.Group("/users")
 	{
 		userGroup.POST("/register", userHandler.Register)
 		userGroup.POST("/login", userHandler.Login)
@@ -90,7 +92,7 @@ func main() {
 	}
 
 	// Record-related endpoints
-	recordGroup := r.Group("/records")
+	recordGroup := apiGroup.Group("/records")
 	{
 		recordGroup.GET("/:recordID", recordHandler.GetRecordAnalysis)
 		recordGroup.POST("/upload", recordHandler.UploadRecord)
@@ -101,17 +103,17 @@ func main() {
 		recordGroup.GET("/users/:userID/consecutive-days", recordHandler.GetConsecutiveRecordingDays)
 	}
 
-	totalGroup := r.Group("/totals")
+	totalGroup := apiGroup.Group("/totals")
 	{
-    totalGroup.GET("/:userID", totalHandler.GetTotals)
-    totalGroup.POST("/:userID/recalculate/:date", totalHandler.RecalculateTotal)
+		totalGroup.GET("/:userID", totalHandler.GetTotals)
+		totalGroup.POST("/:userID/recalculate/:date", totalHandler.RecalculateTotal)
 	}
 
 	r.GET("/swagger/*any",
-    ginSwagger.WrapHandler(swaggerFiles.Handler, 
-        ginSwagger.URL("/swagger/doc.json"),
-    ),
-)
+		ginSwagger.WrapHandler(swaggerFiles.Handler,
+			ginSwagger.URL("/swagger/doc.json"),
+		),
+	)
 
 	// Health check endpoint
 	r.GET("/health", func(c *gin.Context) {
