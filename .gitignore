@@ -11,6 +11,3 @@ __pycache__/
 *.pyo
 *.pyd
 *.python-version
-
-# логи
-*.log

@@ -197,34 +197,35 @@ const useAudioRecorder = ({ setIsRecording, onRecordingStart, onResult }) => {
             summary: result.summary,
             record_date: new Date(),
             record_id: result.record_id,
+            insights: result.insights,
           });
         }
 
-        if (result.text) {
-          try {
-            const insightsResult = await getRecordingInsights({
-              text: result.text,
-              recordID: result.record_id,
-            }).unwrap();
+        // if (result.text) {
+        //   try {
+        //     const insightsResult = await getRecordingInsights({
+        //       text: result.text,
+        //       recordID: result.record_id,
+        //     }).unwrap();
 
-            if (onResult) {
-              onResult((prev) => ({
-                ...prev,
-                insights: insightsResult.insights,
-              }));
-            }
-          } catch (insightsError) {
-            console.error("Error fetching insights:", insightsError);
-          }
-        }
+        //     if (onResult) {
+        //       onResult((prev) => ({
+        //         ...prev,
+        //         insights: insightsResult.insights,
+        //       }));
+        //     }
+        //   } catch (insightsError) {
+        //     console.error("Error fetching insights:", insightsError);
+        //   }
+        // }
 
-        if (currentUser?.ID) {
-          const todayUTC = new Date().toISOString().split('T')[0];
-          await recalculateTotals({
-            userId: currentUser?.ID?.toString() || "-1",
-            date: todayUTC,
-          }).unwrap();
-        }
+        // if (currentUser?.ID) {
+        //   const todayUTC = new Date().toISOString().split('T')[0];
+        //   await recalculateTotals({
+        //     userId: currentUser?.ID?.toString() || "-1",
+        //     date: todayUTC,
+        //   }).unwrap();
+        // }
       } catch (error) {
         console.error("Error during processing:", error);
         alert("Error during processing: " + error.message);

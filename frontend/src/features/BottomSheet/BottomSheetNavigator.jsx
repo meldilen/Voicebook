@@ -3,32 +3,34 @@ import Calendar from '../calendar/components/MoodCalendar';
 import './BottomSheetNavigator.css';
 import AchievementsTab from '../../pages/AchievementsTab';
 import JournalTab from '../../pages/JournalTab';
+import { useTranslation } from "react-i18next";
 
 const BottomSheetNavigator = () => {
   const [activeTab, setActiveTab] = useState('achievements');
+  const { t } = useTranslation();
   
   const tabs = [
     { 
       id: 'achievements', 
-      title: 'Достижения',
+      title: t("bottomSheetNavigator.tabs.achievements"),
       icon: '🏆',
       component: <AchievementsTab />
     },
     { 
       id: 'journal', 
-      title: 'Журнал', 
+      title: t("bottomSheetNavigator.tabs.journal"), 
       icon: '📖',
       component: <JournalTab />
     },
     { 
       id: 'calendar', 
-      title: 'Календарь',
+      title: t("bottomSheetNavigator.tabs.calendar"),
       icon: '📅',
       component: <Calendar />
     },
     { 
       id: 'settings', 
-      title: 'Настройки',
+      title: t("bottomSheetNavigator.tabs.settings"),
       icon: '⚙️',
       component: <div className="settings-view">
         <div className="settings-list">
@@ -37,8 +39,8 @@ const BottomSheetNavigator = () => {
               <span className="setting-icon">🔔</span>
             </div>
             <div className="setting-content">
-              <span className="setting-title">Уведомления</span>
-              <span className="setting-subtitle">Настройте push-уведомления</span>
+              <span className="setting-title">{t("bottomSheetNavigator.settings.notifications.title")}</span>
+              <span className="setting-subtitle">{t("bottomSheetNavigator.settings.notifications.subtitle")}</span>
             </div>
             <div className="setting-toggle"></div>
           </div>
@@ -47,8 +49,8 @@ const BottomSheetNavigator = () => {
               <span className="setting-icon">🌙</span>
             </div>
             <div className="setting-content">
-              <span className="setting-title">Темная тема</span>
-              <span className="setting-subtitle">Автоматическое переключение</span>
+              <span className="setting-title">{t("bottomSheetNavigator.settings.darkTheme.title")}</span>
+              <span className="setting-subtitle">{t("bottomSheetNavigator.settings.darkTheme.subtitle")}</span>
             </div>
             <div className="setting-toggle active"></div>
           </div>
@@ -57,8 +59,8 @@ const BottomSheetNavigator = () => {
               <span className="setting-icon">🔒</span>
             </div>
             <div className="setting-content">
-              <span className="setting-title">Приватность</span>
-              <span className="setting-subtitle">Управление данными</span>
+              <span className="setting-title">{t("bottomSheetNavigator.settings.privacy.title")}</span>
+              <span className="setting-subtitle">{t("bottomSheetNavigator.settings.privacy.subtitle")}</span>
             </div>
             <div className="setting-arrow">›</div>
           </div>

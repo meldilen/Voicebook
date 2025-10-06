@@ -1,4 +1,487 @@
+definitions:
+  handler.InsightsResponse:
+    properties:
+      insights:
+        additionalProperties: true
+        type: object
+    type: object
+  handler.LoginRequest:
+    properties:
+      login:
+        type: string
+      password:
+        type: string
+    required:
+    - login
+    - password
+    type: object
+  handler.RegisterRequest:
+    properties:
+      login:
+        type: string
+      nickname:
+        type: string
+      password:
+        type: string
+    required:
+    - login
+    - nickname
+    - password
+    type: object
+  handler.UpdateProfileRequest:
+    properties:
+      login:
+        type: string
+      nickname:
+        type: string
+      password:
+        type: string
+    type: object
 info:
   contact: {}
-paths: {}
+paths:
+  /records/{recordID}:
+    delete:
+      description: Deletes a record by its record_id.
+      parameters:
+      - description: Record ID
+        in: path
+        name: recordID
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete a record
+      tags:
+      - records
+    get:
+      description: Returns emotion, summary, and feedback for a specific record.
+      parameters:
+      - description: Record ID
+        in: path
+        name: recordID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get analysis result for a record.
+      tags:
+      - records
+  /records/{recordID}/emotion:
+    patch:
+      consumes:
+      - application/json
+      description: Updates the emotion field of a record by ID
+      parameters:
+      - description: Record ID
+        in: path
+        name: recordID
+        required: true
+        type: integer
+      - description: Emotion payload
+        in: body
+        name: body
+        required: true
+        schema:
+          additionalProperties:
+            type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update emotion for a record
+      tags:
+      - records
+  /records/{recordID}/feedback:
+    post:
+      consumes:
+      - application/json
+      description: Sets feedback value for a specific record.
+      parameters:
+      - description: Record ID
+        in: path
+        name: recordID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Set feedback for a record
+      tags:
+      - records
+  /records/insights:
+    post:
+      description: Returns insights for a specific record.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.InsightsResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get insights for a record.
+      tags:
+      - records
+  /records/upload:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Uploads a voice file, sends it to the ML service for analysis,
+        and saves the record.
+      parameters:
+      - description: User ID
+        in: formData
+        name: userID
+        required: true
+        type: integer
+      - description: Voice file
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Upload a new voice record
+      tags:
+      - records
+  /totals/{userID}:
+    get:
+      consumes:
+      - application/json
+      description: Get daily totals (emotion and summary) for a user within a date
+        range
+      parameters:
+      - description: User ID
+        in: path
+        name: userID
+        required: true
+        type: integer
+      - description: Start date (YYYY-MM-DD)
+        in: query
+        name: start_date
+        required: true
+        type: string
+      - description: End date (YYYY-MM-DD)
+        in: query
+        name: end_date
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get totals for date range
+      tags:
+      - totals
+  /totals/{userID}/recalculate/{date}:
+    post:
+      consumes:
+      - application/json
+      description: Recalculate emotion and summary for a specific day
+      parameters:
+      - description: User ID
+        in: path
+        name: userID
+        required: true
+        type: integer
+      - description: Date (YYYY-MM-DD)
+        in: path
+        name: date
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Recalculate daily total
+      tags:
+      - totals
+  /users/{userID}/consecutive-days:
+    get:
+      consumes:
+      - application/json
+      description: Returns how many days in a row the user has recorded voice messages
+      parameters:
+      - description: User ID
+        in: path
+        name: userID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get consecutive recording days
+      tags:
+      - totals
+  /users/{userID}/records:
+    get:
+      consumes:
+      - application/json
+      description: Returns a list of all diary records for a specific user.
+      parameters:
+      - description: User ID
+        in: path
+        name: userID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              additionalProperties: true
+              type: object
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get user records
+      tags:
+      - records
+  /users/login:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: User info
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/handler.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Login a user
+  /users/logout:
+    post:
+      description: Logs out the user by deleting the session token.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Logout a user
+  /users/me:
+    delete:
+      description: Deletes the user, all their records, and session.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete current user account
+      tags:
+      - users
+    get:
+      description: Returns the current user's info based on the session token.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get current user info
+    patch:
+      consumes:
+      - application/json
+      description: Update the current user's profile (login, password, and/or nickname)
+      parameters:
+      - description: Profile fields to update (any or all)
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handler.UpdateProfileRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update user profile
+      tags:
+      - users
+  /users/register:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: User info
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/handler.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: integer
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Register a new user
 swagger: "2.0"

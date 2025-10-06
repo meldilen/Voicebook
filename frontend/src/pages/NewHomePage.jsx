@@ -9,17 +9,7 @@ import BottomSheet from "../features/BottomSheet/BottomSheet";
 import BottomSheetNavigator from "../features/BottomSheet/BottomSheetNavigator";
 import "./NewHomePage.css";
 import { useSetRecordingFeedbackMutation } from "../features/recordings/recordingsApi";
-
-const prompts = [
-  "How was your day?",
-  "What did you feel today?",
-  "What made you happy or upset?",
-  "What are you thinking about right now?",
-  "What events were important to you today?",
-  "Is there anything you'd like to let go of?",
-  "What are you proud of today?",
-  "What caused you stress or anxiety?",
-];
+import { useTranslation } from "react-i18next";
 
 function HomePage() {
   const [isRecording, setIsRecording] = useState(false);
@@ -30,8 +20,16 @@ function HomePage() {
   const [bottomSheetState, setBottomSheetState] = useState("peek");
   const resultRef = useRef(null);
   const [setFeedback] = useSetRecordingFeedbackMutation();
+  const { t } = useTranslation();
 
   useEffect(() => {
+    const prompts = t("onboarding.prompts", { returnObjects: true });
+    const randomIndex = Math.floor(Math.random() * prompts.length);
+    setCurrentPrompt(prompts[randomIndex]);
+  }, [t]);
+
+  useEffect(() => {
+    const prompts = t("onboarding.prompts", { returnObjects: true });
     const randomIndex = Math.floor(Math.random() * prompts.length);
     setCurrentPrompt(prompts[randomIndex]);
 
@@ -50,7 +48,7 @@ function HomePage() {
 
     window.addEventListener("keydown", handleKeyPress);
     return () => window.removeEventListener("keydown", handleKeyPress);
-  }, []);
+  }, [t]);
 
   const handleBottomSheetToggle = () => {
     if (bottomSheetState === "peek" || bottomSheetState === "closed") {
@@ -90,7 +88,7 @@ function HomePage() {
   const handleFeedbackSubmit = async (rating) => {
     try {
       if (!analysisResult?.record_id) {
-        console.error("No recording ID available for feedback");
+        console.error(t("home.feedback.error"));
         return;
       }
 
@@ -98,8 +96,11 @@ function HomePage() {
         recordId: analysisResult.record_id,
         feedback: rating,
       }).unwrap();
+      
+      // Можно показать уведомление об успехе
+      console.log(t("home.feedback.success"));
     } catch (error) {
-      console.error("Failed to submit feedback:", error);
+      console.error(t("home.feedback.error"), error);
     }
   };
 
@@ -119,8 +120,8 @@ function HomePage() {
       />
 
       <div className="home-content">
-        <h1 className="main-title">Your AI Voice Diary</h1>
-        <p className="subtitle">Create your first record today</p>
+        <h1 className="main-title">{t("home.title")}</h1>
+        <p className="subtitle">{t("home.subtitle")}</p>
 
         <div className="prompt-section">
           <p className="prompt-message">{currentPrompt}</p>
@@ -161,7 +162,7 @@ function HomePage() {
           <button
             className="close-btn"
             onClick={() => setShowCalendar(false)}
-            aria-label="Close calendar"
+            aria-label={t("home.calendar.close")}
           >
             <svg viewBox="0 0 24 24">
               <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />

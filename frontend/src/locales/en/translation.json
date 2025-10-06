@@ -29,12 +29,16 @@
     }
   },
   "header": {
-    "calendar": "Calendar",
+    "achievements": "Achievements",
     "profile": "Profile",
-    "record": "Record",
+    "calendar": "Calendar",
     "journal": "Journal",
+    "record": "Record",
     "progress": "Progress",
     "day": "Day",
+    "menu": "Menu",
+    "emocoinsBalance": "Emocoins balance",
+    "availableRecordings": "Available recordings",
     "login": "Login",
     "signUp": "Sign Up"
   },
@@ -85,5 +89,295 @@
       "What are you proud of today?",
       "What caused you stress or anxiety?"
     ]
+  },
+  "home": {
+    "title": "Your AI Voice Diary",
+    "subtitle": "Create your first record today",
+    "calendar": {
+      "close": "Close calendar"
+    },
+    "feedback": {
+      "submit": "Submit feedback",
+      "success": "Feedback submitted",
+      "error": "Error submitting feedback"
+    }
+  },
+  "common": {
+    "close": "Close",
+    "submit": "Submit",
+    "loading": "Loading...",
+    "error": "Error"
+  },
+  "profile": {
+    "title": "Profile",
+    "back": "Back",
+    "editProfile": "Edit Profile",
+    "logout": "Log Out",
+    "deleteAccount": "Delete Account",
+    "userInfo": {
+      "active": "Active",
+      "email": "Email",
+      "noEmail": "No email provided"
+    },
+    "tabs": {
+      "calendar": "Calendar",
+      "stats": "Statistics",
+      "settings": "Settings"
+    },
+    "logoutConfirm": {
+      "title": "Log Out?",
+      "message": "Are you sure you want to log out?",
+      "cancel": "Cancel",
+      "confirm": "Log Out"
+    },
+    "deleteConfirm": {
+      "title": "Delete Account?",
+      "message": "This will permanently delete all your data, including mood history and personal information. This action cannot be undone.",
+      "cancel": "Cancel",
+      "confirm": "Yes, Delete Account"
+    },
+    "dangerZone": "Danger Zone"
+  },
+  "settings": {
+    "title": "Account Settings",
+    "subtitle": "Manage your profile information",
+    "avatar": {
+      "changePhoto": "Change Photo",
+      "comingSoon": "Avatar change functionality coming soon!"
+    },
+    "form": {
+      "nickname": "Nickname",
+      "login": "Login (email)",
+      "newPassword": "New Password",
+      "confirmPassword": "Confirm Password",
+      "newPasswordPlaceholder": "Enter new password",
+      "confirmPasswordPlaceholder": "Confirm new password"
+    },
+    "buttons": {
+      "cancel": "Cancel",
+      "save": "Save Changes",
+      "saving": "Saving...",
+      "showPassword": "Show password",
+      "hidePassword": "Hide password"
+    },
+    "errors": {
+      "updateFailed": "Failed to update profile",
+      "loginTaken": "This login is already taken",
+      "passwordShort": "Password should be at least 6 characters",
+      "passwordUppercase": "Add at least one uppercase letter",
+      "passwordNumber": "Add at least one number",
+      "passwordsDontMatch": "Passwords don't match"
+    },
+    "success": {
+      "profileUpdated": "Profile updated successfully"
+    }
+  },
+  "journal": {
+    "title": "Your Journal",
+    "subtitle": "Review your past recordings and insights",
+    "loading": "Loading your journal entries...",
+    "error": {
+      "message": "Error loading journal entries. Please try again.",
+      "details": "Details:"
+    },
+    "filters": {
+      "date": "Date",
+      "limit": "Limit",
+      "records": "records",
+      "removeDate": "Remove date filter",
+      "removeLimit": "Remove limit filter"
+    },
+    "results": {
+      "showing": "Showing",
+      "recording": "recording",
+      "recordings": "recordings",
+      "forDate": "for",
+      "limitedTo": "limited to"
+    },
+    "empty": {
+      "title": "No recordings yet",
+      "message": "Make your first recording to see it here."
+    }
+  },
+  "achievements": {
+    "rarity": {
+      "common": "Common",
+      "rare": "Rare",
+      "epic": "Epic",
+      "legendary": "Legendary"
+    }
+  },
+  "audioRecorder": {
+    "microphoneBlocked": {
+      "title": "Microphone Access Blocked",
+      "message": "Please enable microphone access in your browser settings to use this feature."
+    },
+    "analyzing": "Voice recording is being analyzed...",
+    "clickToStart": "Click the microphone to start recording",
+    "microphonePermission": "We'll ask for microphone permission",
+    "deleteConfirmation": {
+      "title": "Delete Recording?",
+      "message": "This action cannot be undone. The recording will be permanently deleted."
+    },
+    "buttons": {
+      "delete": "Delete",
+      "save": "Save",
+      "cancel": "Cancel"
+    },
+    "ariaLabels": {
+      "startRecording": "Start recording",
+      "stopRecording": "Stop recording",
+      "pauseRecording": "Pause recording",
+      "resumeRecording": "Resume recording",
+      "deleteRecording": "Delete recording",
+      "saveRecording": "Save recording"
+    }
+  },
+  "feedback": {
+    "title": "How accurate was this analysis?",
+    "instruction": "Click to submit your rating",
+    "thankYou": "Thank you for your feedback! ❤️",
+    "ratings": {
+      "veryPoor": "Very Poor",
+      "poor": "Poor",
+      "average": "Average",
+      "good": "Good",
+      "excellent": "Excellent"
+    }
+  },
+    "recordingCard": {
+    "title": "Your Emotional Report",
+    "processing": "Detailed analysis is being processed...",
+    "recorded": "Recorded",
+    "watermark": "AI-generated, for reference only",
+    "sections": {
+      "summary": "Summary",
+      "emotionalAnalysis": "Emotional Analysis",
+      "physicalResponse": "Physical Response",
+      "copingStrategies": "Coping Strategies",
+      "support": "Support",
+      "recommendations": "Recommendations"
+    },
+    "insights": {
+      "pattern": "Pattern",
+      "keyTriggers": "Key Triggers"
+    },
+    "copingStrategies": {
+      "effective": "Effective",
+      "ineffective": "Ineffective"
+    },
+    "noData": {
+      "pattern": "No pattern data available",
+      "support": "No supportive advice available",
+      "physicalReaction": "No physical reaction data available"
+    }
+  },
+  "recordingListItem": {
+    "sections": {
+      "emotionalAnalysis": "Emotional Analysis",
+      "physicalResponse": "Physical Response",
+      "copingStrategies": "Coping Strategies",
+      "recommendations": "Recommendations"
+    },
+    "insights": {
+      "keyTriggers": "Key Triggers"
+    },
+    "copingStrategies": {
+      "effective": "Effective",
+      "ineffective": "Ineffective"
+    },
+    "noData": {
+      "emotionalDynamics": "No emotional dynamics data available",
+      "physicalReaction": "No physical reaction data available"
+    },
+    "buttons": {
+      "delete": "Delete Recording",
+      "cancel": "Cancel"
+    },
+    "deleteConfirmation": {
+      "title": "Confirm Deletion",
+      "message": "Are you sure you want to delete this recording? This action cannot be undone."
+    }
+  },
+  "recordingsList": {
+    "noRecords": "No recordings found"
+  },
+  "bottomSheetNavigator": {
+    "tabs": {
+      "achievements": "Achievements",
+      "journal": "Journal",
+      "calendar": "Calendar",
+      "settings": "Settings"
+    },
+    "settings": {
+      "notifications": {
+        "title": "Notifications",
+        "subtitle": "Configure push notifications"
+      },
+      "darkTheme": {
+        "title": "Dark Theme",
+        "subtitle": "Automatic switching"
+      },
+      "privacy": {
+        "title": "Privacy",
+        "subtitle": "Data management"
+      }
+    }
+  },
+  "dayPopup": {
+    "title": "Daily Reflection",
+    "yourMood": "Your Mood",
+    "dailySummary": "Daily Summary",
+    "noData": "No data recorded for this day",
+    "addReflection": "+ Add Reflection",
+    "moods": {
+      "joy": "Joy",
+      "surprise": "Surprise",
+      "sadness": "Sadness",
+      "fear": "Fear",
+      "disgust": "Disgust",
+      "anger": "Anger",
+      "neutral": "Neutral"
+    }
+  },
+  "filterControls": {
+    "quickFilters": {
+      "today": "Today",
+      "last7days": "Last 7 days",
+      "last30days": "Last 30 days"
+    },
+    "labels": {
+      "filterByDate": "Filter by date:",
+      "showLast": "Show last:"
+    },
+    "placeholders": {
+      "datePicker": "Select date or use quick filters",
+      "select": "Select..."
+    },
+    "buttons": {
+      "clearAll": "Clear All"
+    },
+    "options": {
+      "allRecords": "All records",
+      "5records": "5 records",
+      "10records": "10 records",
+      "15records": "15 records"
+    }
+  },
+  "calendar": {
+    "previousMonth": "Previous month",
+    "nextMonth": "Next month",
+    "dayNames": ["M", "T", "W", "T", "F", "S", "S"]
+  },
+  "moodIcon": {
+    "labels": {
+      "joy": "Joy",
+      "surprise": "Surprise",
+      "sadness": "Sadness",
+      "fear": "Fear",
+      "disgust": "Disgust",
+      "anger": "Anger",
+      "neutral": "Neutral"
+    }
   }
 }

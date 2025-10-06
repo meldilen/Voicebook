@@ -1,8 +1,11 @@
+version: '3.8'
+
 services:
   nginx:
     image: nginx:alpine
     ports:
       - "443:443"
+      - "80:80"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
       - ./nginx/conf.d:/etc/nginx/conf.d
@@ -10,64 +13,79 @@ services:
       - ./nginx/ssl:/etc/ssl
     depends_on:
       - frontend
-      - go_api
-      - python_api
+      - go-api
+      - ml-service
+    restart: unless-stopped
 
-  db:
-    image: postgres:latest
+  postgres:
+    image: postgres:15
     restart: always
     environment:
-      POSTGRES_USER: voicediary_user
-      POSTGRES_PASSWORD: voicediary_password
-      POSTGRES_DB: voicedb
+      POSTGRES_USER: voicebook_user
+      POSTGRES_PASSWORD: voicebook_password
+      POSTGRES_DB: voicebook_db
     ports:
-      - "5430:5432"
+      - "5432:5432"
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U voicebook_user -d voicebook_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   frontend:
-    env_file: ".env"
     build:
       context: ./frontend
       dockerfile: Dockerfile
+    environment:
+      - REACT_APP_go_api=https://localhost:8080
     volumes:
       - ./frontend:/app
+      - /app/node_modules
     ports:
-      - "80:80"
-    command: nginx -g "daemon off;"
+      - "3000:3000"
+    command: npm start
+    depends_on:
+      - go-api
+    restart: unless-stopped
 
-  go_api:
-    env_file: ".env"
+  go-api:
     build:
       context: ./backend/go_api
       dockerfile: Dockerfile
-    depends_on:
-      - db
     environment:
-      DATABASE_URL: postgres://voicediary_user:voicediary_password@db:5432/voicedb?sslmode=disable
+      - DATABASE_URL=postgres://voicebook_user:voicebook_password@postgres:5432/voicebook_db?sslmode=disable
+      - ML_SERVICE_URL=http://ml-service:8000
+      - LISTEN_ADDR=:8080
+    depends_on:
+      postgres:
+        condition: service_healthy
     volumes:
       - ./backend/go_api:/app
     ports:
       - "8080:8080"
-    command: ./go_api
+    command: go run cmd/api/main.go
+    restart: unless-stopped
 
-  python_api:
-    env_file: ".env"
+  ml-service:
     build:
-      context: ./backend/python_api
+      context: ./ml
       dockerfile: Dockerfile
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 1
-              capabilities: [ gpu ]
+    environment:
+      - SERVICE_ACCOUNT_ID=${SERVICE_ACCOUNT_ID}
+      - KEY_ID=${KEY_ID}
+      - PRIVATE_KEY=${PRIVATE_KEY}
+      - FOLDER_ID=${FOLDER_ID}
+      - BUCKET_NAME=${BUCKET_NAME}
+      - SECRET_KEY=${SECRET_KEY}
+      - SECRET_KEY_ID=${SECRET_KEY_ID}
     volumes:
-      - .:/app
+      - ./ml:/app
     ports:
-      - "5000:5000"
-    command: uvicorn backend.python_api.app:app --host python_api --port 5000 --log-level debug
+      - "8000:8000"
+    command: python ml_api.py
+    restart: unless-stopped
 
 volumes:
-  pgdata:
+  postgres_data:

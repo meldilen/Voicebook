@@ -10,6 +10,7 @@ import Calendar from "../features/calendar/components/MoodCalendar";
 import "./ProfilePage.css";
 import { useState } from "react";
 import { format } from "date-fns";
+import { useTranslation } from "react-i18next";
 
 const ProfilePage = () => {
   const navigate = useNavigate();
@@ -18,6 +19,7 @@ const ProfilePage = () => {
   const [deleteAccountApi] = useDeleteAccountMutation();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const { t } = useTranslation();
 
   const user = useSelector(selectCurrentUser);
   const [activeTab, setActiveTab] = useState("calendar");
@@ -66,7 +68,7 @@ const ProfilePage = () => {
       <button
         className="back-button"
         onClick={() => navigate("/homepage")}
-        aria-label="Go back"
+        aria-label={t("profile.back")}
       >
         <svg
           width="30"
@@ -87,14 +89,14 @@ const ProfilePage = () => {
 
       <div className="profile-content">
         <header className="profile-header">
-          <h1>Profile</h1>
+          <h1>{t("profile.title")}</h1>
           <div className="profile-actions">
             <button
               className="logout-button"
               onClick={() => setShowLogoutConfirm(true)}
-              aria-label="Logout"
+              aria-label={t("profile.logout")}
             >
-              Log Out
+              {t("profile.logout")}
             </button>
           </div>
         </header>
@@ -115,23 +117,23 @@ const ProfilePage = () => {
             <div className="user-details">
               <h2>{user?.Nickname || "User"}</h2>
               <p className="activity-status">
-                Active {format(new Date(), "MMM d, yyyy")}
+                {t("profile.userInfo.active")}
               </p>
             </div>
           </div>
 
           <div className="profile-fields">
             <div className="field">
-              <label>Email</label>
-              <p>{user?.Login || "No email provided"}</p>
+              <label>{t("profile.userInfo.email")}</label>
+              <p>{user?.Login || t("profile.userInfo.noEmail")}</p>
             </div>
 
             <button
               className="edit-button"
               onClick={() => navigate("/profile/settings")}
-              aria-label="Edit profile"
+              aria-label={t("profile.editProfile")}
             >
-              Edit Profile
+              {t("profile.editProfile")}
             </button>
           </div>
         </div>
@@ -146,7 +148,7 @@ const ProfilePage = () => {
               }`}
               onClick={() => setActiveTab("calendar")}
             >
-              Calendar
+              {t("profile.tabs.calendar")}
             </button>
           </div>
         </div>
@@ -160,10 +162,12 @@ const ProfilePage = () => {
         </div>
       </div>
 
+      <div className="danger-zone-section">
+        <h3 className="danger-zone-title">{t("profile.dangerZone")}</h3>
         <button
           className="danger-zone delete-account-button"
           onClick={() => setShowDeleteConfirm(true)}
-          aria-label="Delete account"
+          aria-label={t("profile.deleteAccount")}
         >
           <svg
             width="16"
@@ -180,8 +184,9 @@ const ProfilePage = () => {
               strokeLinejoin="round"
             />
           </svg>
-          Delete My Account
+          {t("profile.deleteAccount")}
         </button>
+      </div>
 
       {showDeleteConfirm && (
         <div className="confirmation-modal">
@@ -203,23 +208,20 @@ const ProfilePage = () => {
                 />
               </svg>
             </div>
-            <h3>Delete Account?</h3>
-            <p>
-              This will permanently delete all your data, including mood history
-              and personal information. This action cannot be undone.
-            </p>
+            <h3>{t("profile.deleteConfirm.title")}</h3>
+            <p>{t("profile.deleteConfirm.message")}</p>
             <div className="modal-actions">
               <button
                 className="secondary-button"
                 onClick={() => setShowDeleteConfirm(false)}
               >
-                Cancel
+                {t("profile.deleteConfirm.cancel")}
               </button>
               <button
                 className="delete-confirm-button"
                 onClick={handleDeleteAccount}
               >
-                Yes, Delete Account
+                {t("profile.deleteConfirm.confirm")}
               </button>
             </div>
           </div>
@@ -229,16 +231,17 @@ const ProfilePage = () => {
       {showLogoutConfirm && (
         <div className="confirmation-modal">
           <div className="modal-content">
-            <p>Are you sure you want to log out?</p>
+            <h3>{t("profile.logoutConfirm.title")}</h3>
+            <p>{t("profile.logoutConfirm.message")}</p>
             <div className="modal-actions">
               <button
                 className="secondary-button"
                 onClick={() => setShowLogoutConfirm(false)}
               >
-                Cancel
+                {t("profile.logoutConfirm.cancel")}
               </button>
               <button className="logout-confirm-button" onClick={handleLogout}>
-                Log Out
+                {t("profile.logoutConfirm.confirm")}
               </button>
             </div>
           </div>

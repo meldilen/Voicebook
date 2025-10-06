@@ -1,9 +1,9 @@
 # gpt.py
-import aiohttp
+import requests
 import json
 from config import FOLDER_ID
 
-async def call_gpt(text: str, prompt: str, model_name: str, iam_token: str) -> str:
+def call_gpt(text: str, prompt: str, model_name: str, iam_token: str) -> dict:
     headers = {
         "Authorization": f"Bearer {iam_token}",
         "Content-Type": "application/json",
@@ -22,17 +22,16 @@ async def call_gpt(text: str, prompt: str, model_name: str, iam_token: str) -> s
         ]
     }
 
-    async with aiohttp.ClientSession() as session:
-        async with session.post(
-            "https://llm.api.cloud.yandex.net/foundationModels/v1/completion",
-            headers=headers,
-            json=data,
-            timeout=30
-        ) as resp:
-            if resp.status != 200:
-                raise RuntimeError(f"API error: {resp.status}, {await resp.text()}")
+    resp = requests.post(
+        "https://llm.api.cloud.yandex.net/foundationModels/v1/completion",
+        headers=headers,
+        json=data,
+        timeout=30
+    )
 
-            response_data = await resp.json()
-            response_text = response_data["result"]["alternatives"][0]["message"]["text"]
+    if resp.status_code != 200:
+        raise RuntimeError(f"API error: {resp.status_code}, {resp.text}")
 
-            return response_text.replace("`", "")
+    response_text = resp.json()["result"]["alternatives"][0]["message"]["text"]
+
+    return response_text.replace("`", "")
