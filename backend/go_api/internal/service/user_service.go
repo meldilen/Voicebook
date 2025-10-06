@@ -27,12 +27,8 @@ func (s *UserService) GetUserByLogin(ctx context.Context, login string) (*reposi
 	return repository.GetUserByLogin(ctx, s.db, login)
 }
 
-func (s *UserService) GetUserByID(ctx context.Context, userID int) (*repository.User, error) {
-	return repository.GetUserByID(ctx, s.db, userID)
-}
-
 func (s *UserService) SaveSession(ctx context.Context, userID int, token string) error {
-	return repository.SaveSession(ctx, s.db, userID, token)
+    return repository.SaveSession(ctx, s.db, userID, token)
 }
 
 func (s *UserService) GetUserBySession(ctx context.Context, token string) (*repository.User, error) {
@@ -48,7 +44,7 @@ func (s *UserService) UpdateUserProfile(ctx context.Context, userID int, login, 
 }
 
 func (s *UserService) UserExists(ctx context.Context, login string) (bool, error) {
-	return repository.UserExists(ctx, s.db, login)
+    return repository.UserExists(ctx, s.db, login)
 }
 
 func (s *UserService) DeleteUserAccount(ctx context.Context, userID int) error {

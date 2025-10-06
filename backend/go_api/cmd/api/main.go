@@ -54,7 +54,6 @@ func main() {
     AllowCredentials: true,
 }))
 
-	// Initialize services
 	recordHandler := handler.NewRecordHandler(db, cfg.MLServiceURL)
 	userService := service.NewUserService(db)
 	userHandler := handler.NewUserHandler(userService)
@@ -90,7 +89,6 @@ func main() {
 		userGroup.GET("/:userID/records", recordHandler.GetRecords)
 		userGroup.PATCH("/me", middleware.AuthMiddleware(userService), userHandler.UpdateProfile)
 		userGroup.DELETE("/me", middleware.AuthMiddleware(userService), userHandler.DeleteAccount)
-		userGroup.GET("/:userID/consecutive-days", recordHandler.GetConsecutiveRecordingDays) // MOVED HERE
 	}
 
 	// Record-related endpoints
@@ -102,36 +100,20 @@ func main() {
 		recordGroup.DELETE("/:recordID", recordHandler.DeleteRecord)
 		recordGroup.POST("/:recordID/feedback", recordHandler.SetRecordFeedback)
 		recordGroup.PATCH("/:recordID/emotion", recordHandler.UpdateEmotion)
+		recordGroup.GET("/users/:userID/consecutive-days", recordHandler.GetConsecutiveRecordingDays)
 	}
 
-	// Total-related endpoints
 	totalGroup := r.Group("/totals")
 	{
-		totalGroup.GET("/:userID", totalHandler.GetTotals)
-		totalGroup.POST("/:userID/recalculate/:date", totalHandler.RecalculateTotal)
-	}
-
-	// Achievements-related endpoints
-	achievementsGroup := r.Group("/api/achievements")
-	achievementsGroup.Use(middleware.AuthMiddleware(userService))
-	{
-		achievementsGroup.GET("", achievementsHandler.GetAchievements)
-		achievementsGroup.POST("/:achievementID/progress", achievementsHandler.UpdateAchievementProgress)
+    totalGroup.GET("/:userID", totalHandler.GetTotals)
+    totalGroup.POST("/:userID/recalculate/:date", totalHandler.RecalculateTotal)
 	}
 
 	r.GET("/swagger/*any",
-		ginSwagger.WrapHandler(swaggerFiles.Handler,
-			ginSwagger.URL("/swagger/doc.json"),
-		),
-	)
-
-	// Health check endpoint
-	r.GET("/health", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"status":  "healthy",
-			"service": "VoiceDiary API",
-		})
-	})
+    ginSwagger.WrapHandler(swaggerFiles.Handler, 
+        ginSwagger.URL("/swagger/doc.json"),
+    ),
+)
 
 	log.Printf("Starting server on port %s\n", cfg.ListenAddr)
 	if err := r.Run(cfg.ListenAddr); err != nil {
