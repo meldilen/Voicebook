@@ -15,6 +15,13 @@ type RecordService struct {
 	mlURL string
 }
 
+type AudioAnalysisResult struct {
+    Emotion  string
+    Summary  string
+    Text     string
+    Insights map[string]interface{}
+}
+
 func NewRecordService(db *sql.DB, mlURL string) *RecordService {
 	return &RecordService{
     	db: db,
@@ -32,16 +39,23 @@ func (s *RecordService) FetchUserRecords(ctx context.Context, userID int, date t
     }
 }
 
-func (s *RecordService) AnalyzeRawAudio(ctx context.Context, fileBytes []byte) (string, string, string, error) {
-	log.Printf("AnalyzeRawAudio: sending file to ML service at %s", s.mlURL)
-	result, err := client.CallMLService(ctx, s.mlURL, fileBytes)
-	if err != nil {
-		log.Printf("AnalyzeRawAudio: failed to call ML service, error: %v", err)
-		return "", "", "", err
-	}
+func (s *RecordService) AnalyzeRawAudio(ctx context.Context, fileBytes []byte) (*AudioAnalysisResult, error) {
+    log.Printf("AnalyzeRawAudio: sending file to ML service at %s", s.mlURL)
+    result, err := client.CallMLService(ctx, s.mlURL, fileBytes)
+    if err != nil {
+        log.Printf("AnalyzeRawAudio: failed to call ML service, error: %v", err)
+        return nil, err
+    }
 
-	log.Printf("AnalyzeRawAudio: received response from ML service, Emotion: %s, Summary: %s, Text: %s", result.Emotion, result.Summary, result.Text)
-	return result.Emotion, result.Summary, result.Text, nil
+    analysisResult := &AudioAnalysisResult{
+        Emotion:  result.Emotion,
+        Summary:  result.Summary,
+        Text:     result.Text,
+        Insights: result.Insights,
+    }
+
+    log.Printf("AnalyzeRawAudio: received response from ML service")
+    return analysisResult, nil
 }
 
 func (s *RecordService) SaveRecord(ctx context.Context, userID int, emotion string, summary string) (int, error) {

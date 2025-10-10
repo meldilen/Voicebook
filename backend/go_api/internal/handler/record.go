@@ -98,22 +98,22 @@ func (h *RecordHandler) UploadRecord(c *gin.Context) {
 	}
 
 	// Send file to ML service
-	emotion, summary, text, err := h.svc.AnalyzeRawAudio(c.Request.Context(), buf.Bytes())
-	if err != nil {
-		log.Printf("UploadRecord: failed to analyze audio, error: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to analyze audio"})
-		return
-	}
+	analysisResult, err := h.svc.AnalyzeRawAudio(c.Request.Context(), buf.Bytes())
+    if err != nil {
+        log.Printf("UploadRecord: failed to analyze audio, error: %v", err)
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to analyze audio"})
+        return
+    }
 
 	// Save record in DB в зависимости от типа пользователя
 	var recordID int
 	if userID != -1 {
 		if userType == "vk" {
 			// Сохраняем запись для VK пользователя
-			recordID, err = h.svc.SaveRecordForVKUser(c.Request.Context(), userID, emotion, summary)
+			recordID, err = h.svc.SaveRecordForVKUser(c.Request.Context(), userID, analysisResult.Emotion, analysisResult.Summary)
 		} else {
 			// Сохраняем запись для обычного пользователя
-			recordID, err = h.svc.SaveRecord(c.Request.Context(), userID, emotion, summary)
+			recordID, err = h.svc.SaveRecord(c.Request.Context(), userID, analysisResult.Emotion, analysisResult.Summary)
 		}
 		
 		if err != nil {
@@ -130,12 +130,13 @@ func (h *RecordHandler) UploadRecord(c *gin.Context) {
 
 	// Формируем ответ
 	response := gin.H{
-		"user_id": userID,
-		"record_id": recordID,
-		"emotion": emotion,
-		"summary": summary,
-		"text": text,
-	}
+    "user_id":   userID,
+    "record_id": recordID,
+    "emotion":   analysisResult.Emotion,
+    "summary":   analysisResult.Summary,
+    "text":      analysisResult.Text,
+    "insights":  analysisResult.Insights,
+}
 
 	// Добавляем VK user ID в ответ если это VK пользователь
 	if userType == "vk" {
