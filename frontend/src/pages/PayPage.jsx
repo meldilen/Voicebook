@@ -37,18 +37,38 @@ export default function TopUp() {
 
   // Просмотр рекламы (фейковое начисление)
   const watchAd = async () => {
-    try {
-      setMessage('Реклама просмотрена. Начисляем монеты...');
-      // имитация начисления
-      const res = await fetch(`/api/vk/add-coins/${userId}?amount=5`, { method: 'POST' });
-      const json = await res.json();
-      dispatch(setCoins(json.coins));
-      setMessage('💰 +5 монет за просмотр рекламы!');
-    } catch (err) {
-      console.error('Ошибка начисления монет:', err);
-      setMessage('Не удалось начислить монеты.');
-    }
-  };
+  try {
+    setMessage('Реклама просмотрена. Начисляем монеты...');
+
+    const res = await fetch(`/api/vk/add-coins/${userId}?amount=5`, { method: 'POST' });
+    const json = await res.json();
+
+    // Если сервер вернул подозрительно низкий баланс — добавляем локально
+    const newBalance = json?.coins && json.coins >= coins
+      ? json.coins
+      : coins + 5;
+
+    dispatch(setCoins(newBalance));
+    setMessage(`💰 +5 монет за просмотр рекламы! Баланс: ${newBalance}`);
+  } catch (err) {
+    console.error('Ошибка начисления монет:', err);
+    setMessage('Не удалось начислить монеты.');
+  }
+};
+
+  // const watchAd = async () => {
+  //   try {
+  //     setMessage('Реклама просмотрена. Начисляем монеты...');
+  //     // имитация начисления
+  //     const res = await fetch(`/api/vk/add-coins/${userId}?amount=5`, { method: 'POST' });
+  //     const json = await res.json();
+  //     dispatch(setCoins(json.coins));
+  //     setMessage('💰 +5 монет за просмотр рекламы!');
+  //   } catch (err) {
+  //     console.error('Ошибка начисления монет:', err);
+  //     setMessage('Не удалось начислить монеты.');
+  //   }
+  // };
 
   // Покупка монет
   const buyCoins = (itemId, amount) => {
