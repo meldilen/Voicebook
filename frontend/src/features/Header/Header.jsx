@@ -1,7 +1,6 @@
 
 import { Link, useLocation } from "react-router-dom";
 import {
-  FaUser,
   FaCalendarAlt,
   FaMicrophone,
   FaChartLine,
@@ -62,14 +61,7 @@ function Header({
             <FaTrophy className="icon" />
             <span className="nav-label">{t("header.achievements")}</span>
           </div>
-          <div
-            className="nav-box profile"
-            onClick={() => navigate("/profile")}
-            title={t("header.profile")}
-          >
-            <FaUser className="icon" />
-            <span className="nav-label">{t("header.profile")}</span>
-          </div>
+
           <div
             className="nav-box calendar"
             onClick={() => onCalendarToggle()}
@@ -78,6 +70,7 @@ function Header({
             <FaCalendarAlt className="icon" />
             <span className="nav-label">{t("header.calendar")}</span>
           </div>
+
           <div
             className="nav-box home"
             onClick={() => navigate("/journal")}
@@ -101,14 +94,7 @@ function Header({
             <FaTrophy className="icon" />
             <span className="nav-label">{t("header.achievements")}</span>
           </div>
-          <div
-            className="nav-box profile"
-            onClick={() => navigate("/profile")}
-            title={t("header.profile")}
-          >
-            <FaUser className="icon" />
-            <span className="nav-label">{t("header.profile")}</span>
-          </div>
+
           <div
             className="nav-box home"
             onClick={() => navigate("/homepage")}
@@ -132,14 +118,7 @@ function Header({
             <FaMicrophone className="icon" />
             <span className="nav-label">{t("header.record")}</span>
           </div>
-          <div
-            className="nav-box profile"
-            onClick={() => navigate("/profile")}
-            title={t("header.profile")}
-          >
-            <FaUser className="icon" />
-            <span className="nav-label">{t("header.profile")}</span>
-          </div>
+
           <div
             className="nav-box clickable"
             title={t("header.emocoinsBalance")}
@@ -196,9 +175,14 @@ function Header({
                     <span className="nav-label">{emocoinsBalance}</span>
                   </div>
 
-                  <div className="nav-box" title={t("header.availableRecordings")}>
+                  <div
+                    className="nav-box"
+                    title={t("header.availableRecordings")}
+                  >
                     <FaMicrophone className="icon" />
-                    <span className="mobile-value">{availableRecordings}/5</span>
+                    <span className="mobile-value">
+                      {availableRecordings}/5
+                    </span>
                   </div>
                 </div>
               </>
@@ -209,7 +193,10 @@ function Header({
                 </div>
 
                 <div className="nav-group right-group">
-                  <div className="nav-box progress" title={t("header.progress")}>
+                  <div
+                    className="nav-box progress"
+                    title={t("header.progress")}
+                  >
                     <div className="progress-content">
                       <FaChartLine className="icon" />
                       <span className="progress-text">{t("header.day")} </span>
@@ -228,9 +215,14 @@ function Header({
                     <span className="nav-label">{emocoinsBalance}</span>
                   </div>
 
-                  <div className="nav-box" title={t("header.availableRecordings")}>
+                  <div
+                    className="nav-box"
+                    title={t("header.availableRecordings")}
+                  >
                     <FaMicrophone className="icon" />
-                    <span className="nav-label">{availableRecordings}/5</span>
+                    <span className="nav-label">
+                      {availableRecordings}/5
+                    </span>
                   </div>
                 </div>
               </>
@@ -239,8 +231,7 @@ function Header({
         ) : (
           <div className="auth-buttons">
             <Link to="/login" className="login-btn">
-              <span className="login-text">{t("header.login")}</span>
-              <FaUser className="login-icon" />
+              {t("header.login")}
             </Link>
             <Link to="/signup" className="signup-btn">
               {t("header.signUp")}
@@ -253,6 +244,7 @@ function Header({
 }
 
 export default Header;
+
 
 
 
