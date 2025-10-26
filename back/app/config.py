@@ -1,6 +1,8 @@
 from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
+    DEBUG: bool = False
+
     DATABASE_URL: str
     
     PRIVATE_KEY_PATH: str = "../scripts/private.pem"
@@ -14,10 +16,10 @@ class Settings(BaseSettings):
     MAX_SESSIONS_PER_USER: int = 5
     SESSION_INACTIVITY_LIMIT_DAYS: int = 30
 
-    ALLOWED_ORIGINS: list[str] = ["http://localhost:3000"]
+    ALLOWED_ORIGINS: list[str] = ["http://localhost:3000", "http://127.0.0.1:3000"]
 
     COOKIE_DOMAIN: str = "localhost"
-    SECURE_COOKIES: bool = False # True в production
+    SECURE_COOKIES: bool = True if DEBUG == False else False  # True в production
 
     class Config:
         env_file = ".env"

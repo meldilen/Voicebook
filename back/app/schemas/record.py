@@ -3,6 +3,7 @@ from datetime import datetime
 from typing import Optional, Dict, Any
 
 class RecordBase(BaseModel):
+    name: str
     emotion: str
     summary: str
     feedback: Optional[int] = None

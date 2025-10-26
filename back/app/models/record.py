@@ -10,7 +10,6 @@ class Record(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     name = Column(String, nullable=False)
-    record_date = Column(DateTime, default=datetime.now(timezone.utc))
     emotion = Column(String, nullable=False)
     summary = Column(String, nullable=False)
     feedback = Column(Integer, nullable=True)

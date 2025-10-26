@@ -4,11 +4,11 @@ from datetime import datetime, timezone, timedelta
 from typing import List, Optional
 import logging
 
-from ..app.models.user import User
-from ..app.models.record import Record
-from ..app.models.session import UserSession
-from ..app.schemas.user import UserCreate, UserUpdate, UserWithStats, SessionInfo
-from ..app.auth import get_password_hash
+from app.models.user import User
+from app.models.record import Record
+from app.models.session import UserSession
+from app.schemas.user import UserCreate, UserUpdate, UserWithStats, SessionInfo
+from app.auth import get_password_hash
 
 logger = logging.getLogger(__name__)
 

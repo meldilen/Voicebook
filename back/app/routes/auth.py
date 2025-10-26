@@ -16,7 +16,7 @@ from ..auth import (
 )
 from ..schemas.user import UserCreate, UserLogin, UserResponse
 from ..schemas.common import LoginResponse, RegisterResponse, Token, RefreshResponse, LogoutResponse
-from ...services.user_service import UserService
+from services.user_service import UserService
 from ..models.user import User
 from ..models.session import UserSession
 

@@ -7,7 +7,7 @@ from ..auth import get_current_user, get_current_session, logout_session, logout
 from ..models.user import User
 from ..models.session import UserSession
 from ..schemas.user import UserResponse, UserUpdate, UserWithStats, SessionInfo
-from ...services.user_service import UserService
+from services.user_service import UserService
 from ..schemas.common import Message
 
 router = APIRouter(prefix="/users", tags=["users"])

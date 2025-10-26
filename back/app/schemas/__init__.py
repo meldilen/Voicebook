@@ -1,6 +1,6 @@
 from .user import UserCreate, UserUpdate, UserResponse, UserLogin
 from .record import RecordCreate, RecordUpdate, RecordResponse
-from .achievement import AchievementUpdate, AchievementResponse
+from .achievement import AchievementResponse
 from .common import Message
 
 __all__ = [
