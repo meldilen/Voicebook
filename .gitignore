@@ -11,3 +11,9 @@ __pycache__/
 *.pyo
 *.pyd
 *.python-version
+
+#keys
+private.pem
+*.key
+*.pem
+!public.pem
