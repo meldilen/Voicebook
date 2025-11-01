@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Request, Response
 from sqlalchemy.orm import Session
+import logging
 
 from ..database import get_db
 from ..auth import (
@@ -22,22 +23,26 @@ from ..models.session import UserSession
 
 router = APIRouter(prefix="/auth", tags=["authentication"])
 
+logger = logging.getLogger(__name__)
+
 @router.post("/register", response_model=RegisterResponse)
 async def register(
     response: Response,
     user_data: UserCreate,
     request: Request,
     db: Session = Depends(get_db)
-):
+):    
     user_service = UserService(db)
     
     if user_service.get_user_by_email(user_data.email):
+        logger.warning(f"Registration failed - email already registered: {user_data.email}")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Email already registered"
         )
     
     if user_service.get_user_by_username(user_data.username):
+        logger.warning(f"Registration failed - username already taken: {user_data.username}")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Username already taken"
@@ -46,11 +51,13 @@ async def register(
     user = user_service.create_user(user_data)
     
     access_token, refresh_token, session = create_session_tokens(db, user, request)
+    logger.info(f"Session created for new user: {session.id}")
     
     set_refresh_token_cookie(response, refresh_token)
     
     user_response = UserResponse.model_validate(user)
     
+    logger.info(f"Registration completed for user: {user.id}")
     return RegisterResponse(
         user=user_response.model_dump(),
         tokens=Token(
@@ -66,26 +73,32 @@ async def login(
     login_data: UserLogin,
     request: Request,
     db: Session = Depends(get_db)
-):
+):    
     user = authenticate_user(db, login_data.email, login_data.password)
     if not user:
+        logger.warning(f"Login failed - incorrect credentials for: {login_data.email}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect email or password"
         )
     
     if not user.is_active:
+        logger.warning(f"Login failed - inactive user: {login_data.email}")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Inactive user"
         )
     
+    logger.info(f"Authentication successful for user: {user.id}")
+    
     access_token, refresh_token, session = create_session_tokens(db, user, request)
+    logger.info(f"Session created for login: {session.id}")
     
     set_refresh_token_cookie(response, refresh_token)
     
     user_response = UserResponse.model_validate(user)
     
+    logger.info(f"Login completed for user: {user.id}")
     return LoginResponse(
         user=user_response.model_dump(),
         tokens=Token(

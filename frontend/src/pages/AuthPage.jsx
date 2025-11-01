@@ -41,39 +41,39 @@ function AuthPage() {
     dispatch(setError(null));
 
     try {
-      // let response;
       if (isLogin) {
         await login({
-          login: formData.email,
+          email: formData.email,
           password: formData.password,
         }).unwrap();
+
         const { data: userData } = await refetchMe();
-        // console.log(userData);
+
         dispatch(setCredentials(userData));
       } else {
         await register({
-          login: formData.email,
+          email: formData.email,
           password: formData.password,
-          nickname: formData.username,
+          username: formData.username,
         }).unwrap();
-        // console.log(response);
-        await login({
-          login: formData.email,
-          password: formData.password,
-        });
 
         const { data: userData } = await refetchMe();
         dispatch(setCredentials(userData));
       }
-
       navigate("/homepage");
     } catch (err) {
-      console.error("Auth error:", err);
-
       let errorMessage = "Authentication failed";
+
       if (err.data) {
+        console.error("AuthPage: Error data:", err.data);
         if (typeof err.data === "string") {
           errorMessage = err.data;
+        } else if (err.data.detail) {
+          if (Array.isArray(err.data.detail)) {
+            errorMessage = err.data.detail.map((d) => d.msg).join(", ");
+          } else if (typeof err.data.detail === "string") {
+            errorMessage = err.data.detail;
+          }
         } else if (err.data.error) {
           errorMessage = err.data.error;
         } else if (err.data.message) {
@@ -81,6 +81,7 @@ function AuthPage() {
         }
       }
 
+      console.error("AuthPage: Final error message:", errorMessage);
       dispatch(setError(errorMessage));
     }
   };

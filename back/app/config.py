@@ -5,8 +5,8 @@ class Settings(BaseSettings):
 
     DATABASE_URL: str
     
-    PRIVATE_KEY_PATH: str = "../scripts/private.pem"
-    PUBLIC_KEY_PATH: str = "../scripts/public.pem"
+    PRIVATE_KEY_PATH: str = "scripts/private.pem"
+    PUBLIC_KEY_PATH: str = "scripts/public.pem"
     ALGORITHM: str = "RS256"
     
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     MAX_SESSIONS_PER_USER: int = 5
     SESSION_INACTIVITY_LIMIT_DAYS: int = 30
 
-    ALLOWED_ORIGINS: list[str] = ["http://localhost:3000", "http://127.0.0.1:3000"]
+    ALLOWED_ORIGINS: list[str] = ["http://localhost:3000","http://127.0.0.1:3000"]
 
     COOKIE_DOMAIN: str = "localhost"
     SECURE_COOKIES: bool = True if DEBUG == False else False  # True в production

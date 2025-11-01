@@ -3,7 +3,7 @@ import { createSlice } from "@reduxjs/toolkit";
 const initialState = {
   user: null,
   token: null,
-  status: "idle", // 'idle' | 'loading' | 'succeeded' | 'failed'
+  status: "idle",
   error: null,
   isAuthenticated: false,
 };
@@ -13,10 +13,17 @@ const authSlice = createSlice({
   initialState,
   reducers: {
     setCredentials: (state, action) => {
-      state.user = action.payload.user;
-      state.token = action.payload.token || 'existing';
+      const { user, tokens } = action.payload;
+      state.user = user;
+      if (tokens && tokens.access_token) {
+        state.token = tokens.access_token;
+      }
       state.isAuthenticated = true;
       state.error = null;
+    },
+    setToken: (state, action) => {
+      state.token = action.payload;
+      state.isAuthenticated = true;
     },
     updateUser: (state, action) => {
       if (state.user) {
@@ -32,33 +39,44 @@ const authSlice = createSlice({
     setError: (state, action) => {
       state.error = action.payload;
     },
+    clearError: (state) => {
+      state.error = null;
+    },
   },
   extraReducers: (builder) => {
     builder
       .addMatcher(
         (action) => action.type.endsWith("/pending"),
-        (state) => {
+        (state, action) => {
           state.status = "loading";
         }
       )
       .addMatcher(
         (action) => action.type.endsWith("/fulfilled"),
-        (state) => {
+        (state, action) => {
           state.status = "succeeded";
         }
       )
       .addMatcher(
         (action) => action.type.endsWith("/rejected"),
-        (state) => {
+        (state, action) => {
           state.status = "failed";
         }
       );
   },
 });
 
-export const { setCredentials, updateUser, logout, setError } = authSlice.actions;
+export const { 
+  setCredentials, 
+  setToken, 
+  updateUser, 
+  logout, 
+  setError, 
+  clearError 
+} = authSlice.actions;
 
 export const selectCurrentUser = (state) => state.auth.user;
+export const selectAuthToken = (state) => state.auth.token;
 export const selectAuthError = (state) => state.auth.error;
 export const selectAuthStatus = (state) => state.auth.status;
 export const selectIsAuthenticated = (state) => state.auth.isAuthenticated;

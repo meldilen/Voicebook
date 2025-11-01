@@ -8,6 +8,7 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 import secrets
 import uuid
+import logging
 
 from .config import settings
 from .database import get_db
@@ -16,6 +17,7 @@ from .models.session import UserSession
 from .schemas.common import TokenPayload
 
 
+logger = logging.getLogger(__name__)
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 security = HTTPBearer()
 
@@ -38,17 +40,25 @@ def authenticate_user(db: Session, email: str, password: str) -> Optional[User]:
 
 
 def create_session_tokens(db: Session, user: User, request: Request = None) -> Tuple[str, str, UserSession]:
+    logger.info(f"Creating session tokens for user: {user.id} ({user.email})")
+    
     # Генерируем уникальные токены
     session_token = str(uuid.uuid4())
     refresh_token = secrets.token_urlsafe(64)
 
-    access_expires = datetime.now(
-        timezone.utc) + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-    refresh_expires = datetime.now(
-        timezone.utc) + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
+    access_expires = datetime.now(timezone.utc) + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    refresh_expires = datetime.now(timezone.utc) + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
 
     user_agent = request.headers.get("user-agent") if request else None
     ip_address = request.client.host if request else None
+
+    # Проверяем, нет ли уже активных сессий
+    existing_sessions = db.query(UserSession).filter(
+        UserSession.user_id == user.id,
+        UserSession.is_active == True
+    ).count()
+    
+    logger.info(f"User {user.id} currently has {existing_sessions} active sessions")
 
     session = UserSession(
         user_id=user.id,
@@ -73,11 +83,15 @@ def create_session_tokens(db: Session, user: User, request: Request = None) -> T
         "type": "access"
     }
     access_token = create_jwt_token(access_token_payload)
+    
+    logger.info(f"Successfully created session {session.id} for user {user.id}")
+    logger.debug(f"Access token expires at: {access_expires}")
+    logger.debug(f"Refresh token expires at: {refresh_expires}")
 
     return access_token, refresh_token, session
 
 
-def create_jwt_token(payload: dict, expires_delta: Optional[timedelta] = None) -> str:
+def create_jwt_token(payload: dict, expires_delta: Optional[timedelta] = None) -> str:    
     payload = payload.copy()
     if expires_delta:
         expire = datetime.now(timezone.utc) + expires_delta
@@ -90,10 +104,11 @@ def create_jwt_token(payload: dict, expires_delta: Optional[timedelta] = None) -
         "session_id": payload.get("session_id"),
         "type": payload.get("type")
     })
+    
     private_key = settings.get_private_key()
-
-    return jwt.encode(payload, private_key, algorithm=settings.ALGORITHM)
-
+    token = jwt.encode(payload, private_key, algorithm=settings.ALGORITHM)
+    
+    return token
 
 def verify_jwt_token(token: str) -> Optional[TokenPayload]:
     try:
@@ -113,7 +128,7 @@ def verify_jwt_token(token: str) -> Optional[TokenPayload]:
 async def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(security),
     db: Session = Depends(get_db)
-) -> User:
+) -> User:    
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -123,6 +138,7 @@ async def get_current_user(
     # Верифицируем JWT токен
     token_payload = verify_jwt_token(credentials.credentials)
     if not token_payload or token_payload.type != "access":
+        logger.warning("Invalid token payload or token type")
         raise credentials_exception
 
     session = db.query(UserSession).filter(
@@ -132,6 +148,7 @@ async def get_current_user(
     ).first()
 
     if not session:
+        logger.warning(f"Session not found or expired: {token_payload.session_id}")
         raise credentials_exception
 
     session.last_used = datetime.now(timezone.utc)
@@ -140,8 +157,10 @@ async def get_current_user(
     user = db.query(User).filter(User.id == token_payload.user_id,
                                  User.is_active == True).first()
     if not user:
+        logger.warning(f"User not found or inactive: {token_payload.user_id}")
         raise credentials_exception
 
+    logger.debug(f"Current user retrieved: {user.id} ({user.email})")
     return user
 
 def set_refresh_token_cookie(response: Response, refresh_token: str):
@@ -170,7 +189,7 @@ def verify_refresh_token(db: Session, refresh_token: str) -> Optional[UserSessio
     
     return session
 
-def refresh_access_token(db: Session, session: UserSession) -> Tuple[str, datetime]:
+def refresh_access_token(db: Session, session: UserSession) -> Tuple[str, datetime]:    
     new_expires = datetime.now(timezone.utc) + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     session.expires_at = new_expires
     session.last_used = datetime.now(timezone.utc)
@@ -185,6 +204,7 @@ def refresh_access_token(db: Session, session: UserSession) -> Tuple[str, dateti
     
     new_access_token = create_jwt_token(access_token_payload)
     
+    logger.info(f"Access token refreshed for session: {session.id}")
     return new_access_token, new_expires
 
 def cleanup_expired_sessions(db: Session):
@@ -238,7 +258,7 @@ async def get_current_session(
 
     return session
 
-def logout_session(db: Session, session_id: int) -> bool:
+def logout_session(db: Session, session_id: int) -> bool:    
     session = db.query(UserSession).filter(
         UserSession.id == session_id,
         UserSession.is_active == True
@@ -247,14 +267,20 @@ def logout_session(db: Session, session_id: int) -> bool:
     if session:
         session.is_active = False
         db.commit()
+        logger.info(f"Session {session_id} logged out successfully")
         return True
+    
+    logger.warning(f"Session {session_id} not found or already inactive")
     return False
 
 def logout_all_sessions(db: Session, user_id: int) -> int:
+    logger.info(f"Logging out all sessions for user: {user_id}")
+    
     result = db.query(UserSession).filter(
         UserSession.user_id == user_id,
         UserSession.is_active == True
     ).update({"is_active": False})
     
     db.commit()
+    logger.info(f"Logged out {result} sessions for user {user_id}")
     return result

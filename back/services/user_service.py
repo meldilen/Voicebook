@@ -26,24 +26,24 @@ class UserService:
     def get_user_by_username(self, username: str) -> Optional[User]:
         return self.db.query(User).filter(User.username == username, User.is_active == True).first()
 
-    def create_user(self, user_data: UserCreate) -> User:
+    def create_user(self, user_data: UserCreate) -> User:        
         try:
-            hashed_password = get_password_hash(user_data.password)
+                hashed_password = get_password_hash(user_data.password)
+                
+                user = User(
+                    username=user_data.username,
+                    email=user_data.email,
+                    hashed_password=hashed_password,
+                    is_active=True,
+                    created_at=datetime.now(timezone.utc)
+                )
 
-            user = User(
-                username=user_data.username,
-                email=user_data.email,
-                hashed_password=hashed_password,
-                is_active=True,
-                created_at=datetime.now(timezone.utc)
-            )
+                self.db.add(user)
+                self.db.commit()
+                self.db.refresh(user)
 
-            self.db.add(user)
-            self.db.commit()
-            self.db.refresh(user)
-
-            logger.info(f"Created new user: {user.username} ({user.email})")
-            return user
+                logger.info(f"Created new user: {user.username} ({user.email})")
+                return user
 
         except Exception as e:
             self.db.rollback()
@@ -81,18 +81,21 @@ class UserService:
         try:
             user = self.get_user_by_id(user_id)
             if not user:
-                logger.warning(f"Attempted to delete non-existent user: {user_id}")
+                logger.warning(
+                    f"Attempted to delete non-existent user: {user_id}")
                 return False
-                
+
             self.db.delete(user)
             self.db.commit()
-            
-            logger.info(f"Successfully deleted user and all associated data: {user_id} (username: {user.username})")
+
+            logger.info(
+                f"Successfully deleted user and all associated data: {user_id} (username: {user.username})")
             return True
-            
+
         except Exception as e:
             self.db.rollback()
-            logger.error(f"Error deleting user {user_id}: {str(e)}", exc_info=True)
+            logger.error(
+                f"Error deleting user {user_id}: {str(e)}", exc_info=True)
             return False
 
     def get_user_with_stats(self, user_id: int) -> Optional[UserWithStats]:
