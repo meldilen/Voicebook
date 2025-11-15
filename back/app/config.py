@@ -1,4 +1,5 @@
 from pydantic_settings import BaseSettings
+import os
 
 class Settings(BaseSettings):
     DEBUG: bool = False
@@ -20,6 +21,15 @@ class Settings(BaseSettings):
 
     COOKIE_DOMAIN: str = "localhost"
     SECURE_COOKIES: bool = True if DEBUG == False else False  # True в production
+
+    # Yandex Cloud ML настройки
+    SERVICE_ACCOUNT_ID: str
+    KEY_ID: str
+    PRIVATE_KEY: str  # Приватный ключ для JWT
+    FOLDER_ID: str
+    BUCKET_NAME: str
+    SECRET_KEY: str  # Секретный ключ для Object Storage
+    SECRET_KEY_ID: str  # Key ID для Object Storage
 
     class Config:
         env_file = ".env"

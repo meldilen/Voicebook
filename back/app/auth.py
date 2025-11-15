@@ -1,7 +1,6 @@
 from datetime import datetime, timedelta, timezone
 from typing import Optional, Tuple
-from jose import JWTError
-import jwt
+from jose import JWTError, jwt
 from passlib.context import CryptContext
 from fastapi import Depends, HTTPException, status, Request, Response
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials

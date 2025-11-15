@@ -42,7 +42,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.ALLOWED_ORIGINS,
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_methods=["*"],
     allow_headers=["*"],
 )
 
@@ -116,6 +116,8 @@ async def rate_limit_handler(request: Request, exc: Exception):
         content={"message": "Too many requests"}
     )
 
+# cd back
+# uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 def start():
     uvicorn.run(
         "app.main:app",

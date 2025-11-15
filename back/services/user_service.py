@@ -172,7 +172,7 @@ class UserService:
             )
             session_info_list.append(session_info)
 
-        return session_info
+        return session_info_list
 
     def get_active_users_count(self) -> int:
         return self.db.query(User).filter(User.is_active == True).count()
