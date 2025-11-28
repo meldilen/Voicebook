@@ -2,8 +2,7 @@
 venv/
 .env
 
-# Machine learning testing outputs
-ml/outputs/
+back/audio_processing/
 
 # Python cache
 __pycache__/
