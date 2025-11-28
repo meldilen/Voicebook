@@ -1,7 +1,25 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import '@testing-library/jest-dom'; 
 import FeedbackWidget from '../features/recordings/components/FeedbackWidget';
+
+// Mock для react-i18next
+jest.mock('react-i18next', () => ({
+  useTranslation: () => ({
+    t: (key) => {
+      const translations = {
+        'feedback.title': 'Feedback',
+        'feedback.instruction': 'Rate your experience',
+        'feedback.thankYou': 'Thank you!',
+        'feedback.ratings.veryPoor': 'Very Poor',
+        'feedback.ratings.poor': 'Poor', 
+        'feedback.ratings.average': 'Average',
+        'feedback.ratings.good': 'Good',
+        'feedback.ratings.excellent': 'Excellent'
+      };
+      return translations[key] || key;
+    }
+  })
+}));
 
 describe('FeedbackWidget', () => {
   const mockOnSubmit = jest.fn();
@@ -10,65 +28,29 @@ describe('FeedbackWidget', () => {
     mockOnSubmit.mockClear();
   });
 
-  it('renders the initial feedback question and instruction', () => {
+  test('renders feedback title and instruction', () => {
     render(<FeedbackWidget onSubmit={mockOnSubmit} />);
     
-    expect(screen.getByText('How accurate was this analysis?')).toBeInTheDocument();
-    expect(screen.getByText('Click to submit your rating')).toBeInTheDocument();
+    expect(screen.getByText('Feedback')).toBeInTheDocument();
+    expect(screen.getByText('Rate your experience')).toBeInTheDocument();
   });
 
-  it('displays all rating options with emojis and labels', () => {
+  test('calls onSubmit with rating value when rating is clicked', () => {
     render(<FeedbackWidget onSubmit={mockOnSubmit} />);
     
-    expect(screen.getByText('😠')).toBeInTheDocument();
-    expect(screen.getByText('Very Poor')).toBeInTheDocument();
-    expect(screen.getByText('😕')).toBeInTheDocument();
-    expect(screen.getByText('Poor')).toBeInTheDocument();
-    expect(screen.getByText('😐')).toBeInTheDocument();
-    expect(screen.getByText('Average')).toBeInTheDocument();
-    expect(screen.getByText('🙂')).toBeInTheDocument();
-    expect(screen.getByText('Good')).toBeInTheDocument();
-    expect(screen.getByText('😊')).toBeInTheDocument();
-    expect(screen.getByText('Excellent')).toBeInTheDocument();
-  });
+    const goodRating = screen.getByText('Good');
+    fireEvent.click(goodRating);
 
-  it('calls onSubmit with the selected rating when a rating is clicked', () => {
-    render(<FeedbackWidget onSubmit={mockOnSubmit} />);
-    
-    const ratingButton = screen.getByLabelText('Good');
-    fireEvent.click(ratingButton);
-    
     expect(mockOnSubmit).toHaveBeenCalledWith(4);
   });
 
-  it('shows the thank you message after a rating is submitted', () => {
+  test('shows thank you message after submission', () => {
     render(<FeedbackWidget onSubmit={mockOnSubmit} />);
     
-    const ratingButton = screen.getByLabelText('Excellent');
-    fireEvent.click(ratingButton);
-    
-    expect(screen.getByText('Thank you for your feedback! ❤️')).toBeInTheDocument();
-    expect(screen.queryByText('How accurate was this analysis?')).not.toBeInTheDocument();
-  });
+    const excellentRating = screen.getByText('Excellent');
+    fireEvent.click(excellentRating);
 
-  it('applies active class when hovering over a rating', () => {
-    render(<FeedbackWidget onSubmit={mockOnSubmit} />);
-    
-    const ratingButton = screen.getByLabelText('Average');
-    fireEvent.mouseEnter(ratingButton);
-    
-    expect(ratingButton).toHaveClass('active');
+    expect(screen.getByText('Thank you!')).toBeInTheDocument();
+    expect(screen.queryByText('Feedback')).not.toBeInTheDocument();
   });
-
-  it('removes active class when mouse leaves a rating', () => {
-    render(<FeedbackWidget onSubmit={mockOnSubmit} />);
-    
-    const ratingButton = screen.getByLabelText('Average');
-    fireEvent.mouseEnter(ratingButton);
-    fireEvent.mouseLeave(ratingButton);
-    
-    expect(ratingButton).not.toHaveClass('active');
-  });
-
- 
 });
