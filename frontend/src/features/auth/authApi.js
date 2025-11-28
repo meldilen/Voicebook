@@ -2,19 +2,58 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { API_CONFIG } from "../../config";
 import { logout, setToken, setCredentials } from "./authSlice";
 
+
+const baseQuery = fetchBaseQuery({
+  baseUrl: API_CONFIG.BASE_URL,
+  credentials: "include",
+  prepareHeaders: (headers, { getState }) => {
+    const token = getState().auth.token;
+    if (token) {
+      headers.set("authorization", `Bearer ${token}`);
+    }
+    return headers;
+  },
+});
+
+export const baseQueryWithReauth = async (args, api, extraOptions) => {
+  let result = await baseQuery(args, api, extraOptions);
+  
+  // Если получили 401 ошибку (токен истек)
+  if (result.error && result.error.status === 401) {
+    console.log('Access token expired, attempting refresh...');
+    
+    try {
+      const refreshResult = await baseQuery(
+        { 
+          url: API_CONFIG.ENDPOINTS.AUTH.REFRESH, 
+          method: 'POST' 
+        }, 
+        api, 
+        extraOptions
+      );
+      
+      if (refreshResult.data) {
+        const { access_token } = refreshResult.data;
+        
+        api.dispatch(setToken(access_token));
+        
+        result = await baseQuery(args, api, extraOptions);
+      } else {
+        console.log('Refresh token expired, logging out...');
+        api.dispatch(logout());
+      }
+    } catch (error) {
+      console.error('Token refresh failed:', error);
+      api.dispatch(logout());
+    }
+  }
+  
+  return result;
+};
+
 export const authApi = createApi({
   reducerPath: "authApi",
-  baseQuery: fetchBaseQuery({
-    baseUrl: API_CONFIG.BASE_URL,
-    credentials: "include",
-    prepareHeaders: (headers, { getState }) => {
-      const token = getState().auth.token;
-      if (token) {
-        headers.set("authorization", `Bearer ${token}`);
-      }
-      return headers;
-    },
-  }),
+  baseQuery: baseQueryWithReauth,
   tagTypes: ["User"],
   endpoints: (builder) => ({
     register: builder.mutation({
@@ -132,6 +171,11 @@ export const authApi = createApi({
         }
       },
     }),
+    getUserSessions: builder.query({
+      query: () => ({
+        url: API_CONFIG.ENDPOINTS.USER.SESSIONS,
+      }),
+    }),
   }),
 });
 
@@ -144,4 +188,5 @@ export const {
   useRefreshTokenMutation,
   useUpdateProfileMutation,
   useDeleteAccountMutation,
+  useGetUserSessionsQuery,
 } = authApi;

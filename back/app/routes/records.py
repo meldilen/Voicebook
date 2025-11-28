@@ -1,7 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, Depends, HTTPException, status, Query, UploadFile, File, Body, Form
 from sqlalchemy.orm import Session
 from datetime import datetime
 from typing import List, Optional
+import uuid
+import os
 
 from ..database import get_db
 from ..auth import get_current_user
@@ -59,6 +61,52 @@ async def get_emotion_timeline(
     
     return timeline
 
+@router.post("/upload", response_model=RecordResponse, status_code=status.HTTP_201_CREATED)
+async def upload_audio_recording(
+    file: UploadFile = File(...),
+    duration: float = Form(0.0),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):    
+    if not file.content_type.startswith('audio/'):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="File must be an audio file"
+        )
+    
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    project_root = os.path.dirname(os.path.dirname(current_dir))
+    processing_dir = os.path.join(project_root, "audio_processing")
+    os.makedirs(processing_dir, exist_ok=True)
+    
+    # Сохраняем файл в папку обработки
+    file_extension = os.path.splitext(file.filename)[1] or '.wav'
+    filename = f"audio_{uuid.uuid4()}{file_extension}"
+    filepath = os.path.join(processing_dir, filename)
+    
+    try:
+        # Сохраняем файл в папку обработки
+        with open(filepath, "wb") as buffer:
+            content = await file.read()
+            buffer.write(content)
+                
+        record_name = f"Recording_{datetime.now().strftime('%Y-%m-%d %H:%M')}"
+        
+        # Передаем обработку в сервис
+        record_service = RecordService(db)
+        record = record_service.process_and_create_record(
+            user_id=current_user.id,
+            audio_file_path=filepath,  # Сервис сам удалит файл после обработки
+            record_name=record_name,
+            duration=duration
+        )
+        
+        return record
+    
+    finally:
+        if os.path.exists(filepath):
+            os.remove(filepath)
+
 @router.post("/", response_model=RecordResponse, status_code=status.HTTP_201_CREATED)
 async def create_record(
     record_data: RecordCreate,
@@ -66,7 +114,6 @@ async def create_record(
     db: Session = Depends(get_db)
 ):
     record_service = RecordService(db)
-    
     record = record_service.create_record(current_user.id, record_data)
     
     return record
@@ -106,6 +153,7 @@ async def update_record(
     
     return record
 
+
 @router.delete("/{record_id}", response_model=Message)
 async def delete_record(
     record_id: int,
@@ -122,3 +170,27 @@ async def delete_record(
         )
     
     return Message(message="Record deleted successfully")
+
+@router.patch("/{record_id}/feedback", response_model=RecordResponse)
+async def update_record_feedback(
+    record_id: int,
+    feedback: Optional[int] = Body(None, ge=1, le=5, description="Rating from 1 to 5"),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    record_service = RecordService(db)
+    
+    record = record_service.get_user_record(current_user.id, record_id)
+    if not record:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Record not found"
+        )
+    
+    updated_record = record_service.update_record_feedback(
+        user_id=current_user.id,
+        record_id=record_id,
+        feedback=feedback
+    )
+    
+    return updated_record

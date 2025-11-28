@@ -1,31 +1,30 @@
 export const API_CONFIG = {
   // BASE_URL: "http://178.205.96.163:8080",
-  BASE_URL: "http://localhost:8080",
+  BASE_URL: "http://localhost:8000",
 
   ENDPOINTS: {
     AUTH: {
-      LOGIN: '/users/login',
-      REGISTER: '/users/register',
+      LOGIN: '/auth/login',
+      REGISTER: '/auth/register',
       ME: '/users/me',
-      LOGOUT: '/users/logout',
+      LOGOUT: '/auth/logout',
+      LOGOUT_ALL: '/auth/logout-all',
+      REFRESH: '/auth/refresh',
       UPDATE_PROFILE: '/users/me',
       DELETE_ACCOUNT: '/users/me'
     },
-    USER_RECORDS: {
-      GET_ALL: '/users/:userID/records',
-      GET_CONSECUTIVE_DAYS: '/records/users/:userID/consecutive-days'
-    },
     RECORDS: {
+      GET_ALL: '/records/',
       UPLOAD: '/records/upload',
-      GET_ANALYSIS: '/records/:recordID',
-      GET_INSIGHTS: '/records/insights',
-      DELETE: '/records/:recordID',
-      SET_FEEDBACK: '/records/:recordID/feedback'
+      GET_BY_ID: '/records/{recordId}',
+      UPDATE: '/records/{recordId}',
+      UPDATE_FEEDBACK: '/records/{recordId}/feedback',
+      DELETE: '/records/{recordId}',
+      STATS: '/records/stats',
+      TIMELINE: '/records/timeline'
     },
-    TOTALS: {
-      GET: '/totals/:userID',
-      RECALCULATE: '/totals/:userID/recalculate/:date',
-    
+    USER: {
+      SESSIONS: '/users/me/sessions'
     }
   }
 };

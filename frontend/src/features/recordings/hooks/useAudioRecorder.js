@@ -1,11 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import {
-  useUploadRecordingMutation,
-  useGetRecordingInsightsMutation,
-} from "../recordingsApi";
-import { useSelector } from "react-redux";
-import { selectCurrentUser } from "../../auth/authSlice";
-import { useRecalculateTotalsMutation } from "../../calendar/totalApi";
+import { useUploadRecordingMutation } from "../recordingsApi";
 
 const useAudioRecorder = ({ setIsRecording, onRecordingStart, onResult }) => {
   const [isRecording, setRecording] = useState(false);
@@ -21,9 +15,6 @@ const useAudioRecorder = ({ setIsRecording, onRecordingStart, onResult }) => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isActionInProgress, setIsActionInProgress] = useState(false);
   const [uploadRecording] = useUploadRecordingMutation();
-  const [getRecordingInsights] = useGetRecordingInsightsMutation();
-  const currentUser = useSelector(selectCurrentUser);
-  const [recalculateTotals] = useRecalculateTotalsMutation();
 
   useEffect(() => {
     const checkPermission = async () => {
@@ -187,7 +178,7 @@ const useAudioRecorder = ({ setIsRecording, onRecordingStart, onResult }) => {
           audioBlob,
           `voice-${new Date().toISOString()}.wav`
         );
-        formData.append("userID", currentUser?.ID?.toString() || "-1");
+        formData.append("duration", recordTime);
 
         const result = await uploadRecording(formData).unwrap();
 
@@ -195,37 +186,10 @@ const useAudioRecorder = ({ setIsRecording, onRecordingStart, onResult }) => {
           onResult({
             emotion: result.emotion,
             summary: result.summary,
-            record_date: new Date(),
-            record_id: result.record_id,
+            record_id: result.id,
             insights: result.insights,
           });
         }
-
-        // if (result.text) {
-        //   try {
-        //     const insightsResult = await getRecordingInsights({
-        //       text: result.text,
-        //       recordID: result.record_id,
-        //     }).unwrap();
-
-        //     if (onResult) {
-        //       onResult((prev) => ({
-        //         ...prev,
-        //         insights: insightsResult.insights,
-        //       }));
-        //     }
-        //   } catch (insightsError) {
-        //     console.error("Error fetching insights:", insightsError);
-        //   }
-        // }
-
-        // if (currentUser?.ID) {
-        //   const todayUTC = new Date().toISOString().split('T')[0];
-        //   await recalculateTotals({
-        //     userId: currentUser?.ID?.toString() || "-1",
-        //     date: todayUTC,
-        //   }).unwrap();
-        // }
       } catch (error) {
         console.error("Error during processing:", error);
         alert("Error during processing: " + error.message);

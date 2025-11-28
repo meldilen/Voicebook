@@ -1,14 +1,18 @@
-const moodOptions = [
-  { value: 'joy', emoji: '😊', label: 'Joy', color: '#2ed573' },
-  { value: 'surprise', emoji: '😲', label: 'Surprise', color: '#2ed573' },
-  { value: 'sadness', emoji: '😢', label: 'Sadness', color: '#bdd5ee' },
-  { value: 'fear', emoji: '😨', label: 'Fear', color: '#bdd5ee' },
-  { value: 'disgust', emoji: '🤢', label: 'Disgust', color: '#bdd5ee' },
-  { value: 'anger', emoji: '😠', label: 'Anger', color: '#ff4757' },
-  { value: 'neutral', emoji: '😐', label: 'Neutral', color: '#ffa500' }
-];
+import { useTranslation } from "react-i18next";
 
-export const MoodIcon = ({ mood }) => {
+const MoodIcon = ({ mood }) => {
+  const { t } = useTranslation();
+
+  const moodOptions = [
+    { value: 'joy', emoji: '😊', label: t("moodIcon.labels.joy"), color: '#2ed573' },
+    { value: 'surprise', emoji: '😲', label: t("moodIcon.labels.surprise"), color: '#2ed573' },
+    { value: 'sadness', emoji: '😢', label: t("moodIcon.labels.sadness"), color: '#bdd5ee' },
+    { value: 'fear', emoji: '😨', label: t("moodIcon.labels.fear"), color: '#bdd5ee' },
+    { value: 'disgust', emoji: '🤢', label: t("moodIcon.labels.disgust"), color: '#bdd5ee' },
+    { value: 'anger', emoji: '😠', label: t("moodIcon.labels.anger"), color: '#ff4757' },
+    { value: 'neutral', emoji: '😐', label: t("moodIcon.labels.neutral"), color: '#ffa500' }
+  ];
+
   const moodMap = moodOptions.reduce((acc, option) => {
     acc[option.value] = {
       emoji: option.emoji,
@@ -30,3 +34,5 @@ export const MoodIcon = ({ mood }) => {
     </span>
   );
 };
+
+export { MoodIcon };

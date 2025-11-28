@@ -11,7 +11,6 @@ import {
 } from "react-icons/fa";
 import "./Header.css";
 import { useNavigate } from "react-router-dom";
-import { useGetConsecutiveDaysQuery } from "../recordings/recordingsApi";
 import { selectCurrentUser } from "../auth/authSlice";
 import { useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
@@ -34,11 +33,7 @@ function Header({
 
   const currentUser = useSelector(selectCurrentUser);
 
-  const { data: streakData } = useGetConsecutiveDaysQuery(currentUser?.ID, {
-    skip: !currentUser?.ID,
-  });
-
-  const streakDays = streakData?.data?.consecutive_days || 1;
+  const streakDays = currentUser?.consecutive_days || 1;
 
   useEffect(() => {
     const checkIsMobile = () => {

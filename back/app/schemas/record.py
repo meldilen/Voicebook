@@ -1,13 +1,13 @@
 from pydantic import BaseModel, ConfigDict
 from datetime import datetime
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 
 class RecordBase(BaseModel):
     name: str
     emotion: str
     summary: str
     feedback: Optional[int] = None
-    insights: Dict[str, Any]
+    insights: Dict[str, Any] | List
     duration: float
 
 class RecordCreate(RecordBase):
