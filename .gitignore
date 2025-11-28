@@ -2,8 +2,7 @@
 venv/
 .env
 
-# Machine learning testing outputs
-ml/outputs/
+back/audio_processing/
 
 # Python cache
 __pycache__/
@@ -11,3 +10,9 @@ __pycache__/
 *.pyo
 *.pyd
 *.python-version
+
+#keys
+private.pem
+*.key
+*.pem
+!public.pem

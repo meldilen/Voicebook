@@ -4,6 +4,7 @@ import {
   useLogoutMutation,
   useGetMeQuery,
   useDeleteAccountMutation,
+  useGetUserSessionsQuery,
 } from "../features/auth/authApi";
 import { logout, selectCurrentUser } from "../features/auth/authSlice";
 import Calendar from "../features/calendar/components/MoodCalendar";
@@ -23,37 +24,27 @@ const ProfilePage = () => {
   const [activeTab, setActiveTab] = useState("calendar");
   const [isLoadingAvatar, setIsLoadingAvatar] = useState(true);
 
-  useGetMeQuery(undefined, { skip: !user });
+  const { data: userData } = useGetMeQuery();
+
+  const currentUser = userData || user;
 
   const handleLogout = async () => {
     try {
-      const response = await logoutApi().unwrap();
-      console.log("Logout API response:", response);
+      await logoutApi().unwrap();
       dispatch(logout());
       navigate("/onboarding", { state: { fromLogout: true } });
     } catch (err) {
-      console.error("Logout failed:", {
-        error: err,
-        status: err.status,
-        data: err.data,
-        originalError: err.originalError,
-      });
+      console.error("Logout failed:", err);
     }
   };
 
   const handleDeleteAccount = async () => {
     try {
-      const response = await deleteAccountApi().unwrap();
-      console.log("Delete account API response:", response);
+      await deleteAccountApi().unwrap();
       dispatch(logout());
       navigate("/onboarding", { state: { fromAccountDeletion: true } });
     } catch (err) {
-      console.error("Account deletion failed:", {
-        error: err,
-        status: err.status,
-        data: err.data,
-        originalError: err.originalError,
-      });
+      console.error("Account deletion failed:", err);
     }
   };
 
@@ -105,7 +96,7 @@ const ProfilePage = () => {
               {isLoadingAvatar && <div className="avatar loading"></div>}
               <img
                 src={`https://ui-avatars.com/api/?name=${
-                  user?.Nickname || "User"
+                  user?.username || "User"
                 }&background=672f94&color=fff`}
                 alt="User"
                 className={`avatar ${isLoadingAvatar ? "hidden" : ""}`}
@@ -113,9 +104,17 @@ const ProfilePage = () => {
               />
             </div>
             <div className="user-details">
-              <h2>{user?.Nickname || "User"}</h2>
+              <h2>{user?.username || "User"}</h2>
               <p className="activity-status">
-                Active {format(new Date(), "MMM d, yyyy")}
+                {currentUser?.last_login
+                  ? `Active since ${format(
+                      new Date(currentUser.last_login),
+                      "MMM d, yyyy"
+                    )}`
+                  : `Joined ${format(
+                      new Date(currentUser?.created_at),
+                      "MMM d, yyyy"
+                    )}`}
               </p>
             </div>
           </div>
@@ -123,8 +122,29 @@ const ProfilePage = () => {
           <div className="profile-fields">
             <div className="field">
               <label>Email</label>
-              <p>{user?.Login || "No email provided"}</p>
+              <p>{user?.email || "No email provided"}</p>
             </div>
+
+            {currentUser?.total_records !== undefined && (
+              <div className="field">
+                <label>Total Records</label>
+                <p>{currentUser.total_records}</p>
+              </div>
+            )}
+
+            {currentUser?.total_duration !== undefined && (
+              <div className="field">
+                <label>Total Duration</label>
+                <p>{Math.round(currentUser.total_duration / 60)} minutes</p>
+              </div>
+            )}
+
+            {currentUser?.consecutive_days !== undefined && (
+              <div className="field">
+                <label>Consecutive Days</label>
+                <p>{currentUser.consecutive_days} days</p>
+              </div>
+            )}
 
             <button
               className="edit-button"
@@ -148,6 +168,16 @@ const ProfilePage = () => {
             >
               Calendar
             </button>
+            <button
+              role="tab"
+              aria-selected={activeTab === "sessions"}
+              className={`tab-button ${
+                activeTab === "sessions" ? "active" : ""
+              }`}
+              onClick={() => setActiveTab("sessions")}
+            >
+              Sessions
+            </button>
           </div>
         </div>
 
@@ -157,31 +187,36 @@ const ProfilePage = () => {
               <Calendar />
             </div>
           )}
+          {activeTab === "sessions" && (
+            <div className="sessions-container">
+              <SessionsList />
+            </div>
+          )}
         </div>
       </div>
 
-        <button
-          className="danger-zone delete-account-button"
-          onClick={() => setShowDeleteConfirm(true)}
-          aria-label="Delete account"
+      <button
+        className="danger-zone delete-account-button"
+        onClick={() => setShowDeleteConfirm(true)}
+        aria-label="Delete account"
+      >
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
         >
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M19 7L18.1327 19.1425C18.0579 20.1891 17.187 21 16.1378 21H7.86224C6.81296 21 5.94208 20.1891 5.86732 19.1425L5 7M10 11V17M14 11V17M15 7V4C15 3.44772 14.5523 3 14 3H10C9.44772 3 9 3.44772 9 4V7M4 7H20"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-          Delete My Account
-        </button>
+          <path
+            d="M19 7L18.1327 19.1425C18.0579 20.1891 17.187 21 16.1378 21H7.86224C6.81296 21 5.94208 20.1891 5.86732 19.1425L5 7M10 11V17M14 11V17M15 7V4C15 3.44772 14.5523 3 14 3H10C9.44772 3 9 3.44772 9 4V7M4 7H20"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+        Delete My Account
+      </button>
 
       {showDeleteConfirm && (
         <div className="confirmation-modal">
@@ -244,6 +279,27 @@ const ProfilePage = () => {
           </div>
         </div>
       )}
+    </div>
+  );
+};
+
+const SessionsList = () => {
+  const { data: sessions } = useGetUserSessionsQuery();
+  
+  return (
+    <div className="sessions-list">
+      <h3>Active Sessions</h3>
+      {sessions?.map(session => (
+        <div key={session.id} className="session-item">
+          <div className="session-info">
+            <p className="session-device">{session.user_agent}</p>
+            <p className="session-ip">IP: {session.ip_address}</p>
+            <p className="session-last-used">
+              Last used: {format(new Date(session.last_used), "MMM d, HH:mm")}
+            </p>
+          </div>
+        </div>
+      ))}
     </div>
   );
 };

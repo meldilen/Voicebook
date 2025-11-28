@@ -1,17 +1,19 @@
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import "./FeedbackWidget.css";
 
 const FeedbackWidget = ({ onSubmit }) => {
   const [selectedRating, setSelectedRating] = useState(null);
   const [hoverRating, setHoverRating] = useState(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const { t } = useTranslation();
 
   const ratings = [
-    { value: 1, emoji: "😠", label: "Very Poor" },
-    { value: 2, emoji: "😕", label: "Poor" },
-    { value: 3, emoji: "😐", label: "Average" },
-    { value: 4, emoji: "🙂", label: "Good" },
-    { value: 5, emoji: "😊", label: "Excellent" },
+    { value: 1, emoji: "😠", label: t("feedback.ratings.veryPoor") },
+    { value: 2, emoji: "😕", label: t("feedback.ratings.poor") },
+    { value: 3, emoji: "😐", label: t("feedback.ratings.average") },
+    { value: 4, emoji: "🙂", label: t("feedback.ratings.good") },
+    { value: 5, emoji: "😊", label: t("feedback.ratings.excellent") },
   ];
 
   const handleRatingClick = (rating) => {
@@ -24,7 +26,7 @@ const FeedbackWidget = ({ onSubmit }) => {
     return (
       <div className="feedback-container">
         <div className="thank-you-message">
-          Thank you for your feedback! ❤️
+          {t("feedback.thankYou")}
         </div>
       </div>
     );
@@ -32,8 +34,8 @@ const FeedbackWidget = ({ onSubmit }) => {
 
   return (
     <div className="feedback-container">
-      <h3>How accurate was this analysis?</h3>
-      <p className="instruction">Click to submit your rating</p>
+      <h3>{t("feedback.title")}</h3>
+      <p className="instruction">{t("feedback.instruction")}</p>
       <div className="rating-container">
         {ratings.map((rating) => (
           <button

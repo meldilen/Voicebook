@@ -1,57 +1,45 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { format, parseISO } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
 import "./RecordingListItem.css";
-import { useGetRecordingAnalysisQuery } from "../recordingsApi";
 import { useDeleteRecordingMutation } from "../recordingsApi";
 import { useRecalculateTotalsMutation } from "../../calendar/totalApi";
-
-function LoadingSkeleton() {
-  return (
-    <div className="loading-skeleton">
-      <div className="skeleton-line short"></div>
-      <div className="skeleton-line medium"></div>
-      <div className="skeleton-line long"></div>
-    </div>
-  );
-}
 
 function RecordingListItem({ recording, isExpanded, onToggleExpand }) {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteRecording] = useDeleteRecordingMutation();
   const [recalculateTotals] = useRecalculateTotalsMutation();
-  const { data: fullAnalysis, isLoading: isAnalysisLoading } =
-    useGetRecordingAnalysisQuery(recording.record_id, {
-      skip: !isExpanded,
-    });
+  const { t } = useTranslation();
 
   const capitalizeFirst = (str) => {
     if (!str) return str;
     return str.charAt(0).toUpperCase() + str.slice(1);
   };
 
-  const formattedDate = format(
-    new Date(recording.record_date),
-    "MMM d, yyyy - h:mm a"
-  );
-
-  const displayRecording =
-    isExpanded && fullAnalysis ? { ...recording, ...fullAnalysis } : recording;
+  const formattedDate = recording.created_at
+    ? format(new Date(recording.created_at), "MMM d, yyyy - h:mm a")
+    : t("common.unknownDate", "Unknown date");
 
   const handleDelete = async () => {
     try {
       const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-      
-      const recordDate = parseISO(recording.record_date);
+
+      const recordDate = recording.created_at
+        ? parseISO(recording.created_at)
+        : new Date();
+
       const zonedDate = toZonedTime(recordDate, userTimeZone);
       const utcDate = format(zonedDate, "yyyy-MM-dd");
-      
-      await deleteRecording(recording.record_id).unwrap();
-      await recalculateTotals({
-        userId: recording.user_id, 
-        date: utcDate
-      }).unwrap();
-      
+
+      await deleteRecording(recording.id)
+      if (recording.user_id) {
+        await recalculateTotals({
+          userId: recording.user_id.toString(),
+          date: utcDate,
+        }).unwrap();
+      }
+
       setShowDeleteConfirm(false);
     } catch (err) {
       console.error("Failed to delete recording:", err);
@@ -65,10 +53,10 @@ function RecordingListItem({ recording, isExpanded, onToggleExpand }) {
       <div className="detail-section">
         <h4>
           <span className="section-icon">
-            {title === "Emotional Analysis" && "🧠"}
-            {title === "Physical Response" && "💪"}
-            {title === "Coping Strategies" && "🛡️"}
-            {title === "Recommendations" && "💡"}
+            {title === t("recordingListItem.sections.emotionalAnalysis") && "🧠"}
+            {title === t("recordingListItem.sections.physicalResponse") && "💪"}
+            {title === t("recordingListItem.sections.copingStrategies") && "🛡️"}
+            {title === t("recordingListItem.sections.recommendations") && "💡"}
           </span>
           {title}
         </h4>
@@ -79,6 +67,93 @@ function RecordingListItem({ recording, isExpanded, onToggleExpand }) {
 
   const hasCopingStrategies = (strategies) => {
     return strategies?.effective || strategies?.ineffective;
+  };
+
+  const renderInsights = () => {
+    const insights = recording.insights || {};
+
+    return (
+      <>
+        {renderInsightSection(
+          t("recordingListItem.sections.emotionalAnalysis"),
+          insights.emotional_dynamics || insights.emotion,
+          (content) => (
+            <div className="insight-card">
+              <p>
+                {capitalizeFirst(content) ||
+                  t("recordingListItem.noData.emotionalDynamics")}
+              </p>
+              {insights.key_triggers?.length > 0 && (
+                <div className="insight-subsection">
+                  <h5>{t("recordingListItem.insights.keyTriggers")}</h5>
+                  <ul>
+                    {insights.key_triggers.map((trigger, index) => (
+                      <li key={index}>{capitalizeFirst(trigger)}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          )
+        )}
+
+        {renderInsightSection(
+          t("recordingListItem.sections.physicalResponse"),
+          insights.physical_reaction,
+          (reaction) => (
+            <div className="insight-card">
+              <p>
+                {capitalizeFirst(reaction) ||
+                  t("recordingListItem.noData.physicalReaction")}
+              </p>
+            </div>
+          )
+        )}
+
+        {hasCopingStrategies(insights.coping_strategies) &&
+          renderInsightSection(
+            t("recordingListItem.sections.copingStrategies"),
+            insights.coping_strategies,
+            (strategies) => (
+              <div className="strategy-container">
+                {strategies.effective && (
+                  <div className="strategy-card effective">
+                    <div className="strategy-header">
+                      <span className="strategy-icon">✅</span>
+                      <h5>{t("recordingListItem.copingStrategies.effective")}</h5>
+                    </div>
+                    <p>{capitalizeFirst(strategies.effective)}</p>
+                  </div>
+                )}
+                {strategies.ineffective && (
+                  <div className="strategy-card ineffective">
+                    <div className="strategy-header">
+                      <span className="strategy-icon">❌</span>
+                      <h5>{t("recordingListItem.copingStrategies.ineffective")}</h5>
+                    </div>
+                    <p>{capitalizeFirst(strategies.ineffective)}</p>
+                  </div>
+                )}
+              </div>
+            )
+          )}
+
+        {insights.recommendations?.length > 0 &&
+          renderInsightSection(
+            t("recordingListItem.sections.recommendations"),
+            insights.recommendations,
+            (recommendations) => (
+              <div className="recommendations-card">
+                <ol>
+                  {recommendations.map((rec, index) => (
+                    <li key={index}>{capitalizeFirst(rec)}</li>
+                  ))}
+                </ol>
+              </div>
+            )
+          )}
+      </>
+    );
   };
 
   return (
@@ -105,148 +180,64 @@ function RecordingListItem({ recording, isExpanded, onToggleExpand }) {
         <div className="recording-summary">
           <div className="recording-meta">
             <span
-              className={`emotion-badge ${displayRecording.emotion?.toLowerCase()}`}
+              className={`emotion-badge ${recording.emotion?.toLowerCase()}`}
             >
-              {displayRecording.emotion}
+              {t(`emotions.${recording.emotion}`, recording.emotion)}
             </span>
             <span className="date">{formattedDate}</span>
-            {displayRecording.feedback !== undefined &&
-              displayRecording.feedback !== null && (
+            {recording.feedback !== undefined &&
+              recording.feedback !== null && (
                 <span className="feedback">
                   {Array.from({ length: 5 }).map((_, i) => (
                     <span
                       key={i}
                       className={`star ${
-                        i < displayRecording.feedback ? "filled" : ""
+                        i < recording.feedback ? "filled" : ""
                       }`}
                     >
-                      {i < displayRecording.feedback ? "★" : "☆"}
+                      {i < recording.feedback ? "★" : "☆"}
                     </span>
                   ))}
                 </span>
               )}
           </div>
           <div className="recording-preview">
-            <p>{capitalizeFirst(displayRecording.summary)}</p>
+            <p>{capitalizeFirst(recording.summary)}</p>
           </div>
         </div>
       </div>
 
       {isExpanded && (
         <div className="recording-details">
-          {isAnalysisLoading ? (
-            <div className="loading-analysis">
-              <LoadingSkeleton />
-            </div>
-          ) : (
-            <>
-              {renderInsightSection(
-                "Emotional Analysis",
-                displayRecording.insights?.emotional_dynamics,
-                (content) => (
-                  <div className="insight-card">
-                    <p>{capitalizeFirst(content) || "No emotional dynamics data available"}</p>
-                    {displayRecording.insights?.key_triggers?.length > 0 && (
-                      <div className="insight-subsection">
-                        <h5>Key Triggers</h5>
-                        <ul>
-                          {displayRecording.insights.key_triggers.map(
-                            (trigger, index) => (
-                              <li key={index}>{capitalizeFirst(trigger)}</li>
-                            )
-                          )}
-                        </ul>
-                      </div>
-                    )}
-                  </div>
-                )
-              )}
+          {renderInsights()}
 
-              {renderInsightSection(
-                "Physical Response",
-                displayRecording.insights?.physical_reaction,
-                (reaction) => (
-                  <div className="insight-card">
-                    <p>{capitalizeFirst(reaction) || "No physical reaction data available"}</p>
-                  </div>
-                )
-              )}
-
-              {hasCopingStrategies(
-                displayRecording.insights?.coping_strategies
-              ) &&
-                renderInsightSection(
-                  "Coping Strategies",
-                  displayRecording.insights?.coping_strategies,
-                  (strategies) => (
-                    <div className="strategy-container">
-                      {strategies.effective && (
-                        <div className="strategy-card effective">
-                          <div className="strategy-header">
-                            <span className="strategy-icon">✅</span>
-                            <h5>Effective</h5>
-                          </div>
-                          <p>{capitalizeFirst(strategies.effective)}</p>
-                        </div>
-                      )}
-                      {strategies.ineffective && (
-                        <div className="strategy-card ineffective">
-                          <div className="strategy-header">
-                            <span className="strategy-icon">❌</span>
-                            <h5>Ineffective</h5>
-                          </div>
-                          <p>{capitalizeFirst(strategies.ineffective)}</p>
-                        </div>
-                      )}
-                    </div>
-                  )
-                )}
-
-              {displayRecording.insights?.recommendations?.length > 0 &&
-                renderInsightSection(
-                  "Recommendations",
-                  displayRecording.insights.recommendations,
-                  (recommendations) => (
-                    <div className="recommendations-card">
-                      <ol>
-                        {recommendations.map((rec, index) => (
-                          <li key={index}>{capitalizeFirst(rec)}</li>
-                        ))}
-                      </ol>
-                    </div>
-                  )
-                )}
-
-              <div className="buttons">
-                <button
-                  className="delete"
-                  onClick={() => setShowDeleteConfirm(true)}
-                >
-                  Delete Recording
-                </button>
-              </div>
-            </>
-          )}
+          <div className="buttons">
+            <button
+              className="delete"
+              onClick={() => setShowDeleteConfirm(true)}
+            >
+              {t("recordingListItem.buttons.delete")}
+            </button>
+          </div>
         </div>
       )}
 
       {showDeleteConfirm && (
         <div className="modal-overlay">
           <div className="confirm-modal">
-            <h3>Confirm Deletion</h3>
+            <h3>{t("recordingListItem.deleteConfirmation.title")}</h3>
             <p>
-              Are you sure you want to delete this recording? This action cannot
-              be undone.
+              {t("recordingListItem.deleteConfirmation.message")}
             </p>
             <div className="modal-actions">
               <button
                 className="cancel-button"
                 onClick={() => setShowDeleteConfirm(false)}
               >
-                Cancel
+                {t("recordingListItem.buttons.cancel")}
               </button>
               <button className="confirm-delete-button" onClick={handleDelete}>
-                Delete
+                {t("recordingListItem.buttons.delete")}
               </button>
             </div>
           </div>

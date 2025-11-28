@@ -1,10 +1,9 @@
-// import { useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
-// import { selectIsAuthenticated } from "../features/auth/authSlice";
+import { selectIsAuthenticated } from "../features/auth/authSlice";
 
 const ProtectedRoute = () => {
-  // const isAuthenticated = useSelector(selectIsAuthenticated);
-    const isAuthenticated = true;
+  const isAuthenticated = useSelector(selectIsAuthenticated);
   const location = useLocation();
 
   const isFromLogout = location.state?.fromLogout;

@@ -18,8 +18,12 @@ function JournalTab() {
     isFetching,
     error,
   } = useGetRecordingsQuery(
-    { userId: user?.ID, date: dateFilter, limit: limitFilter },
-    { skip: !user?.ID, refetchOnMountOrArgChange: true }
+    {
+      skip: 0,
+      limit: limitFilter || 100,
+      start_date: dateFilter ? new Date(dateFilter).toISOString() : undefined,
+    },
+    { skip: !user?.id, refetchOnMountOrArgChange: true }
   );
 
   const handleDateChange = (e) => {

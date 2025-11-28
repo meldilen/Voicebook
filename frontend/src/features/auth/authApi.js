@@ -1,137 +1,180 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { API_CONFIG } from "../../config";
+import { logout, setToken, setCredentials } from "./authSlice";
+
+
+const baseQuery = fetchBaseQuery({
+  baseUrl: API_CONFIG.BASE_URL,
+  credentials: "include",
+  prepareHeaders: (headers, { getState }) => {
+    const token = getState().auth.token;
+    if (token) {
+      headers.set("authorization", `Bearer ${token}`);
+    }
+    return headers;
+  },
+});
+
+export const baseQueryWithReauth = async (args, api, extraOptions) => {
+  let result = await baseQuery(args, api, extraOptions);
+  
+  // Если получили 401 ошибку (токен истек)
+  if (result.error && result.error.status === 401) {
+    console.log('Access token expired, attempting refresh...');
+    
+    try {
+      const refreshResult = await baseQuery(
+        { 
+          url: API_CONFIG.ENDPOINTS.AUTH.REFRESH, 
+          method: 'POST' 
+        }, 
+        api, 
+        extraOptions
+      );
+      
+      if (refreshResult.data) {
+        const { access_token } = refreshResult.data;
+        
+        api.dispatch(setToken(access_token));
+        
+        result = await baseQuery(args, api, extraOptions);
+      } else {
+        console.log('Refresh token expired, logging out...');
+        api.dispatch(logout());
+      }
+    } catch (error) {
+      console.error('Token refresh failed:', error);
+      api.dispatch(logout());
+    }
+  }
+  
+  return result;
+};
 
 export const authApi = createApi({
   reducerPath: "authApi",
-  baseQuery: fetchBaseQuery({
-    baseUrl: API_CONFIG.BASE_URL,
-    credentials: "include",
-    prepareHeaders: (headers, { getState }) => {
-      // console.log("Cookies:", document.cookie);
-      return headers;
-    },
-  }),
+  baseQuery: baseQueryWithReauth,
+  tagTypes: ["User"],
   endpoints: (builder) => ({
     register: builder.mutation({
-      query: (credentials) => ({
-        url: API_CONFIG.ENDPOINTS.AUTH.REGISTER,
-        method: "POST",
-        body: credentials,
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }),
-      transformResponse: (response) => {
-        // console.log("[REGISTER] Server response:", response);
-        return response;
+      query: (credentials) => {
+        return {
+          url: API_CONFIG.ENDPOINTS.AUTH.REGISTER,
+          method: "POST",
+          body: credentials,
+        };
       },
-      transformErrorResponse: (response) => {
-        // console.error("[REGISTER] Server error:", response);
-        return response;
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          if (data.tokens && data.tokens.access_token) {
+            dispatch(setToken(data.tokens.access_token));
+            if (data.user) {
+              dispatch(
+                setCredentials({
+                  user: data.user,
+                  tokens: data.tokens,
+                })
+              );
+            }
+          }
+        } catch (error) {
+          console.error("authApi: Registration error:", error);
+        }
       },
     }),
     login: builder.mutation({
-      query: (credentials) => ({
-        url: API_CONFIG.ENDPOINTS.AUTH.LOGIN,
-        method: "POST",
-        body: credentials,
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }),
-      transformResponse: (response) => {
-        // console.log("[LOGIN] Success:", {
-        //   endpoint: API_CONFIG.ENDPOINTS.AUTH.LOGIN,
-        //   response,
-        // });
-        return response;
+      query: (credentials) => {
+        return {
+          url: API_CONFIG.ENDPOINTS.AUTH.LOGIN,
+          method: "POST",
+          body: credentials,
+        };
       },
-      transformErrorResponse: (response) => {
-        // console.error("[LOGIN] Error:", {
-        //   endpoint: API_CONFIG.ENDPOINTS.AUTH.LOGIN,
-        //   status: response.status,
-        //   data: response.data,
-        // });
-        return response;
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          if (data.tokens) {
+            dispatch(setToken(data.tokens.access_token));
+            if (data.user) {
+              dispatch(
+                setCredentials({
+                  user: data.user,
+                  tokens: data.tokens,
+                })
+              );
+            }
+          }
+        } catch (error) {
+          console.error("authApi: Login error:", error);
+        }
       },
     }),
     getMe: builder.query({
-      query: () => ({
-        url: API_CONFIG.ENDPOINTS.AUTH.ME,
-        credentials: "include",
-      }),
-      transformResponse: (response) => {
-        // console.log("[ME] User data:", response);
-        return response;
+      query: () => {
+        return {
+          url: API_CONFIG.ENDPOINTS.AUTH.ME,
+        };
       },
-      transformErrorResponse: (response) => {
-        // console.error("[ME] Error fetching user:", {
-        //   status: response.status,
-        //   data: response.data,
-        // });
-        return response;
-      },
+      providesTags: ["User"],
     }),
     logout: builder.mutation({
       query: () => ({
         url: API_CONFIG.ENDPOINTS.AUTH.LOGOUT,
         method: "POST",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
       }),
-      transformResponse: (response) => {
-        // console.log("[LOGOUT] Success:", response);
-        return response;
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          await queryFulfilled;
+        } finally {
+          dispatch(logout());
+        }
       },
-      transformErrorResponse: (response) => {
-        // console.error("[LOGOUT] Error:", {
-        //   status: response.status,
-        //   data: response.data,
-        // });
-        return response;
+    }),
+    logoutAll: builder.mutation({
+      query: () => ({
+        url: API_CONFIG.ENDPOINTS.AUTH.LOGOUT_ALL,
+        method: "POST",
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          await queryFulfilled;
+        } finally {
+          dispatch(logout());
+        }
       },
+    }),
+    refreshToken: builder.mutation({
+      query: () => ({
+        url: API_CONFIG.ENDPOINTS.AUTH.REFRESH,
+        method: "POST",
+      }),
     }),
     updateProfile: builder.mutation({
       query: (profileData) => ({
         url: API_CONFIG.ENDPOINTS.AUTH.UPDATE_PROFILE,
-        method: "PATCH",
+        method: "PUT",
         body: profileData,
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
       }),
-      transformResponse: (response) => {
-        // console.log("[UPDATE PROFILE] Success:", response);
-        return response;
-      },
-      transformErrorResponse: (response) => {
-        // console.error("[UPDATE PROFILE] Error:", {
-        //   status: response.status,
-        //   data: response.data,
-        // });
-        return response;
-      },
+      invalidatesTags: ["User"],
     }),
     deleteAccount: builder.mutation({
       query: () => ({
         url: API_CONFIG.ENDPOINTS.AUTH.DELETE_ACCOUNT,
         method: "DELETE",
-        credentials: "include",
       }),
-      transformResponse: (response) => {
-        // console.log("[DELETE ACCOUNT] Success:", response);
-        return response;
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          await queryFulfilled;
+        } finally {
+          dispatch(logout());
+        }
       },
-      transformErrorResponse: (response) => {
-        // console.error("[DELETE ACCOUNT] Error:", {
-        //   status: response.status,
-        //   data: response.data,
-        // });
-        return response;
-      },
+    }),
+    getUserSessions: builder.query({
+      query: () => ({
+        url: API_CONFIG.ENDPOINTS.USER.SESSIONS,
+      }),
     }),
   }),
 });
@@ -141,6 +184,9 @@ export const {
   useLoginMutation,
   useGetMeQuery,
   useLogoutMutation,
+  useLogoutAllMutation,
+  useRefreshTokenMutation,
   useUpdateProfileMutation,
   useDeleteAccountMutation,
+  useGetUserSessionsQuery,
 } = authApi;

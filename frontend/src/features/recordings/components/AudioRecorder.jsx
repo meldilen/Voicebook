@@ -10,9 +10,11 @@ import {
 } from "react-icons/fa";
 import "./AudioRecorder.css";
 import useAudioRecorder from "../hooks/useAudioRecorder";
+import { useTranslation } from "react-i18next";
 
 const AudioRecorder = ({ setIsRecording, onRecordingStart, onResult }) => {
   const particlesRef = useRef(null);
+  const { t } = useTranslation();
 
   const {
     isRecording,
@@ -89,10 +91,11 @@ const AudioRecorder = ({ setIsRecording, onRecordingStart, onResult }) => {
           <div className="notification-banner warning">
             <FaExclamationTriangle className="banner-icon warning" />
             <div className="banner-content">
-              <div className="banner-title">Microphone Access Blocked</div>
+              <div className="banner-title">
+                {t("audioRecorder.microphoneBlocked.title")}
+              </div>
               <div className="banner-message">
-                Please enable microphone access in your browser settings to use
-                this feature.
+                {t("audioRecorder.microphoneBlocked.message")}
               </div>
             </div>
           </div>
@@ -106,7 +109,11 @@ const AudioRecorder = ({ setIsRecording, onRecordingStart, onResult }) => {
           <button
             className="voice-button"
             onClick={handleMainButtonClick}
-            aria-label={isRecording ? "Stop recording" : "Start recording"}
+            aria-label={
+              isRecording
+                ? t("audioRecorder.ariaLabels.stopRecording")
+                : t("audioRecorder.ariaLabels.startRecording")
+            }
             disabled={
               permission === "denied" ||
               isActionInProgress ||
@@ -125,14 +132,18 @@ const AudioRecorder = ({ setIsRecording, onRecordingStart, onResult }) => {
                 isPaused ? "resume-state" : ""
               }`}
               onClick={togglePause}
-              aria-label={isPaused ? "Resume recording" : "Pause recording"}
+              aria-label={
+                isPaused
+                  ? t("audioRecorder.ariaLabels.resumeRecording")
+                  : t("audioRecorder.ariaLabels.pauseRecording")
+              }
             >
               {isPaused ? <FaPlay /> : <FaPause />}
             </button>
             <button
               className="control-button stop-button"
               onClick={stopRecording}
-              aria-label="Stop recording"
+              aria-label={t("audioRecorder.ariaLabels.stopRecording")}
             >
               <FaStop />
             </button>
@@ -146,16 +157,14 @@ const AudioRecorder = ({ setIsRecording, onRecordingStart, onResult }) => {
               <div className="loading-circle"></div>
               <div className="loading-circle"></div>
             </div>
-            <p className="analysis-note">
-              Voice recording is being analyzed...
-            </p>
+            <p className="analysis-note">{t("audioRecorder.analyzing")}</p>
           </div>
         )}
 
         {permission === "prompt" && !isRecording && (
           <div className="permission-prompt">
-            <p>Click the microphone to start recording</p>
-            <small>We'll ask for microphone permission</small>
+            <p>{t("audioRecorder.clickToStart")}</p>
+            <small>{t("audioRecorder.microphonePermission")}</small>
           </div>
         )}
 
@@ -165,45 +174,46 @@ const AudioRecorder = ({ setIsRecording, onRecordingStart, onResult }) => {
               <button
                 className="action-button delete-button"
                 onClick={handleDeleteClick}
-                aria-label="Delete recording"
+                aria-label={t("audioRecorder.ariaLabels.deleteRecording")}
               >
                 <FaTrash />
-                <span className="button-label">Delete</span>
+                <span className="button-label">
+                  {t("audioRecorder.buttons.delete")}
+                </span>
               </button>
               <button
                 className="action-button save-button"
                 onClick={saveRecording}
-                aria-label="Save recording"
+                aria-label={t("audioRecorder.ariaLabels.saveRecording")}
               >
                 <FaCheck />
-                <span className="button-label">Save</span>
+                <span className="button-label">
+                  {t("audioRecorder.buttons.save")}
+                </span>
               </button>
             </div>
           </div>
         )}
 
         {showDeleteConfirm && (
-  <div className="delete-confirmation">
-    <div className="confirmation-text">
-      <h3>Delete Recording?</h3>
-      <p>This action cannot be undone. The recording will be permanently deleted.</p>
-    </div>
-    <div className="confirmation-buttons">
-      <button
-        className="btn btn-secondary"
-        onClick={handleDeleteCancel}
-      >
-        Cancel
-      </button>
-      <button
-        className="btn btn-danger"
-        onClick={cancelRecording}
-      >
-        Delete
-      </button>
-    </div>
-  </div>
-)}
+          <div className="delete-confirmation">
+            <div className="confirmation-text">
+              <h3>{t("audioRecorder.deleteConfirmation.title")}</h3>
+              <p>{t("audioRecorder.deleteConfirmation.message")}</p>
+            </div>
+            <div className="confirmation-buttons">
+              <button
+                className="btn btn-secondary"
+                onClick={handleDeleteCancel}
+              >
+                {t("audioRecorder.buttons.cancel")}
+              </button>
+              <button className="btn btn-danger" onClick={cancelRecording}>
+                {t("audioRecorder.buttons.delete")}
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

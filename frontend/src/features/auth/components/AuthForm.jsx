@@ -220,7 +220,7 @@ const AuthForm = ({ isLogin, onSubmit, authError }) => {
             onChange={handleChange}
             onBlur={handleBlur}
             onKeyDown={handleKeyDown}
-            placeholder={t().auth.repeatPasswordPlaceholder}
+            placeholder={t("auth.repeatPasswordPlaceholder")}
             showPassword={showRepeatPassword}
             togglePasswordVisibility={() =>
               setShowRepeatPassword(!showRepeatPassword)

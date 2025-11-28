@@ -16,8 +16,8 @@ const SettingsPage = () => {
   const { refetch } = useGetMeQuery();
 
   const [formData, setFormData] = useState({
-    nickname: "",
-    login: "",
+    username: "",
+    email: "",
     newPassword: "",
     confirmPassword: "",
   });
@@ -30,8 +30,8 @@ const SettingsPage = () => {
   useEffect(() => {
     if (user) {
       setFormData({
-        nickname: user.Nickname || "",
-        login: user.Login || "",
+        username: user.username || "",
+        email: user.email || "",
         newPassword: "",
         confirmPassword: "",
       });
@@ -77,8 +77,8 @@ const SettingsPage = () => {
 
     try {
       const updateData = {
-        nickname: formData.nickname,
-        login: formData.login,
+        username: formData.username,
+        email: formData.email,
         ...(formData.newPassword && { password: formData.newPassword }),
       };
 
@@ -88,10 +88,15 @@ const SettingsPage = () => {
     } catch (err) {
       console.error("Failed to update profile:", err);
       let errorMessage = "Failed to update profile";
-      if (err.data?.error?.includes("already in use")) {
-        errorMessage = "This login is already taken";
-      } else if (err.data?.error) {
-        errorMessage = err.data.error;
+
+      if (err.data?.detail) {
+        if (typeof err.data.detail === "string") {
+          errorMessage = err.data.detail;
+        } else if (Array.isArray(err.data.detail)) {
+          errorMessage = err.data.detail.map((d) => d.msg).join(", ");
+        }
+      } else if (err.data?.message) {
+        errorMessage = err.data.message;
       }
       setApiError(errorMessage);
     }
@@ -131,7 +136,7 @@ const SettingsPage = () => {
               <div className="avatar-wrapper">
                 <img
                   src={`https://ui-avatars.com/api/?name=${
-                    formData.nickname || "User"
+                    formData.username || "User"
                   }&background=8b5cf6&color=fff`}
                   alt="Profile"
                   className="avatar"
@@ -171,12 +176,12 @@ const SettingsPage = () => {
 
             <div className="settings-form">
               <div className="form-group">
-                <label htmlFor="nickname">Nickname</label>
+                <label htmlFor="username">Username</label>
                 <input
-                  id="nickname"
-                  name="nickname"
+                  id="username"
+                  name="username"
                   type="text"
-                  value={formData.nickname}
+                  value={formData.username}
                   onChange={handleChange}
                   className="form-input"
                   required
@@ -184,12 +189,12 @@ const SettingsPage = () => {
               </div>
 
               <div className="form-group">
-                <label htmlFor="login">Login</label>
+                <label htmlFor="email">Email</label>
                 <input
-                  id="login"
-                  name="login"
+                  id="email"
+                  name="email"
                   type="email"
-                  value={formData.login}
+                  value={formData.email}
                   onChange={handleChange}
                   className="form-input"
                   required
