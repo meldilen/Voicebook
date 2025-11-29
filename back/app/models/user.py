@@ -14,6 +14,9 @@ class User(Base):
     is_active = Column(Boolean(), default=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     last_login = Column(DateTime, nullable=True)
+    daily_records_used = Column(Integer, default=0, nullable=False)
+    last_record_reset = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    max_daily_records = Column(Integer, default=5, nullable=False)  # Базовый лимит
 
     records = relationship("Record", back_populates="user", cascade="all, delete-orphan")
     achievements = relationship("UserAchievement", back_populates="user", cascade="all, delete-orphan")

@@ -8,6 +8,7 @@ from app.models.record import Record
 from app.models.user import User
 from app.schemas.record import RecordCreate, RecordUpdate, RecordResponse, RecordWithUser
 from .audio_processor import AudioProcessor
+from .limit_service import RecordLimitService
 
 logger = logging.getLogger(__name__)
 
@@ -16,6 +17,7 @@ class RecordService:
     def __init__(self, db: Session):
         self.db = db
         self.audio_processor = AudioProcessor()
+        self.limit_service = RecordLimitService(db)
 
     def get_record_by_id(self, record_id: int) -> Optional[Record]:
         return self.db.query(Record).filter(Record.id == record_id).first()
@@ -27,6 +29,16 @@ class RecordService:
         ).first()
 
     def process_and_create_record(self, user_id: int, audio_file_path: str, record_name: str, duration: float) -> Record:
+        if not self.limit_service.can_user_create_record(user_id):
+            from fastapi import HTTPException
+            raise HTTPException(
+                status_code=429, 
+                detail={
+                    "error": "Daily recording limit exceeded",
+                    "limit_info": self.limit_service.get_user_limit_info(user_id)
+                }
+            )
+        
         try:
             ml_result = self.audio_processor.process_audio(audio_file_path)
 
@@ -41,6 +53,10 @@ class RecordService:
 
             record = self.create_record(user_id, record_data)
 
+            success = self.limit_service.increment_record_count(user_id)
+            if not success:
+                logger.error(f"Failed to increment counter for user {user_id}")
+
             logger.info(
                 f"Created record {record.id} from audio processing for user {user_id}")
             return record
@@ -50,6 +66,9 @@ class RecordService:
                 f"Error processing audio and creating record: {str(e)}")
             raise
 
+    def get_user_recording_limit(self, user_id: int) -> dict:
+        return self.limit_service.get_user_limit_info(user_id)
+    
     def get_user_records(
         self,
         user_id: int,

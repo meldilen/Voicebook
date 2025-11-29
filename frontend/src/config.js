@@ -21,6 +21,7 @@ export const API_CONFIG = {
       UPDATE_FEEDBACK: '/records/{recordId}/feedback',
       DELETE: '/records/{recordId}',
       STATS: '/records/stats',
+      LIMITS: "/records/limits",
       TIMELINE: '/records/timeline'
     },
     USER: {
