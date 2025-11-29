@@ -9,6 +9,7 @@ from app.models.user import User
 from app.schemas.record import RecordCreate, RecordUpdate, RecordResponse, RecordWithUser
 from .audio_processor import AudioProcessor
 from .limit_service import RecordLimitService
+from .achievement_service import AchievementService
 
 logger = logging.getLogger(__name__)
 
@@ -52,6 +53,8 @@ class RecordService:
             )
 
             record = self.create_record(user_id, record_data)
+
+            self._check_achievements_after_record_creation(user_id, record)
 
             success = self.limit_service.increment_record_count(user_id)
             if not success:
@@ -254,3 +257,120 @@ class RecordService:
             logger.error(
                 f"Error updating feedback for record {record_id}: {str(e)}")
             raise
+
+    def _check_achievements_after_record_creation(self, user_id: int, record: Record):
+            try:
+                # 1. Первая запись - достижение ID 1
+                user_records_count = self.db.query(Record).filter(Record.user_id == user_id).count()
+                if user_records_count == 1:
+                    AchievementService.update_achievement_progress(self.db, user_id, 1)  # "Первый шаг"
+                    logger.info(f"Unlocked 'First Step' achievement for user {user_id}")
+
+                # 2. Общее количество записей - достижение ID 6 (Эмоциональный детектив)
+                if user_records_count >= 50:
+                    AchievementService.update_achievement_progress(self.db, user_id, 6, user_records_count)
+                elif user_records_count > 0:
+                    # Обновляем прогресс для достижения "Эмоциональный детектив"
+                    AchievementService.update_achievement_progress(self.db, user_id, 6, 1)
+
+                # 3. Общая длительность записей - достижение ID 7 (Голос сердца)
+                total_duration = self.db.query(func.coalesce(func.sum(Record.duration), 0)).filter(
+                    Record.user_id == user_id
+                ).scalar()
+                if total_duration >= 100:  # 100 минут
+                    AchievementService.update_achievement_progress(self.db, user_id, 7, int(total_duration))
+                elif total_duration > 0:
+                    AchievementService.update_achievement_progress(self.db, user_id, 7, int(record.duration))
+
+                # 4. Проверяем разнообразие эмоций - достижение ID 4 (Радуга эмоций)
+                unique_emotions = self.db.query(Record.emotion).filter(
+                    Record.user_id == user_id
+                ).distinct().count()
+                if unique_emotions >= 5:
+                    AchievementService.update_achievement_progress(self.db, user_id, 4, unique_emotions)
+                elif unique_emotions > 0:
+                    # Проверяем, добавилась ли новая эмоция
+                    current_emotions = set([r[0] for r in self.db.query(Record.emotion).filter(
+                        Record.user_id == user_id
+                    ).distinct().all()])
+                    if record.emotion not in current_emotions:
+                        AchievementService.update_achievement_progress(self.db, user_id, 4, 1)
+
+                # 5. Проверяем последовательные дни - достижения ID 2 и 3
+                self._check_consecutive_days_achievements(user_id)
+
+                # 6. Проверяем позитивные записи - достижение ID 5 (Луч света)
+                self._check_positivity_streak(user_id, record)
+
+            except Exception as e:
+                logger.error(f"Error checking achievements for user {user_id}: {str(e)}")
+
+    def _check_consecutive_days_achievements(self, user_id: int):
+        """Проверяем достижения за последовательные дни"""
+        try:
+            # Получаем даты записей пользователя
+            record_dates = self.db.query(
+                func.date(Record.created_at).label('record_date')
+            ).filter(
+                Record.user_id == user_id
+            ).distinct().order_by(
+                func.date(Record.created_at).desc()
+            ).all()
+
+            if not record_dates:
+                return
+
+            dates = [record[0] for record in record_dates]
+            current_date = datetime.now(timezone.utc).date()
+            
+            # Считаем последовательные дни
+            consecutive = 0
+            for i, record_date in enumerate(dates):
+                if record_date == current_date - timedelta(days=i):
+                    consecutive += 1
+                else:
+                    break
+
+            # Обновляем прогресс для достижений последовательных дней
+            if consecutive >= 7:
+                AchievementService.update_achievement_progress(self.db, user_id, 2, consecutive)  # 7 дней подряд
+            if consecutive >= 30:
+                AchievementService.update_achievement_progress(self.db, user_id, 3, consecutive)  # Месячный марафон
+
+        except Exception as e:
+            logger.error(f"Error checking consecutive days for user {user_id}: {str(e)}")
+
+    def _check_positivity_streak(self, user_id: int, current_record: Record):
+        """Проверяем серию позитивных записей после грустной"""
+        try:
+            positive_emotions = ['happy', 'surprised']
+            sad_emotions = ['angry', 'disgust', 'fearful', 'sadness']
+            
+            # Получаем последние 6 записей перед текущей
+            recent_records = self.db.query(Record).filter(
+                Record.user_id == user_id,
+                Record.created_at < current_record.created_at
+            ).order_by(desc(Record.created_at)).limit(6).all()
+
+            if len(recent_records) < 5:
+                return
+
+            # Проверяем паттерн: грустная запись, затем 5 позитивных
+            records_to_check = [current_record] + recent_records[:5]
+            
+            # Первая запись в проверяемом периоде должна быть грустной
+            if records_to_check[-1].emotion not in sad_emotions:
+                return
+            
+            # Следующие 5 записей (включая текущую) должны быть позитивными
+            positive_streak = True
+            for record in records_to_check[:5]:
+                if record.emotion not in positive_emotions:
+                    positive_streak = False
+                    break
+            
+            if positive_streak:
+                AchievementService.update_achievement_progress(self.db, user_id, 5, 5)  # "Луч света"
+
+        except Exception as e:
+            logger.error(f"Error checking positivity streak for user {user_id}: {str(e)}")
