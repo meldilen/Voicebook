@@ -44,10 +44,10 @@
   margin-right: auto;
 }
 
-.gradient-ball, 
-.gradient-ball-2, 
-.gradient-ball-3, 
-.gradient-ball-4, 
+.gradient-ball,
+.gradient-ball-2,
+.gradient-ball-3,
+.gradient-ball-4,
 .gradient-ball-5 {
   position: fixed;
   border-radius: 50%;
@@ -198,7 +198,11 @@
 }
 
 .filter-btn.active {
-  background: linear-gradient(135deg, rgba(124, 58, 237, 0.2), rgba(91, 33, 182, 0.2));
+  background: linear-gradient(
+    135deg,
+    rgba(124, 58, 237, 0.2),
+    rgba(91, 33, 182, 0.2)
+  );
   border-color: #7c3aed;
   color: #f3f4f6;
 }
@@ -230,9 +234,57 @@
   color: #d1d5db;
 }
 
+.loading-state,
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(255, 255, 255, 0.1);
+  border-left: 3px solid #7c3aed;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.error-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.error-state h3 {
+  color: #f87171;
+  margin-bottom: 0.5rem;
+}
+
+.error-state p {
+  color: #9ca3af;
+}
+
 @keyframes float {
-  0%, 100% { transform: translateY(0px) scale(1); }
-  50% { transform: translateY(-20px) scale(1.05); }
+  0%,
+  100% {
+    transform: translateY(0px) scale(1);
+  }
+  50% {
+    transform: translateY(-20px) scale(1.05);
+  }
 }
 
 @keyframes gentleAppear {
@@ -269,28 +321,28 @@
     margin-top: 80px;
     padding: 0 15px;
   }
-  
+
   .achievements-title {
     font-size: 2rem;
   }
-  
+
   .achievements-subtitle {
     font-size: 1rem;
     padding: 0 1rem;
   }
-  
+
   .achievements-controls {
     flex-direction: column;
     align-items: center;
   }
-  
+
   .completion-stats {
     flex-direction: column;
     text-align: center;
     gap: 1.5rem;
     padding: 1rem;
   }
-  
+
   .gradient-ball,
   .gradient-ball-2,
   .gradient-ball-3,
@@ -332,24 +384,24 @@
   .achievements-grid {
     gap: 1rem;
   }
-  
+
   .achievements-title {
     font-size: 1.8rem;
   }
-  
+
   .filter-btn {
     padding: 0.6rem 1rem;
     font-size: 0.9rem;
   }
-  
+
   .completion-stats {
     gap: 1rem;
   }
-  
+
   .completion-text h3 {
     font-size: 1.2rem;
   }
-  
+
   .completion-text p {
     font-size: 1rem;
   }
