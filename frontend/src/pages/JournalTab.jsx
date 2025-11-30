@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { useGetRecordingsQuery } from "../features/recordings/recordingsApi";
 import { useSelector } from "react-redux";
 import "./JournalTab.css";
@@ -6,6 +7,7 @@ import FilterControls from "../features/journal/components/FilterControls";
 import RecordingsList from "../features/recordings/components/RecordingsList";
 
 function JournalTab() {
+  const { t } = useTranslation();
   const user = useSelector((state) => state.auth.user);
   const [dateFilter, setDateFilter] = useState("");
   const [limitFilter, setLimitFilter] = useState(0);
@@ -60,7 +62,7 @@ function JournalTab() {
             style={{ "--delay": "0.4s", "--color": "#cac1f9" }}
           ></div>
         </div>
-        <p>Loading your journal entries...</p>
+        <p>{t("journal.loading")}</p>
       </div>
     );
   }
@@ -68,8 +70,8 @@ function JournalTab() {
   if (isError) {
     return (
       <div className="journal-tab error">
-        <p>Error loading journal entries. Please try again.</p>
-        {error && <p>Details: {error.message}</p>}
+        <p>{t("journal.error.message")}</p>
+        {error && <p>{t("journal.error.details")} {error.message}</p>}
       </div>
     );
   }
@@ -77,8 +79,8 @@ function JournalTab() {
   return (
     <div className="journal-tab">
       <div className="journal-header">
-        <h1>Your Journal</h1>
-        <p>Review your past recordings and insights</p>
+        <h1>{t("journal.title")}</h1>
+        <p>{t("journal.subtitle")}</p>
       </div>
 
       <FilterControls
@@ -92,13 +94,13 @@ function JournalTab() {
         <div className="active-filters">
           {dateFilter && (
             <span className="filter-tag">
-              Date: {dateFilter}
+              {t("journal.filters.date")}: {dateFilter}
               <button onClick={removeDateFilter}>×</button>
             </span>
           )}
           {limitFilter > 0 && (
             <span className="filter-tag">
-              Limit: {limitFilter} records
+              {t("journal.filters.limit")}: {limitFilter} {t("journal.filters.records")}
               <button onClick={removeLimitFilter}>×</button>
             </span>
           )}
@@ -107,9 +109,13 @@ function JournalTab() {
 
       {recordings.length > 0 && (
         <div className="results-counter">
-          Showing {recordings.length} recording{recordings.length !== 1 ? 's' : ''}
-          {dateFilter && ` for ${dateFilter}`}
-          {limitFilter > 0 && ` (limited to ${limitFilter})`}
+          {t("journal.results.showing")} {recordings.length}{" "}
+          {recordings.length === 1 
+            ? t("journal.results.recording") 
+            : t("journal.results.recordings")
+          }
+          {dateFilter && ` ${t("journal.results.forDate")} ${dateFilter}`}
+          {limitFilter > 0 && ` ${t("journal.results.limitedTo")} ${limitFilter}`}
         </div>
       )}
 

@@ -136,7 +136,18 @@
       "cancel": "Cancel",
       "confirm": "Yes, Delete Account"
     },
-    "dangerZone": "Danger Zone"
+    "dangerZone": "Danger Zone",
+    "stats": {
+      "totalRecords": "Total Records",
+      "totalDuration": "Total Duration",
+      "consecutiveDays": "Consecutive Days",
+      "minutes": "minutes",
+      "days": "days"
+    },
+    "sessions": {
+      "activeSessions": "Active Sessions",
+      "lastUsed": "Last used"
+    }
   },
   "settings": {
     "title": "Account Settings",
@@ -199,14 +210,6 @@
       "message": "Make your first recording to see it here."
     }
   },
-  "achievements": {
-    "rarity": {
-      "common": "Common",
-      "rare": "Rare",
-      "epic": "Epic",
-      "legendary": "Legendary"
-    }
-  },
   "audioRecorder": {
     "microphoneBlocked": {
       "title": "Microphone Access Blocked",
@@ -245,7 +248,7 @@
       "excellent": "Excellent"
     }
   },
-    "recordingCard": {
+  "recordingCard": {
     "title": "Your Emotional Report",
     "processing": "Detailed analysis is being processed...",
     "recorded": "Recorded",
@@ -379,5 +382,38 @@
       "anger": "Anger",
       "neutral": "Neutral"
     }
+  },
+  "achievements": {
+    "title": "Path to Yourself",
+    "subtitle": "Your steps in exploring the inner world",
+    "loading": "Loading your achievements...",
+    "error": {
+      "title": "Loading Error",
+      "message": "Failed to load achievements. Please refresh the page."
+    },
+    "categories": {
+      "all": "All",
+      "voice": "Voice",
+      "regularity": "Regularity",
+      "variety": "Variety",
+      "reflection": "Self-reflection",
+      "positivity": "Positive Thoughts",
+      "analysis": "Depth",
+      "social": "Communication"
+    },
+    "stats": {
+      "achievements": "achievements"
+    },
+    "motivation": {
+      "high": "🎉 Most of the journey is complete!",
+      "medium": "🚀 Halfway there!",
+      "low": "💫 Keep up the good work!",
+      "start": "🌟 Take the first step"
+    },
+    "noResults": {
+      "title": "No achievements found",
+      "message": "Try selecting a different category"
+    },
+    "unknown": "Unknown achievement"
   }
 }

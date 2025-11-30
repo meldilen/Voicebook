@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
+import { useTranslation } from "react-i18next";
 import {
   useLogoutMutation,
   useGetMeQuery,
@@ -13,6 +14,7 @@ import { useState } from "react";
 import { format } from "date-fns";
 
 const ProfilePage = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [logoutApi] = useLogoutMutation();
@@ -57,7 +59,7 @@ const ProfilePage = () => {
       <button
         className="back-button"
         onClick={() => navigate("/homepage")}
-        aria-label="Go back"
+        aria-label={t("common.back")}
       >
         <svg
           width="30"
@@ -78,14 +80,14 @@ const ProfilePage = () => {
 
       <div className="profile-content">
         <header className="profile-header">
-          <h1>Profile</h1>
+          <h1>{t("profile.title")}</h1>
           <div className="profile-actions">
             <button
               className="logout-button"
               onClick={() => setShowLogoutConfirm(true)}
-              aria-label="Logout"
+              aria-label={t("profile.logout")}
             >
-              Log Out
+              {t("profile.logout")}
             </button>
           </div>
         </header>
@@ -96,22 +98,22 @@ const ProfilePage = () => {
               {isLoadingAvatar && <div className="avatar loading"></div>}
               <img
                 src={`https://ui-avatars.com/api/?name=${
-                  user?.username || "User"
+                  user?.username || t("common.user")
                 }&background=672f94&color=fff`}
-                alt="User"
+                alt={t("common.user")}
                 className={`avatar ${isLoadingAvatar ? "hidden" : ""}`}
                 onLoad={handleImageLoad}
               />
             </div>
             <div className="user-details">
-              <h2>{user?.username || "User"}</h2>
+              <h2>{user?.username || t("common.user")}</h2>
               <p className="activity-status">
                 {currentUser?.last_login
-                  ? `Active since ${format(
+                  ? `${t("profile.userInfo.active")} ${format(
                       new Date(currentUser.last_login),
                       "MMM d, yyyy"
                     )}`
-                  : `Joined ${format(
+                  : `${t("profile.userInfo.joined")} ${format(
                       new Date(currentUser?.created_at),
                       "MMM d, yyyy"
                     )}`}
@@ -121,37 +123,37 @@ const ProfilePage = () => {
 
           <div className="profile-fields">
             <div className="field">
-              <label>Email</label>
-              <p>{user?.email || "No email provided"}</p>
+              <label>{t("profile.userInfo.email")}</label>
+              <p>{user?.email || t("profile.userInfo.noEmail")}</p>
             </div>
 
             {currentUser?.total_records !== undefined && (
               <div className="field">
-                <label>Total Records</label>
+                <label>{t("profile.stats.totalRecords")}</label>
                 <p>{currentUser.total_records}</p>
               </div>
             )}
 
             {currentUser?.total_duration !== undefined && (
               <div className="field">
-                <label>Total Duration</label>
-                <p>{Math.round(currentUser.total_duration / 60)} minutes</p>
+                <label>{t("profile.stats.totalDuration")}</label>
+                <p>{Math.round(currentUser.total_duration / 60)} {t("profile.stats.minutes")}</p>
               </div>
             )}
 
             {currentUser?.consecutive_days !== undefined && (
               <div className="field">
-                <label>Consecutive Days</label>
-                <p>{currentUser.consecutive_days} days</p>
+                <label>{t("profile.stats.consecutiveDays")}</label>
+                <p>{currentUser.consecutive_days} {t("profile.stats.days")}</p>
               </div>
             )}
 
             <button
               className="edit-button"
               onClick={() => navigate("/profile/settings")}
-              aria-label="Edit profile"
+              aria-label={t("profile.editProfile")}
             >
-              Edit Profile
+              {t("profile.editProfile")}
             </button>
           </div>
         </div>
@@ -166,7 +168,7 @@ const ProfilePage = () => {
               }`}
               onClick={() => setActiveTab("calendar")}
             >
-              Calendar
+              {t("profile.tabs.calendar")}
             </button>
             <button
               role="tab"
@@ -176,7 +178,7 @@ const ProfilePage = () => {
               }`}
               onClick={() => setActiveTab("sessions")}
             >
-              Sessions
+              {t("profile.tabs.stats")}
             </button>
           </div>
         </div>
@@ -198,7 +200,7 @@ const ProfilePage = () => {
       <button
         className="danger-zone delete-account-button"
         onClick={() => setShowDeleteConfirm(true)}
-        aria-label="Delete account"
+        aria-label={t("profile.deleteAccount")}
       >
         <svg
           width="16"
@@ -215,7 +217,7 @@ const ProfilePage = () => {
             strokeLinejoin="round"
           />
         </svg>
-        Delete My Account
+        {t("profile.deleteAccount")}
       </button>
 
       {showDeleteConfirm && (
@@ -238,23 +240,22 @@ const ProfilePage = () => {
                 />
               </svg>
             </div>
-            <h3>Delete Account?</h3>
+            <h3>{t("profile.deleteConfirm.title")}</h3>
             <p>
-              This will permanently delete all your data, including mood history
-              and personal information. This action cannot be undone.
+              {t("profile.deleteConfirm.message")}
             </p>
             <div className="modal-actions">
               <button
                 className="secondary-button"
                 onClick={() => setShowDeleteConfirm(false)}
               >
-                Cancel
+                {t("profile.deleteConfirm.cancel")}
               </button>
               <button
                 className="delete-confirm-button"
                 onClick={handleDeleteAccount}
               >
-                Yes, Delete Account
+                {t("profile.deleteConfirm.confirm")}
               </button>
             </div>
           </div>
@@ -264,16 +265,16 @@ const ProfilePage = () => {
       {showLogoutConfirm && (
         <div className="confirmation-modal">
           <div className="modal-content">
-            <p>Are you sure you want to log out?</p>
+            <p>{t("profile.logoutConfirm.message")}</p>
             <div className="modal-actions">
               <button
                 className="secondary-button"
                 onClick={() => setShowLogoutConfirm(false)}
               >
-                Cancel
+                {t("profile.logoutConfirm.cancel")}
               </button>
               <button className="logout-confirm-button" onClick={handleLogout}>
-                Log Out
+                {t("profile.logoutConfirm.confirm")}
               </button>
             </div>
           </div>
@@ -284,18 +285,19 @@ const ProfilePage = () => {
 };
 
 const SessionsList = () => {
+  const { t } = useTranslation();
   const { data: sessions } = useGetUserSessionsQuery();
   
   return (
     <div className="sessions-list">
-      <h3>Active Sessions</h3>
+      <h3>{t("profile.sessions.activeSessions")}</h3>
       {sessions?.map(session => (
         <div key={session.id} className="session-item">
           <div className="session-info">
             <p className="session-device">{session.user_agent}</p>
             <p className="session-ip">IP: {session.ip_address}</p>
             <p className="session-last-used">
-              Last used: {format(new Date(session.last_used), "MMM d, HH:mm")}
+              {t("profile.sessions.lastUsed")}: {format(new Date(session.last_used), "MMM d, HH:mm")}
             </p>
           </div>
         </div>

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import { useTranslation } from "react-i18next";
 import AchievementCard from "../features/achievements/components/AchievementCard";
 import "./AchievementsPage.css";
 import Header from "../features/Header/Header";
@@ -16,7 +17,7 @@ import {
 function AchievementsPage() {
   const [filter, setFilter] = useState("all");
   const [filteredAchievements, setFilteredAchievements] = useState([]);
-
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const userAchievements = useSelector(selectUserAchievements);
 
@@ -42,14 +43,14 @@ function AchievementsPage() {
   }, [statsData, dispatch]);
 
   const categories = [
-    { id: "all", name: "Все", icon: "🌟" },
-    { id: "voice", name: "Голос", icon: "🎤" },
-    { id: "regularity", name: "Постоянство", icon: "📅" },
-    { id: "variety", name: "Разнообразие", icon: "🎭" },
-    { id: "reflection", name: "Самоанализ", icon: "🤔" },
-    { id: "positivity", name: "Светлые мысли", icon: "✨" },
-    { id: "analysis", name: "Глубина", icon: "🕵️" },
-    { id: "social", name: "Общение", icon: "💬" },
+    { id: "all", name: t("achievements.categories.all"), icon: "🌟" },
+    { id: "voice", name: t("achievements.categories.voice"), icon: "🎤" },
+    { id: "regularity", name: t("achievements.categories.regularity"), icon: "📅" },
+    { id: "variety", name: t("achievements.categories.variety"), icon: "🎭" },
+    { id: "reflection", name: t("achievements.categories.reflection"), icon: "🤔" },
+    { id: "positivity", name: t("achievements.categories.positivity"), icon: "✨" },
+    { id: "analysis", name: t("achievements.categories.analysis"), icon: "🕵️" },
+    { id: "social", name: t("achievements.categories.social"), icon: "💬" },
   ];
 
   useEffect(() => {
@@ -62,7 +63,7 @@ function AchievementsPage() {
     }
     const transformedAchievements = filtered.map((ach) => ({
       id: ach.achievement_id,
-      title: ach.achievement?.title || "Неизвестное достижение",
+      title: ach.achievement?.title || t("achievements.unknown"),
       description: ach.achievement?.description || "",
       icon: ach.achievement?.icon || "🏆",
       category: ach.achievement?.category || "other",
@@ -75,7 +76,7 @@ function AchievementsPage() {
     }));
 
     setFilteredAchievements(transformedAchievements);
-  }, [filter, userAchievements]);
+  }, [filter, userAchievements, t]);
 
   const unlockedCount =
     userAchievements?.filter((ach) => ach.unlocked).length || 0;
@@ -90,7 +91,7 @@ function AchievementsPage() {
         <div className="achievements-container">
           <div className="loading-state">
             <div className="loading-spinner"></div>
-            <p>Загружаем ваши достижения...</p>
+            <p>{t("achievements.loading")}</p>
           </div>
         </div>
       </div>
@@ -104,15 +105,17 @@ function AchievementsPage() {
         <div className="achievements-container">
           <div className="error-state">
             <div className="error-icon">⚠️</div>
-            <h3>Ошибка загрузки</h3>
-            <p>Не удалось загрузить достижения. Попробуйте обновить страницу.</p>
+            <h3>{t("achievements.error.title")}</h3>
+            <p>
+              {t("achievements.error.message")}
+            </p>
           </div>
         </div>
       </div>
     );
   }
-  
-    return (
+
+  return (
     <div className="achievements-page">
       <Header />
       <div className="gradient-ball"></div>
@@ -123,9 +126,11 @@ function AchievementsPage() {
 
       <div className="achievements-container">
         <div className="achievements-header">
-          <h1 className="achievements-title">Путь к себе</h1>
+          <h1 className="achievements-title">
+            {t("achievements.title")}
+          </h1>
           <p className="achievements-subtitle">
-            Ваши шаги в исследовании внутреннего мира через голосовой дневник
+            {t("achievements.subtitle")}
           </p>
 
           <div className="stats-section">
@@ -183,17 +188,19 @@ function AchievementsPage() {
                     {unlockedCount}
                     <span className="stats-total">/{totalCount}</span>
                   </span>
-                  <span className="stats-label">достижений</span>
+                  <span className="stats-label">
+                    {t("achievements.stats.achievements")}
+                  </span>
                 </div>
 
                 <div className="stats-motivation">
                   {completionPercentage >= 75
-                    ? "🎉 Большая часть пути пройдена!"
+                    ? t("achievements.motivation.high")
                     : completionPercentage >= 50
-                    ? "🚀 Половина пути!"
+                    ? t("achievements.motivation.medium")
                     : completionPercentage >= 25
-                    ? "💫 Продолжайте в том же духе!"
-                    : "🌟 Сделайте первый шаг"}
+                    ? t("achievements.motivation.low")
+                    : t("achievements.motivation.start")}
                 </div>
               </div>
             </div>
@@ -226,8 +233,8 @@ function AchievementsPage() {
         {filteredAchievements.length === 0 && (
           <div className="no-results">
             <div className="no-results-icon">🔍</div>
-            <h3>Шаги не найдены</h3>
-            <p>Попробуйте выбрать другую категорию пути</p>
+            <h3>{t("achievements.noResults.title")}</h3>
+            <p>{t("achievements.noResults.message")}</p>
           </div>
         )}
       </div>

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { selectCurrentUser } from "../features/auth/authSlice";
@@ -10,6 +11,7 @@ import "./SettingsPage.css";
 import PasswordVisibilityIcon from "../features/auth/components/VisibilityIcon";
 
 const SettingsPage = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const user = useSelector(selectCurrentUser);
   const [updateProfile, { isLoading }] = useUpdateProfileMutation();
@@ -43,15 +45,15 @@ const SettingsPage = () => {
 
     if (formData.newPassword) {
       if (formData.newPassword.length < 6) {
-        newErrors.newPassword = "Password should be at least 6 characters";
+        newErrors.newPassword = t("settings.errors.passwordShort");
       } else if (!/[A-Z]/.test(formData.newPassword)) {
-        newErrors.newPassword = "Add at least one uppercase letter";
+        newErrors.newPassword = t("settings.errors.passwordUppercase");
       } else if (!/\d/.test(formData.newPassword)) {
-        newErrors.newPassword = "Add at least one number";
+        newErrors.newPassword = t("settings.errors.passwordNumber");
       }
 
       if (formData.newPassword !== formData.confirmPassword) {
-        newErrors.confirmPassword = "Passwords don't match";
+        newErrors.confirmPassword = t("settings.errors.passwordsDontMatch");
       }
     }
 
@@ -87,7 +89,7 @@ const SettingsPage = () => {
       navigate("/profile");
     } catch (err) {
       console.error("Failed to update profile:", err);
-      let errorMessage = "Failed to update profile";
+      let errorMessage = t("settings.errors.updateFailed");
 
       if (err.data?.detail) {
         if (typeof err.data.detail === "string") {
@@ -106,7 +108,7 @@ const SettingsPage = () => {
 
   return (
     <div className="settings-page">
-      <button className="back-button" onClick={handleBack} aria-label="Go back">
+      <button className="back-button" onClick={handleBack} aria-label={t("common.back")}>
         <svg
           width="30"
           height="30"
@@ -126,8 +128,8 @@ const SettingsPage = () => {
 
       <div className="settings-container">
         <div className="settings-header">
-          <h1>Account Settings</h1>
-          <p>Manage your profile information</p>
+          <h1>{t("settings.title")}</h1>
+          <p>{t("settings.subtitle")}</p>
         </div>
 
         <form onSubmit={handleSubmit}>
@@ -136,19 +138,19 @@ const SettingsPage = () => {
               <div className="avatar-wrapper">
                 <img
                   src={`https://ui-avatars.com/api/?name=${
-                    formData.username || "User"
+                    formData.username || t("common.user")
                   }&background=8b5cf6&color=fff`}
-                  alt="Profile"
+                  alt={t("settings.avatar.alt")}
                   className="avatar"
                 />
                 <button
                   type="button"
                   className="avatar-edit-button"
                   onClick={() =>
-                    alert("Avatar change functionality coming soon!")
+                    alert(t("settings.avatar.comingSoon"))
                   }
                 >
-                  Change Photo
+                  {t("settings.avatar.changePhoto")}
                 </button>
               </div>
             </div>
@@ -176,7 +178,7 @@ const SettingsPage = () => {
 
             <div className="settings-form">
               <div className="form-group">
-                <label htmlFor="username">Username</label>
+                <label htmlFor="username">{t("settings.form.nickname")}</label>
                 <input
                   id="username"
                   name="username"
@@ -189,7 +191,7 @@ const SettingsPage = () => {
               </div>
 
               <div className="form-group">
-                <label htmlFor="email">Email</label>
+                <label htmlFor="email">{t("settings.form.login")}</label>
                 <input
                   id="email"
                   name="email"
@@ -202,12 +204,12 @@ const SettingsPage = () => {
               </div>
 
               <div className="form-group">
-                <label htmlFor="newPassword">New Password</label>
+                <label htmlFor="newPassword">{t("settings.form.newPassword")}</label>
                 <div className="password-input-wrapper">
                   <input
                     id="newPassword"
                     name="newPassword"
-                    placeholder="Enter new password"
+                    placeholder={t("settings.form.newPasswordPlaceholder")}
                     type={showPassword ? "text" : "password"}
                     value={formData.newPassword}
                     onChange={handleChange}
@@ -220,7 +222,9 @@ const SettingsPage = () => {
                     className="password-toggle"
                     onClick={() => setShowPassword(!showPassword)}
                     aria-label={
-                      showPassword ? "Hide password" : "Show password"
+                      showPassword 
+                        ? t("settings.buttons.hidePassword")
+                        : t("settings.buttons.showPassword")
                     }
                   >
                     <PasswordVisibilityIcon visible={showPassword} />
@@ -234,12 +238,12 @@ const SettingsPage = () => {
               </div>
 
               <div className="form-group">
-                <label htmlFor="confirmPassword">Confirm Password</label>
+                <label htmlFor="confirmPassword">{t("settings.form.confirmPassword")}</label>
                 <div className="password-input-wrapper">
                   <input
                     id="confirmPassword"
                     name="confirmPassword"
-                    placeholder="Confirm new password"
+                    placeholder={t("settings.form.confirmPasswordPlaceholder")}
                     type={showConfirmPassword ? "text" : "password"}
                     value={formData.confirmPassword}
                     onChange={handleChange}
@@ -252,7 +256,9 @@ const SettingsPage = () => {
                     className="password-toggle"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     aria-label={
-                      showConfirmPassword ? "Hide password" : "Show password"
+                      showConfirmPassword 
+                        ? t("settings.buttons.hidePassword")
+                        : t("settings.buttons.showPassword")
                     }
                   >
                     <PasswordVisibilityIcon visible={showConfirmPassword} />
@@ -272,10 +278,10 @@ const SettingsPage = () => {
                   onClick={handleBack}
                   disabled={isLoading}
                 >
-                  Cancel
+                  {t("settings.buttons.cancel")}
                 </button>
                 <button type="submit" className="save-btn" disabled={isLoading}>
-                  {isLoading ? "Saving..." : "Save Changes"}
+                  {isLoading ? t("settings.buttons.saving") : t("settings.buttons.save")}
                 </button>
               </div>
             </div>

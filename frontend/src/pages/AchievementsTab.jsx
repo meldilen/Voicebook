@@ -1,160 +1,121 @@
 import React, { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
+import { useDispatch, useSelector } from "react-redux";
 import AchievementCard from "../features/achievements/components/AchievementCard";
 import "./AchievementsTab.css";
-
-const achievementsData = [
-  {
-    id: 1,
-    title: "Первый шаг",
-    description: "Сделал первую голосовую запись в дневнике",
-    icon: "🎤",
-    category: "voice",
-    categoryIcon: "🎤",
-    rarity: "common",
-    unlocked: true,
-    progress: 1,
-    required: 1,
-    dateUnlocked: "2025-01-15",
-  },
-  {
-    id: 2,
-    title: "7 дней подряд",
-    description: "Вел голосовой дневник неделю без пропусков",
-    icon: "🔥",
-    category: "regularity",
-    categoryIcon: "📅",
-    rarity: "rare",
-    unlocked: true,
-    progress: 7,
-    required: 7,
-    dateUnlocked: "2025-01-21",
-  },
-  {
-    id: 3,
-    title: "Месячный марафон",
-    description: "30 дней ведения голосового дневника",
-    icon: "🏆",
-    category: "regularity",
-    categoryIcon: "📅",
-    rarity: "epic",
-    unlocked: true,
-    progress: 30,
-    required: 30,
-    dateUnlocked: "2025-07-12",
-  },
-  {
-    id: 4,
-    title: "Радуга эмоций",
-    description: "Выразил 5 или более разных эмоций в записях",
-    icon: "🌈",
-    category: "variety",
-    categoryIcon: "🎭",
-    rarity: "rare",
-    unlocked: true,
-    progress: 5,
-    required: 5,
-    dateUnlocked: "2025-01-18",
-  },
-  {
-    id: 5,
-    title: "Взгляд в прошлое",
-    description: "Прослушал записи за другой день (месяц назад)",
-    icon: "🔍",
-    category: "reflection",
-    categoryIcon: "🤔",
-    rarity: "rare",
-    unlocked: false,
-    progress: 0,
-    required: 1,
-    dateUnlocked: null,
-  },
-  {
-    id: 6,
-    title: "Луч света",
-    description: "Серия из 5 позитивных записей после грустной",
-    icon: "✨",
-    category: "positivity",
-    categoryIcon: "😊",
-    rarity: "epic",
-    unlocked: false,
-    progress: 2,
-    required: 5,
-    dateUnlocked: null,
-  },
-  {
-    id: 7,
-    title: "Эмоциональный детектив",
-    description: "Проанализировал 50 различных записей",
-    icon: "🕵️",
-    category: "analysis",
-    categoryIcon: "📊",
-    rarity: "legendary",
-    unlocked: false,
-    progress: 32,
-    required: 50,
-    dateUnlocked: null,
-  },
-  {
-    id: 8,
-    title: "Голос сердца",
-    description: "Записал 100 минут размышлений",
-    icon: "💖",
-    category: "voice",
-    categoryIcon: "🎤",
-    rarity: "common",
-    unlocked: false,
-    progress: 45,
-    required: 100,
-    dateUnlocked: null,
-  },
-  {
-    id: 9,
-    title: "Сердечный друг",
-    description: "Поделился достижениями с друзьями",
-    icon: "💖",
-    category: "social",
-    rarity: "common",
-    unlocked: false,
-    progress: 0,
-    required: 1,
-    dateUnlocked: null,
-  },
-];
+import {
+  useGetMyAchievementsQuery,
+  useGetAchievementStatsQuery,
+} from "../features/achievements/achievementsApi";
+import {
+  selectUserAchievements,
+  setUserAchievements,
+  setStats,
+} from "../features/achievements/achievementsSlice";
 
 function AchievementsTab() {
   const [filter, setFilter] = useState("all");
-  const [filteredAchievements, setFilteredAchievements] = 
-    useState(achievementsData);
+  const [filteredAchievements, setFilteredAchievements] = useState([]);
+  const { t } = useTranslation();
+  const dispatch = useDispatch();
+  const userAchievements = useSelector(selectUserAchievements);
 
-const categories = [
-    { id: "all", name: "Все", icon: "🌟" },
-    { id: "voice", name: "Голос", icon: "🎤" },
-    { id: "regularity", name: "Постоянство", icon: "📅" },
-    { id: "variety", name: "Разнообразие", icon: "🎭" },
-    { id: "reflection", name: "Самоанализ", icon: "🤔" },
-    { id: "positivity", name: "Светлые мысли", icon: "✨" },
-    { id: "analysis", name: "Глубина", icon: "🕵️" },
-    { id: "social", name: "Общение", icon: "💬" },
-];
+  const {
+    data: achievementsData,
+    isLoading: achievementsLoading,
+    error: achievementsError,
+  } = useGetMyAchievementsQuery();
+
+  const { data: statsData, isLoading: statsLoading } =
+    useGetAchievementStatsQuery();
 
   useEffect(() => {
-    let filtered = achievementsData;
-    if (filter !== "all") {
-      filtered = filtered.filter((ach) => ach.category === filter);
+    if (achievementsData) {
+      dispatch(setUserAchievements(achievementsData));
     }
-    setFilteredAchievements(filtered);
-  }, [filter]);
+  }, [achievementsData, dispatch]);
 
-  const unlockedCount = achievementsData.filter((ach) => ach.unlocked).length;
-  const totalCount = achievementsData.length;
-  const completionPercentage = Math.round((unlockedCount / totalCount) * 100);
+  useEffect(() => {
+    if (statsData) {
+      dispatch(setStats(statsData));
+    }
+  }, [statsData, dispatch]);
 
+  const categories = [
+    { id: "all", name: t("achievements.categories.all"), icon: "🌟" },
+    { id: "voice", name: t("achievements.categories.voice"), icon: "🎤" },
+    { id: "regularity", name: t("achievements.categories.regularity"), icon: "📅" },
+    { id: "variety", name: t("achievements.categories.variety"), icon: "🎭" },
+    { id: "reflection", name: t("achievements.categories.reflection"), icon: "🤔" },
+    { id: "positivity", name: t("achievements.categories.positivity"), icon: "✨" },
+    { id: "analysis", name: t("achievements.categories.analysis"), icon: "🕵️" },
+    { id: "social", name: t("achievements.categories.social"), icon: "💬" },
+  ];
+
+  useEffect(() => {
+    if (!userAchievements) return;
+
+    let filtered = userAchievements;
+
+    if (filter !== "all") {
+      filtered = filtered.filter((ach) => ach.achievement?.category === filter);
+    }
+    const transformedAchievements = filtered.map((ach) => ({
+      id: ach.achievement_id,
+      title: ach.achievement?.title || t("achievements.unknown"),
+      description: ach.achievement?.description || "",
+      icon: ach.achievement?.icon || "🏆",
+      category: ach.achievement?.category || "other",
+      categoryIcon: ach.achievement?.category_icon || "🌟",
+      rarity: ach.achievement?.rarity || "common",
+      unlocked: ach.unlocked,
+      progress: ach.progress || 0,
+      required: ach.achievement?.required_value || 1,
+      dateUnlocked: ach.unlocked_at,
+    }));
+
+    setFilteredAchievements(transformedAchievements);
+  }, [filter, userAchievements, t]);
+
+  const unlockedCount =
+    userAchievements?.filter((ach) => ach.unlocked).length || 0;
+  const totalCount = userAchievements?.length || 0;
+  const completionPercentage =
+    totalCount > 0 ? Math.round((unlockedCount / totalCount) * 100) : 0;
+
+  if (achievementsLoading || statsLoading) {
+    return (
+      <div className="achievements-page">
+        <div className="achievements-container">
+          <div className="loading-state">
+            <div className="loading-spinner"></div>
+            <p>{t("achievements.loading")}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  if (achievementsError) {
+    return (
+      <div className="achievements-page">
+        <div className="achievements-container">
+          <div className="error-state">
+            <div className="error-icon">⚠️</div>
+            <h3>{t("achievements.error.title")}</h3>
+            <p>
+              {t("achievements.error.message")}
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="achievements-tab">
       <div className="achievements-header">
-        <h1>Путь к себе</h1>
-        <p>Ваши шаги в исследовании внутреннего мира</p>
+        <h1>{t("achievements.title")}</h1>
+        <p>{t("achievements.subtitle")}</p>
       </div>
 
       <div className="stats-section">
@@ -205,23 +166,26 @@ const categories = [
               </text>
             </svg>
           </div>
-          
+
           <div className="stats-info">
             <div className="stats-main">
               <span className="stats-count">
-                {unlockedCount}<span className="stats-total">/{totalCount}</span>
+                {unlockedCount}
+                <span className="stats-total">/{totalCount}</span>
               </span>
-              <span className="stats-label">достижений</span>
+              <span className="stats-label">
+                {t("achievements.stats.achievements")}
+              </span>
             </div>
-            
+
             <div className="stats-motivation">
               {completionPercentage >= 75
-                ? "🎉 Большая часть пути пройдена!"
+                ? t("achievements.motivation.high")
                 : completionPercentage >= 50
-                ? "🚀 Половина пути!"
+                ? t("achievements.motivation.medium")
                 : completionPercentage >= 25
-                ? "💫 Продолжайте в том же духе!"
-                : "🌟 Сделайте первый шаг"}
+                ? t("achievements.motivation.low")
+                : t("achievements.motivation.start")}
             </div>
           </div>
         </div>
@@ -251,8 +215,8 @@ const categories = [
       {filteredAchievements.length === 0 && (
         <div className="no-results">
           <div className="no-results-icon">🔍</div>
-          <h3>Достижения не найдены</h3>
-          <p>Попробуйте выбрать другую категорию</p>
+          <h3>{t("achievements.noResults.title")}</h3>
+          <p>{t("achievements.noResults.message")}</p>
         </div>
       )}
     </div>
