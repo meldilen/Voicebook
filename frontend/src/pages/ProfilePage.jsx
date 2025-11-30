@@ -288,20 +288,121 @@ const SessionsList = () => {
   const { t } = useTranslation();
   const { data: sessions } = useGetUserSessionsQuery();
   
+  // Функция для определения типа устройства по user_agent
+  const getDeviceInfo = (userAgent) => {
+    if (!userAgent) return { type: 'unknown', browser: 'Unknown' };
+    
+    const ua = userAgent.toLowerCase();
+    let type = 'desktop';
+    let browser = 'Unknown Browser';
+    
+    // Определение типа устройства
+    if (ua.includes('mobile') || ua.includes('android') || ua.includes('iphone')) {
+      type = 'mobile';
+    } else if (ua.includes('tablet') || ua.includes('ipad')) {
+      type = 'tablet';
+    }
+    
+    // Определение браузера
+    if (ua.includes('chrome')) browser = 'Chrome';
+    else if (ua.includes('firefox')) browser = 'Firefox';
+    else if (ua.includes('safari') && !ua.includes('chrome')) browser = 'Safari';
+    else if (ua.includes('edge')) browser = 'Edge';
+    else if (ua.includes('opera')) browser = 'Opera';
+    
+    return { type, browser };
+  };
+
+  // Функция для получения иконки устройства
+  const getDeviceIcon = (type) => {
+    switch (type) {
+      case 'mobile': return '📱';
+      case 'tablet': return '📱';
+      case 'desktop': return '💻';
+      default: return '🔍';
+    }
+  };
+
+  // Функция для получения статуса сессии
+  const getSessionStatus = (lastUsed) => {
+    const now = new Date();
+    const lastUsedDate = new Date(lastUsed);
+    const diffHours = (now - lastUsedDate) / (1000 * 60 * 60);
+    
+    if (diffHours < 1) return { status: 'active', color: '#10B981', text: t('profile.sessions.status.active') };
+    if (diffHours < 24) return { status: 'recent', color: '#F59E0B', text: t('profile.sessions.status.recent') };
+    return { status: 'inactive', color: '#6B7280', text: t('profile.sessions.status.inactive') };
+  };
+
   return (
     <div className="sessions-list">
-      <h3>{t("profile.sessions.activeSessions")}</h3>
-      {sessions?.map(session => (
-        <div key={session.id} className="session-item">
-          <div className="session-info">
-            <p className="session-device">{session.user_agent}</p>
-            <p className="session-ip">IP: {session.ip_address}</p>
-            <p className="session-last-used">
-              {t("profile.sessions.lastUsed")}: {format(new Date(session.last_used), "MMM d, HH:mm")}
-            </p>
-          </div>
+      <div className="sessions-header">
+        <h3>{t("profile.sessions.activeSessions")}</h3>
+        <div className="sessions-count">
+          {sessions?.length || 0} {t('profile.sessions.sessions')}
         </div>
-      ))}
+      </div>
+      
+      {!sessions || sessions.length === 0 ? (
+        <div className="no-sessions">
+          <div className="no-sessions-icon">🔒</div>
+          <h4>{t('profile.sessions.noSessions')}</h4>
+          <p>{t('profile.sessions.noSessionsDescription')}</p>
+        </div>
+      ) : (
+        <div className="sessions-grid">
+          {sessions?.map((session, index) => {
+            const deviceInfo = getDeviceInfo(session.user_agent);
+            const sessionStatus = getSessionStatus(session.last_used);
+            const isCurrentSession = index === 0; // Предполагаем, что первая сессия - текущая
+            
+            return (
+              <div key={session.id} className={`session-card ${isCurrentSession ? 'current' : ''}`}>
+                <div className="session-header">
+                  <div className="device-info">
+                    <span className="device-icon">{getDeviceIcon(deviceInfo.type)}</span>
+                    <div className="device-details">
+                      <span className="device-type">{deviceInfo.browser}</span>
+                      <span className="device-os">{deviceInfo.type}</span>
+                    </div>
+                  </div>
+                  <div className="session-status" style={{ color: sessionStatus.color }}>
+                    <div className="status-dot" style={{ backgroundColor: sessionStatus.color }}></div>
+                    {sessionStatus.text}
+                  </div>
+                </div>
+                
+                <div className="session-details">
+                  <div className="detail-item">
+                    <span className="detail-label">IP:</span>
+                    <span className="detail-value">{session.ip_address}</span>
+                  </div>
+                  <div className="detail-item">
+                    <span className="detail-label">{t('profile.sessions.lastUsed')}:</span>
+                    <span className="detail-value">
+                      {format(new Date(session.last_used), "MMM d, yyyy 'at' HH:mm")}
+                    </span>
+                  </div>
+                  {session.created_at && (
+                    <div className="detail-item">
+                      <span className="detail-label">{t('profile.sessions.created')}:</span>
+                      <span className="detail-value">
+                        {format(new Date(session.created_at), "MMM d, yyyy")}
+                      </span>
+                    </div>
+                  )}
+                </div>
+                
+                {isCurrentSession && (
+                  <div className="current-session-badge">
+                    {t('profile.sessions.currentSession')}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 };

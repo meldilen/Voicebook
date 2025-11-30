@@ -145,9 +145,19 @@
       "days": "days"
     },
     "sessions": {
-      "activeSessions": "Active Sessions",
-      "lastUsed": "Last used"
+    "activeSessions": "Active Sessions",
+    "sessions": "sessions",
+    "noSessions": "No active sessions",
+    "noSessionsDescription": "You don't have any active sessions at the moment",
+    "lastUsed": "Last used",
+    "created": "Created",
+    "currentSession": "Current Session",
+    "status": {
+      "active": "Active now",
+      "recent": "Recent",
+      "inactive": "Inactive"
     }
+  }
   },
   "settings": {
     "title": "Account Settings",
