@@ -10,6 +10,8 @@ from app.schemas.record import RecordCreate, RecordUpdate, RecordResponse, Recor
 from .audio_processor import AudioProcessor
 from .limit_service import RecordLimitService
 from .achievement_service import AchievementService
+from .daily_stats_service import DailyStatsService
+
 
 logger = logging.getLogger(__name__)
 
@@ -112,6 +114,14 @@ class RecordService:
             self.db.refresh(record)
 
             logger.info(f"Created record {record.id} for user {user_id}")
+
+            try:
+                daily_stats_service = DailyStatsService(self.db)
+                record_date = datetime.now(timezone.utc).date()
+                daily_stats_service.generate_daily_stats(user_id, record_date)
+            except Exception as e:
+                logger.error(f"Error generating daily stats: {str(e)}")
+    
             return record
 
         except Exception as e:

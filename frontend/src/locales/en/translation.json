@@ -136,7 +136,28 @@
       "cancel": "Cancel",
       "confirm": "Yes, Delete Account"
     },
-    "dangerZone": "Danger Zone"
+    "dangerZone": "Danger Zone",
+    "stats": {
+      "totalRecords": "Total Records",
+      "totalDuration": "Total Duration",
+      "consecutiveDays": "Consecutive Days",
+      "minutes": "minutes",
+      "days": "days"
+    },
+    "sessions": {
+      "activeSessions": "Active Sessions",
+      "sessions": "sessions",
+      "noSessions": "No active sessions",
+      "noSessionsDescription": "You don't have any active sessions at the moment",
+      "lastUsed": "Last used",
+      "created": "Created",
+      "currentSession": "Current Session",
+      "status": {
+        "active": "Active now",
+        "recent": "Recent",
+        "inactive": "Inactive"
+      }
+    }
   },
   "settings": {
     "title": "Account Settings",
@@ -199,14 +220,6 @@
       "message": "Make your first recording to see it here."
     }
   },
-  "achievements": {
-    "rarity": {
-      "common": "Common",
-      "rare": "Rare",
-      "epic": "Epic",
-      "legendary": "Legendary"
-    }
-  },
   "audioRecorder": {
     "microphoneBlocked": {
       "title": "Microphone Access Blocked",
@@ -245,7 +258,7 @@
       "excellent": "Excellent"
     }
   },
-    "recordingCard": {
+  "recordingCard": {
     "title": "Your Emotional Report",
     "processing": "Detailed analysis is being processed...",
     "recorded": "Recorded",
@@ -331,14 +344,18 @@
     "noData": "No data recorded for this day",
     "addReflection": "+ Add Reflection",
     "moods": {
-      "joy": "Joy",
-      "surprise": "Surprise",
-      "sadness": "Sadness",
-      "fear": "Fear",
+      "happy": "Happy",
+      "surprised": "Surprised",
+      "sadness": "Sad",
+      "fearful": "Fearful",
       "disgust": "Disgust",
-      "anger": "Anger",
+      "angry": "Angry",
       "neutral": "Neutral"
-    }
+    },
+    "loading": "Loading...",
+    "recordsCount": "Records",
+    "totalDuration": "Total duration",
+    "emotionDistribution": "Emotion distribution"
   },
   "filterControls": {
     "quickFilters": {
@@ -371,13 +388,46 @@
   },
   "moodIcon": {
     "labels": {
-      "joy": "Joy",
-      "surprise": "Surprise",
-      "sadness": "Sadness",
-      "fear": "Fear",
+      "happy": "Happy",
+      "surprised": "Surprised",
+      "sadness": "Sad",
+      "fearful": "Fearful",
       "disgust": "Disgust",
-      "anger": "Anger",
+      "angry": "Angry",
       "neutral": "Neutral"
     }
+  },
+  "achievements": {
+    "title": "Path to Yourself",
+    "subtitle": "Your steps in exploring the inner world",
+    "loading": "Loading your achievements...",
+    "error": {
+      "title": "Loading Error",
+      "message": "Failed to load achievements. Please refresh the page."
+    },
+    "categories": {
+      "all": "All",
+      "voice": "Voice",
+      "regularity": "Regularity",
+      "variety": "Variety",
+      "reflection": "Self-reflection",
+      "positivity": "Positive Thoughts",
+      "analysis": "Depth",
+      "social": "Communication"
+    },
+    "stats": {
+      "achievements": "achievements"
+    },
+    "motivation": {
+      "high": "🎉 Most of the journey is complete!",
+      "medium": "🚀 Halfway there!",
+      "low": "💫 Keep up the good work!",
+      "start": "🌟 Take the first step"
+    },
+    "noResults": {
+      "title": "No achievements found",
+      "message": "Try selecting a different category"
+    },
+    "unknown": "Unknown achievement"
   }
 }

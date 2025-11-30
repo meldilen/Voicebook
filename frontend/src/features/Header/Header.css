@@ -256,3 +256,43 @@
     font-size: 0.7rem;
   }
 }
+
+/* Language Switcher Styles */
+.language-switcher {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+
+.language-switcher:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.language-switcher option {
+  background: #2a2a2a;
+  color: white;
+}
+
+/* Mobile styles for language switcher */
+@media (max-width: 768px) {
+  .language-switcher {
+    padding: 6px 8px;
+    font-size: 0.8rem;
+    margin-right: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .language-switcher {
+    padding: 5px 6px;
+    font-size: 0.75rem;
+    margin-right: 5px;
+  }
+}

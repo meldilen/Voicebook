@@ -4,12 +4,12 @@ const MoodIcon = ({ mood }) => {
   const { t } = useTranslation();
 
   const moodOptions = [
-    { value: 'joy', emoji: '😊', label: t("moodIcon.labels.joy"), color: '#2ed573' },
-    { value: 'surprise', emoji: '😲', label: t("moodIcon.labels.surprise"), color: '#2ed573' },
+    { value: 'happy', emoji: '😊', label: t("moodIcon.labels.happy"), color: '#2ed573' },
+    { value: 'surprised', emoji: '😲', label: t("moodIcon.labels.surprised"), color: '#2ed573' },
     { value: 'sadness', emoji: '😢', label: t("moodIcon.labels.sadness"), color: '#bdd5ee' },
-    { value: 'fear', emoji: '😨', label: t("moodIcon.labels.fear"), color: '#bdd5ee' },
+    { value: 'fearful', emoji: '😨', label: t("moodIcon.labels.fearful"), color: '#bdd5ee' },
     { value: 'disgust', emoji: '🤢', label: t("moodIcon.labels.disgust"), color: '#bdd5ee' },
-    { value: 'anger', emoji: '😠', label: t("moodIcon.labels.anger"), color: '#ff4757' },
+    { value: 'angry', emoji: '😠', label: t("moodIcon.labels.angry"), color: '#ff4757' },
     { value: 'neutral', emoji: '😐', label: t("moodIcon.labels.neutral"), color: '#ffa500' }
   ];
 

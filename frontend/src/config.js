@@ -33,6 +33,11 @@ export const API_CONFIG = {
       GET_STATS: '/achievements/stats',
       GET_PROGRESS: '/achievements/{achievementId}/progress',
       UPDATE_PROGRESS: '/achievements/{achievementId}/progress'
-    }
+    },
+    CALENDAR: {
+      GET_MONTH: '/calendar/{year}/{month}',
+      GET_DAY: '/calendar/day/{date}',
+      GENERATE_DAY: '/calendar/generate/{date}'
+    },
   }
 };

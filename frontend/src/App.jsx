@@ -7,8 +7,8 @@ import AuthPage from "./pages/AuthPage";
 import HomePage from "./pages/HomePage";
 import ProfilePage from "./pages/ProfilePage";
 import SettingsPage from "./pages/SettingsPage";
-import ProtectedRoute from "./app/ProtectedRoute";
-import InitializeAuth from "./features/auth/InitializeAuth";
+import ProtectedRoute from "./app/ProtectedRoute.jsx";
+import InitializeAuth from "./features/auth/InitializeAuth.jsx";
 import JournalPage from "./pages/JournalPage"; 
 import AchievementsPage from "./pages/AchievementsPage";
 
