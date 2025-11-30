@@ -5,7 +5,7 @@ import { baseQueryWithReauth } from "../auth/authApi";
 export const recordingsApi = createApi({
   reducerPath: "recordingsApi",
   baseQuery: baseQueryWithReauth,
-  tagTypes: ["Recordings"],
+  tagTypes: ["Recordings", "RecordingLimit"],
   endpoints: (builder) => ({
     uploadRecording: builder.mutation({
       query: (formData) => ({
@@ -13,7 +13,7 @@ export const recordingsApi = createApi({
         method: "POST",
         body: formData,
       }),
-      invalidatesTags: ["Recordings"],
+      invalidatesTags: ["Recordings", "RecordingLimit"],
     }),
     getRecordings: builder.query({
       query: ({
@@ -44,7 +44,7 @@ export const recordingsApi = createApi({
         ),
         method: "DELETE",
       }),
-      invalidatesTags: ["Recordings"],
+      invalidatesTags: ["Recordings", "RecordingLimit"],
     }),
     setRecordingFeedback: builder.mutation({
       query: ({ recordId, feedback }) => ({
@@ -57,6 +57,12 @@ export const recordingsApi = createApi({
       }),
       invalidatesTags: ["Recordings"],
     }),
+    getRecordingLimit: builder.query({
+      query: () => ({
+        url: API_CONFIG.ENDPOINTS.RECORDS.LIMITS,
+      }),
+      providesTags: ["RecordingLimit"],
+    }),
   }),
 });
 
@@ -65,4 +71,5 @@ export const {
   useGetRecordingsQuery,
   useDeleteRecordingMutation,
   useSetRecordingFeedbackMutation,
+  useGetRecordingLimitQuery,
 } = recordingsApi;

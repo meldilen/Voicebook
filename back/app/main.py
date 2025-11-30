@@ -8,7 +8,7 @@ import logging
 
 from .config import settings
 from .database import engine, get_db
-from .models import user, record, session, achievement, user_achievement
+from .models import user
 from .routes import auth, users, records, achievements
 from .auth import cleanup_expired_sessions
 
@@ -25,6 +25,10 @@ logger = logging.getLogger(__name__)
 try:
     user.Base.metadata.create_all(bind=engine)
     logger.info("Database tables created successfully")
+
+    from scripts.init_achievements import init_achievements
+    logger.info("Starting achievements initialization...")
+    init_achievements()
 except Exception as e:
     logger.error(f"Error creating database tables: {str(e)}")
     raise
@@ -49,7 +53,7 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(users.router)
 app.include_router(records.router)
-# app.include_router(achievements.router)
+app.include_router(achievements.router)
 
 @app.get("/")
 async def root():

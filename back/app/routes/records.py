@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Query, UploadFile, File, Body, Form
 from sqlalchemy.orm import Session
 from datetime import datetime
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 import uuid
 import os
 
@@ -60,6 +60,19 @@ async def get_emotion_timeline(
     timeline = record_service.get_emotion_timeline(current_user.id, days)
     
     return timeline
+
+@router.get("/limits", response_model=Dict[str, Any])
+async def get_recording_limits(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Get user's recording limits and usage for today.
+    """
+    record_service = RecordService(db)
+    limit_info = record_service.get_user_recording_limit(current_user.id)
+    
+    return limit_info
 
 @router.post("/upload", response_model=RecordResponse, status_code=status.HTTP_201_CREATED)
 async def upload_audio_recording(
@@ -194,3 +207,4 @@ async def update_record_feedback(
     )
     
     return updated_record
+

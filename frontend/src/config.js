@@ -21,10 +21,18 @@ export const API_CONFIG = {
       UPDATE_FEEDBACK: '/records/{recordId}/feedback',
       DELETE: '/records/{recordId}',
       STATS: '/records/stats',
+      LIMITS: "/records/limits",
       TIMELINE: '/records/timeline'
     },
     USER: {
       SESSIONS: '/users/me/sessions'
+    },
+    ACHIEVEMENTS: {
+      GET_ALL: '/achievements/',
+      GET_MY: '/achievements/my',
+      GET_STATS: '/achievements/stats',
+      GET_PROGRESS: '/achievements/{achievementId}/progress',
+      UPDATE_PROGRESS: '/achievements/{achievementId}/progress'
     }
   }
 };

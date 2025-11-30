@@ -9,6 +9,7 @@ from app.models.record import Record
 from app.models.session import UserSession
 from app.schemas.user import UserCreate, UserUpdate, UserWithStats, SessionInfo
 from app.auth import get_password_hash
+from .achievement_service import AchievementService
 
 logger = logging.getLogger(__name__)
 
@@ -42,6 +43,12 @@ class UserService:
                 self.db.commit()
                 self.db.refresh(user)
 
+                try:
+                    AchievementService.initialize_user_achievements(self.db, user.id)
+                    logger.info(f"Initialized achievements for new user {user.id}")
+                except Exception as e:
+                    logger.error(f"Failed to initialize achievements for user {user.id}: {str(e)}")
+                    
                 logger.info(f"Created new user: {user.username} ({user.email})")
                 return user
 

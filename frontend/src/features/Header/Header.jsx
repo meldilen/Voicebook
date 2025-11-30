@@ -15,10 +15,10 @@ import { selectCurrentUser } from "../auth/authSlice";
 import { useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
 import { useEffect, useState } from "react";
+import { useGetRecordingLimitQuery } from "../recordings/recordingsApi";
 
 function Header({
   onCalendarToggle,
-  availableRecordings = 5,
   emocoinsBalance = 150,
   onBottomSheetToggle,
 }) {
@@ -26,6 +26,7 @@ function Header({
   const location = useLocation();
   const navigate = useNavigate();
   const [isMobile, setIsMobile] = useState(false);
+  const { data: limitData } = useGetRecordingLimitQuery();
 
   const isHomePage = location.pathname === "/homepage";
   const isJournalPage = location.pathname === "/journal";
@@ -34,6 +35,7 @@ function Header({
   const currentUser = useSelector(selectCurrentUser);
 
   const streakDays = currentUser?.consecutive_days || 1;
+  const availableRecordings = limitData ? limitData.remaining : 5;
 
   useEffect(() => {
     const checkIsMobile = () => {
