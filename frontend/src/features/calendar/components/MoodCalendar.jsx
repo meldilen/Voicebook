@@ -1,74 +1,66 @@
-import { useState, useEffect } from "react";
-import {
-  FaChevronLeft,
-  FaChevronRight,
-} from "react-icons/fa";
+import { useState } from "react";
+import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import "./MoodCalendar.css";
 import DayPopup from "./DayPopup";
 import { MoodIcon } from "./MoodIcon";
-import { useGetTotalsQuery } from "../totalApi";
+import { useGetCalendarMonthQuery } from "../calendarApi";
 import { useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
 
-const Calendar = () => {
+const MoodCalendar = () => {
   const today = new Date();
   const [currentDate, setCurrentDate] = useState(today);
-  const [selectedDay, setSelectedDay] = useState(today.getDate());
-  const [dailyData, setDailyData] = useState({});
+  const [selectedDate, setSelectedDate] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const { t, i18n } = useTranslation();
 
-  const userId = useSelector((state) => state.auth.user?.ID);
+  const token = useSelector((state) => state.auth.token);
 
   const year = currentDate.getFullYear();
-  const month = currentDate.getMonth();
-  const startDate = new Date(year, month, 1).toISOString().split("T")[0];
-  const endDate = new Date(year, month + 1, 0).toISOString().split("T")[0];
+  const month = currentDate.getMonth() + 1; // Месяцы с 1 до 12
 
-  const { data: response, refetch } = useGetTotalsQuery(
-    { userId, startDate, endDate },
-    { skip: !userId }
+  // Получаем данные календаря за месяц
+  const { 
+    data: calendarData = [], 
+    isLoading: calendarLoading
+  } = useGetCalendarMonthQuery(
+    { year, month },
+    { skip: !token }
   );
 
-  useEffect(() => {
-    if (userId) {
-      refetch();
-    }
-  }, [userId, refetch]);
+  // Преобразуем данные в удобный формат
+  const dailyData = calendarData.reduce((acc, day) => {
+    const date = new Date(day.date);
+    const dayNumber = date.getDate();
+    acc[dayNumber] = {
+      mood: day.dominant_emotion,
+      summary: day.daily_summary,
+      recordsCount: day.records_count,
+      hasRecords: day.has_records
+    };
+    return acc;
+  }, {});
 
-  useEffect(() => {
-    if (response?.success && response.data) {
-      const transformedData = {};
-      response.data.forEach((day) => {
-        const dayNumber = new Date(day.date).getDate();
-        transformedData[dayNumber] = {
-          mood: day.emotion,
-          summary: day.summary,
-        };
-        console.log(day.emotion, day.summary);
-      });
-      setDailyData(transformedData);
-    } else {
-      setDailyData({});
-    }
-  }, [response]);
-
-  const firstDay = new Date(year, month, 1);
-  const startDay = (firstDay.getDay() + 6) % 7;
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const firstDay = new Date(year, month - 1, 1);
+  const startDay = (firstDay.getDay() + 6) % 7; // Начинаем с понедельника
+  const daysInMonth = new Date(year, month, 0).getDate();
 
   const calendarDays = [
     ...Array(startDay).fill(null),
     ...Array.from({ length: daysInMonth }, (_, i) => i + 1),
   ];
 
-  // Локализация названия месяца с большой буквы
-  const monthName = currentDate.toLocaleString(i18n.language, { month: "long" });
+  // Локализация названия месяца
+  const monthName = currentDate.toLocaleString(i18n.language, { 
+    month: "long",
+    year: "numeric"
+  });
   const capitalizedMonthName = monthName.charAt(0).toUpperCase() + monthName.slice(1);
 
   const handleDayClick = (day) => {
     if (day) {
-      setSelectedDay(day);
+      const selectedDate = new Date(year, month - 1, day);
+      setSelectedDate(selectedDate.toISOString().split('T')[0]);
     }
   };
 
@@ -77,11 +69,16 @@ const Calendar = () => {
     const newDate = new Date(currentDate);
     newDate.setMonth(newDate.getMonth() + increment);
     setCurrentDate(newDate);
-    setSelectedDay(null);
+    setSelectedDate(null);
     setTimeout(() => setIsLoading(false), 300);
   };
 
-  const currentDayData = selectedDay ? dailyData[selectedDay] : null;
+  const getDayData = (day) => {
+    return dailyData[day] || null;
+  };
+
+  const selectedDayData = selectedDate ? 
+    calendarData.find(day => day.date === selectedDate) : null;
 
   return (
     <div className="calendar-wrapper">
@@ -96,16 +93,18 @@ const Calendar = () => {
             onClick={() => changeMonth(-1)}
             className="nav-button"
             aria-label={t("calendar.previousMonth")}
+            disabled={calendarLoading}
           >
             <FaChevronLeft />
           </button>
           <h2 className="month-year-display">
-            {capitalizedMonthName} {year}
+            {capitalizedMonthName}
           </h2>
           <button
             onClick={() => changeMonth(1)}
             className="nav-button"
             aria-label={t("calendar.nextMonth")}
+            disabled={calendarLoading}
           >
             <FaChevronRight />
           </button>
@@ -120,23 +119,23 @@ const Calendar = () => {
         ))}
       </div>
 
-      <div className={`days-grid ${isLoading ? "loading" : ""}`}>
+      <div className={`days-grid ${isLoading || calendarLoading ? "loading" : ""}`}>
         {calendarDays.map((day, index) =>
-          isLoading ? (
+          isLoading || calendarLoading ? (
             <div key={index} className="day-cell loading-skeleton" />
           ) : (
             <div
               key={index}
-              className={`day-cell ${day === selectedDay ? "selected" : ""} ${
-                dailyData[day] ? "has-note" : ""
-              }`}
+              className={`day-cell ${selectedDate && day === new Date(selectedDate).getDate() ? "selected" : ""} ${
+                getDayData(day)?.hasRecords ? "has-note" : ""
+              } ${day === today.getDate() && month === today.getMonth() + 1 && year === today.getFullYear() ? "today" : ""}`}
               onClick={() => handleDayClick(day)}
               tabIndex={day ? 0 : -1}
             >
               {day && <span className="day-number">{day}</span>}
-              {dailyData[day] ? (
+              {getDayData(day)?.hasRecords ? (
                 <div className="mood-emoji-main">
-                  <MoodIcon mood={dailyData[day].mood} />
+                  <MoodIcon mood={getDayData(day).mood} />
                 </div>
               ) : (
                 day && <div className="empty-day"></div>
@@ -147,13 +146,12 @@ const Calendar = () => {
       </div>
 
       <DayPopup
-        currentDayData={currentDayData}
-        selectedDay={selectedDay}
-        monthName={capitalizedMonthName}
-        year={year}
+        selectedDate={selectedDate}
+        dayData={selectedDayData}
+        onClose={() => setSelectedDate(null)}
       />
     </div>
   );
 };
 
-export default Calendar;
+export default MoodCalendar;

@@ -145,19 +145,19 @@
       "days": "days"
     },
     "sessions": {
-    "activeSessions": "Active Sessions",
-    "sessions": "sessions",
-    "noSessions": "No active sessions",
-    "noSessionsDescription": "You don't have any active sessions at the moment",
-    "lastUsed": "Last used",
-    "created": "Created",
-    "currentSession": "Current Session",
-    "status": {
-      "active": "Active now",
-      "recent": "Recent",
-      "inactive": "Inactive"
+      "activeSessions": "Active Sessions",
+      "sessions": "sessions",
+      "noSessions": "No active sessions",
+      "noSessionsDescription": "You don't have any active sessions at the moment",
+      "lastUsed": "Last used",
+      "created": "Created",
+      "currentSession": "Current Session",
+      "status": {
+        "active": "Active now",
+        "recent": "Recent",
+        "inactive": "Inactive"
+      }
     }
-  }
   },
   "settings": {
     "title": "Account Settings",
@@ -344,14 +344,18 @@
     "noData": "No data recorded for this day",
     "addReflection": "+ Add Reflection",
     "moods": {
-      "joy": "Joy",
-      "surprise": "Surprise",
-      "sadness": "Sadness",
-      "fear": "Fear",
+      "happy": "Happy",
+      "surprised": "Surprised",
+      "sadness": "Sad",
+      "fearful": "Fearful",
       "disgust": "Disgust",
-      "anger": "Anger",
+      "angry": "Angry",
       "neutral": "Neutral"
-    }
+    },
+    "loading": "Loading...",
+    "recordsCount": "Records",
+    "totalDuration": "Total duration",
+    "emotionDistribution": "Emotion distribution"
   },
   "filterControls": {
     "quickFilters": {
@@ -384,12 +388,12 @@
   },
   "moodIcon": {
     "labels": {
-      "joy": "Joy",
-      "surprise": "Surprise",
-      "sadness": "Sadness",
-      "fear": "Fear",
+      "happy": "Happy",
+      "surprised": "Surprised",
+      "sadness": "Sad",
+      "fearful": "Fearful",
       "disgust": "Disgust",
-      "anger": "Anger",
+      "angry": "Angry",
       "neutral": "Neutral"
     }
   },

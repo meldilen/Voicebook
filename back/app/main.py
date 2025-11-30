@@ -9,7 +9,7 @@ import logging
 from .config import settings
 from .database import engine, get_db
 from .models import user
-from .routes import auth, users, records, achievements
+from .routes import auth, users, records, achievements, calendar
 from .auth import cleanup_expired_sessions
 
 logging.basicConfig(
@@ -54,6 +54,7 @@ app.include_router(auth.router)
 app.include_router(users.router)
 app.include_router(records.router)
 app.include_router(achievements.router)
+app.include_router(calendar.router)
 
 @app.get("/")
 async def root():

@@ -2,6 +2,7 @@ from .user import UserCreate, UserUpdate, UserResponse, UserLogin
 from .record import RecordCreate, RecordUpdate, RecordResponse
 from .achievement import AchievementResponse
 from .common import Message
+from .daily_stats import DailyStatsResponse
 
 __all__ = [
     "UserBase",
@@ -25,5 +26,6 @@ __all__ = [
     "Token",
     "TokenPayload",
     "LoginResponse",
-    "LogoutResponse"
+    "LogoutResponse",
+    "DailyStatsResponse"
 ]

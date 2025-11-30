@@ -351,14 +351,18 @@
     "noData": "На этот день нет записей",
     "addReflection": "+ Добавить запись",
     "moods": {
-      "joy": "Радость",
+      "happy": "Радость",
       "surprise": "Удивление",
       "sadness": "Грусть",
       "fear": "Страх",
       "disgust": "Отвращение",
       "anger": "Злость",
       "neutral": "Нейтральное"
-    }
+    },
+    "loading": "Загрузка...",
+    "recordsCount": "Записи",
+    "totalDuration": "Длительность",
+    "emotionDistribution": "Распределение эмоций"
   },
   "filterControls": {
     "quickFilters": {
@@ -391,7 +395,7 @@
   },
   "moodIcon": {
     "labels": {
-      "joy": "Радость",
+      "happy": "Радость",
       "surprise": "Удивление",
       "sadness": "Грусть",
       "fear": "Страх",

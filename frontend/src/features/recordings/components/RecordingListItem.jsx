@@ -4,12 +4,12 @@ import { format, parseISO } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
 import "./RecordingListItem.css";
 import { useDeleteRecordingMutation } from "../recordingsApi";
-import { useRecalculateTotalsMutation } from "../../calendar/totalApi";
+import { useGenerateCalendarDayMutation } from "../../calendar/calendarApi";
 
 function RecordingListItem({ recording, isExpanded, onToggleExpand }) {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteRecording] = useDeleteRecordingMutation();
-  const [recalculateTotals] = useRecalculateTotalsMutation();
+  const [generateCalendarDay] = useGenerateCalendarDayMutation();
   const { t } = useTranslation();
 
   const capitalizeFirst = (str) => {
@@ -32,12 +32,14 @@ function RecordingListItem({ recording, isExpanded, onToggleExpand }) {
       const zonedDate = toZonedTime(recordDate, userTimeZone);
       const utcDate = format(zonedDate, "yyyy-MM-dd");
 
-      await deleteRecording(recording.id)
-      if (recording.user_id) {
-        await recalculateTotals({
-          userId: recording.user_id.toString(),
+      await deleteRecording(recording.id).unwrap();
+      
+      try {
+        await generateCalendarDay({
           date: utcDate,
         }).unwrap();
+      } catch (calendarError) {
+        console.warn("Calendar stats regeneration failed:", calendarError);
       }
 
       setShowDeleteConfirm(false);

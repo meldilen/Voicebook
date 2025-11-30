@@ -1,18 +1,26 @@
 import './DayPopup.css';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from "react-i18next";
+import { useGetCalendarDayQuery } from '../calendarApi';
 
-const DayPopup = ({ currentDayData, selectedDay, monthName, year }) => {
+const DayPopup = ({ selectedDate, dayData, onClose }) => {
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+
+  const { data: detailedData, isLoading } = useGetCalendarDayQuery(
+    { date: selectedDate },
+    { skip: !selectedDate }
+  );
+
+  const displayData = detailedData || dayData;
 
   const moodOptions = [
-    { value: 'joy', label: t("dayPopup.moods.joy"), class: 'positive' },
-    { value: 'surprise', label: t("dayPopup.moods.surprise"), class: 'positive' },
+    { value: 'happy', label: t("dayPopup.moods.happy"), class: 'positive' },
+    { value: 'surprised', label: t("dayPopup.moods.surprised"), class: 'positive' },
     { value: 'sadness', label: t("dayPopup.moods.sadness"), class: 'negative' },
-    { value: 'fear', label: t("dayPopup.moods.fear"), class: 'negative' },
+    { value: 'fearful', label: t("dayPopup.moods.fearful"), class: 'negative' },
     { value: 'disgust', label: t("dayPopup.moods.disgust"), class: 'negative' },
-    { value: 'anger', label: t("dayPopup.moods.anger"), class: 'aggressive' },
+    { value: 'angry', label: t("dayPopup.moods.angry"), class: 'aggressive' },
     { value: 'neutral', label: t("dayPopup.moods.neutral"), class: 'neutral' }
   ];
 
@@ -30,29 +38,76 @@ const DayPopup = ({ currentDayData, selectedDay, monthName, year }) => {
     navigate('/homepage');
   };
 
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString(i18n.language, {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    });
+  };
+
+  if (!selectedDate) {
+    return null;
+  }
+
   return (
     <div className="voice-note-panel">
       <div className="popup-header">
-        <h3>{selectedDay ? `${monthName} ${selectedDay}, ${year}` : t("dayPopup.title")}</h3>
+        <h3>{formatDate(selectedDate)}</h3>
+        <button className="close-button" onClick={onClose}>×</button>
         <div className="divider"></div>
       </div>
 
-      {currentDayData ? (
+      {isLoading ? (
+        <div className="loading-state">
+          <p>{t("dayPopup.loading")}</p>
+        </div>
+      ) : displayData ? (
         <div className="note-content">
-          <div className="mood-section">
-            <h4>{t("dayPopup.yourMood")}</h4>
-            <div className="mood-display">
-              <span className={`emotion-pill ${getMoodClass(currentDayData.mood)}`}>
-                {getMoodLabel(currentDayData.mood)}
+          <div className="stats-overview">
+            <div className="stat-item">
+              <span className="stat-label">{t("dayPopup.recordsCount")}</span>
+              <span className="stat-value">{displayData.records_count || 0}</span>
+            </div>
+            <div className="stat-item">
+              <span className="stat-label">{t("dayPopup.totalDuration")}</span>
+              <span className="stat-value">
+                {Math.round(displayData.total_duration || 0)} min
               </span>
             </div>
           </div>
 
-          {currentDayData.summary && (
+          {displayData.dominant_emotion && (
+            <div className="mood-section">
+              <h4>{t("dayPopup.yourMood")}</h4>
+              <div className="mood-display">
+                <span className={`emotion-pill ${getMoodClass(displayData.dominant_emotion)}`}>
+                  {getMoodLabel(displayData.dominant_emotion)}
+                </span>
+              </div>
+            </div>
+          )}
+
+          {displayData.daily_summary && (
             <div className="summary-section">
               <h4>{t("dayPopup.dailySummary")}</h4>
               <div className="summary-text">
-                <p>{currentDayData.summary}</p>
+                <p>{displayData.daily_summary}</p>
+              </div>
+            </div>
+          )}
+
+          {displayData.emotion_distribution && (
+            <div className="emotion-distribution">
+              <h4>{t("dayPopup.emotionDistribution")}</h4>
+              <div className="emotion-bars">
+                {Object.entries(displayData.emotion_distribution).map(([emotion, count]) => (
+                  <div key={emotion} className="emotion-bar">
+                    <span className="emotion-name">{getMoodLabel(emotion)}</span>
+                    <span className="emotion-count">{count}</span>
+                  </div>
+                ))}
               </div>
             </div>
           )}
