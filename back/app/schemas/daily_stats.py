@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from datetime import date, datetime
 from typing import Optional, Dict, Any
 
@@ -34,6 +34,9 @@ class CalendarResponse(BaseModel):
     dominant_emotion: Optional[str] = None
     records_count: int = 0
     has_records: bool = False
+    
+    class Config:
+        from_attributes = True
 
 class CalendarDetailResponse(DailyStatsResponse):
     pass

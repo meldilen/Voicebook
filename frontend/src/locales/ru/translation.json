@@ -352,11 +352,11 @@
     "addReflection": "+ Добавить запись",
     "moods": {
       "happy": "Радость",
-      "surprise": "Удивление",
+      "surprised": "Удивление",
       "sadness": "Грусть",
-      "fear": "Страх",
+      "fearful": "Страх",
       "disgust": "Отвращение",
-      "anger": "Злость",
+      "angry": "Злость",
       "neutral": "Нейтральное"
     },
     "loading": "Загрузка...",

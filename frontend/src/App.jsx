@@ -31,7 +31,6 @@ return (
             )}
             <Routes>
               <Route path="/" element={<Navigate to="/onboarding" replace />} />
-              {/* <Route path="/" element={<Navigate to="/achievements" replace />} /> */}
               <Route path="/homepage" element={<HomePage />} />
               <Route path="/onboarding" element={<OnboardingPage />} />
               <Route path="/login" element={<AuthPage />} />
@@ -40,7 +39,6 @@ return (
               
               <Route element={<ProtectedRoute />}>
                 <Route path="/homepage" element={<HomePage />} />
-                {/* <Route path="/achievements" element={<AchievementsPage />} /> */}
                 <Route path="/profile" element={<ProfilePage />} />
                 <Route path="/profile/settings" element={<SettingsPage />} />
                 <Route path="/journal" element={<JournalPage />} />
