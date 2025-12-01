@@ -39,12 +39,31 @@ const DayPopup = ({ selectedDate, dayData, onClose }) => {
   };
 
   const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString(i18n.language, {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric'
-    });
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) {
+        // Если дата некорректна, парсим вручную
+        const parts = dateString.split('-');
+        if (parts.length === 3) {
+          const [year, month, day] = parts.map(Number);
+          const validDate = new Date(year, month - 1, day);
+          return validDate.toLocaleDateString(i18n.language, {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric'
+          });
+        }
+        return dateString;
+      }
+      return date.toLocaleDateString(i18n.language, {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+      });
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return dateString;
+    }
   };
 
   if (!selectedDate) {
@@ -69,12 +88,6 @@ const DayPopup = ({ selectedDate, dayData, onClose }) => {
             <div className="stat-item">
               <span className="stat-label">{t("dayPopup.recordsCount")}</span>
               <span className="stat-value">{displayData.records_count || 0}</span>
-            </div>
-            <div className="stat-item">
-              <span className="stat-label">{t("dayPopup.totalDuration")}</span>
-              <span className="stat-value">
-                {Math.round(displayData.total_duration || 0)} min
-              </span>
             </div>
           </div>
 

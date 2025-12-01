@@ -11,7 +11,7 @@ function RecordingCard({ result }) {
     return str.charAt(0).toUpperCase() + str.slice(1);
   };
 
-  const formattedDate = new Date(result.record_date).toLocaleDateString(
+  const formattedDate = new Date(result.created_at).toLocaleDateString(
     "en-US",
     {
       weekday: "long",

@@ -13,7 +13,7 @@ export const recordingsApi = createApi({
         method: "POST",
         body: formData,
       }),
-      invalidatesTags: ["Recordings", "RecordingLimit"],
+      invalidatesTags: ["Recordings", "RecordingLimit", "Achievements"],
     }),
     getRecordings: builder.query({
       query: ({

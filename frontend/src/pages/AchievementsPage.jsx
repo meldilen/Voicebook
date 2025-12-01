@@ -25,7 +25,9 @@ function AchievementsPage() {
     data: achievementsData,
     isLoading: achievementsLoading,
     error: achievementsError,
-  } = useGetMyAchievementsQuery();
+  } = useGetMyAchievementsQuery(undefined, {
+  refetchOnMountOrArgChange: true,
+});
 
   const { data: statsData, isLoading: statsLoading } =
     useGetAchievementStatsQuery();

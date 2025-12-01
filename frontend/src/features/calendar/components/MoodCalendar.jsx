@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import "./MoodCalendar.css";
 import DayPopup from "./DayPopup";
 import { MoodIcon } from "./MoodIcon";
-import { useGetCalendarMonthQuery } from "../calendarApi";
+import { useGetCalendarMonthQuery, useGetCalendarDayQuery } from "../calendarApi";
 import { useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
 
@@ -13,44 +13,82 @@ const MoodCalendar = () => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const { t, i18n } = useTranslation();
-
   const token = useSelector((state) => state.auth.token);
 
   const year = currentDate.getFullYear();
-  const month = currentDate.getMonth() + 1; // Месяцы с 1 до 12
+  const month = currentDate.getMonth(); // Изменено: используем 0-based месяц
 
-  // Получаем данные календаря за месяц
   const { 
     data: calendarData = [], 
-    isLoading: calendarLoading
+    isLoading: calendarLoading,
   } = useGetCalendarMonthQuery(
-    { year, month },
-    { skip: !token }
+    { year, month: month + 1 }, // API ожидает 1-based месяц
+    { 
+      skip: !token,
+      refetchOnMountOrArgChange: true
+    }
   );
 
-  // Преобразуем данные в удобный формат
-  const dailyData = calendarData.reduce((acc, day) => {
-    const date = new Date(day.date);
-    const dayNumber = date.getDate();
-    acc[dayNumber] = {
-      mood: day.dominant_emotion,
-      summary: day.daily_summary,
-      recordsCount: day.records_count,
-      hasRecords: day.has_records
-    };
-    return acc;
-  }, {});
+  // Запрос детальной информации при выборе дня
+  const { 
+    data: selectedDayDetail,
+    isLoading: dayDetailLoading,
+  } = useGetCalendarDayQuery(
+    { date: selectedDate },
+    { skip: !selectedDate || !token }
+  );
 
-  const firstDay = new Date(year, month - 1, 1);
-  const startDay = (firstDay.getDay() + 6) % 7; // Начинаем с понедельника
-  const daysInMonth = new Date(year, month, 0).getDate();
+  // Преобразуем данные в удобный формат с useMemo
+  const dailyData = useMemo(() => {
+    if (!calendarData) return {};
+    
+    return calendarData.reduce((acc, day) => {
+      try {
+        // Безопасное извлечение дня из даты
+        const dateStr = day.date;
+        let dayNumber;
+        
+        if (typeof dateStr === 'string') {
+          // Парсим строку даты в формате "YYYY-MM-DD"
+          const dateObj = new Date(dateStr);
+          if (!isNaN(dateObj.getTime())) {
+            dayNumber = dateObj.getDate();
+          } else {
+            // Альтернативный парсинг
+            const parts = dateStr.split('-');
+            if (parts.length >= 3) {
+              dayNumber = parseInt(parts[2], 10);
+            }
+          }
+        } else if (day.date instanceof Date) {
+          dayNumber = day.date.getDate();
+        }
+        
+        if (dayNumber && !isNaN(dayNumber)) {
+          acc[dayNumber] = {
+            mood: day.dominant_emotion,
+            summary: day.daily_summary,
+            recordsCount: day.records_count,
+            hasRecords: day.has_records || day.records_count > 0
+          };
+        }
+      } catch (error) {
+        console.error('Error processing day data:', error, day);
+      }
+      return acc;
+    }, {});
+  }, [calendarData]);
+
+  // Используем старую проверенную конструкцию для дней
+  const firstDay = new Date(year, month, 1);
+  const startDay = (firstDay.getDay() + 6) % 7; // Понедельник как первый день недели
+  const daysInMonth = new Date(year, month + 1, 0).getDate(); // Последний день месяца
 
   const calendarDays = [
     ...Array(startDay).fill(null),
     ...Array.from({ length: daysInMonth }, (_, i) => i + 1),
   ];
 
-  // Локализация названия месяца
   const monthName = currentDate.toLocaleString(i18n.language, { 
     month: "long",
     year: "numeric"
@@ -59,17 +97,22 @@ const MoodCalendar = () => {
 
   const handleDayClick = (day) => {
     if (day) {
-      const selectedDate = new Date(year, month - 1, day);
-      setSelectedDate(selectedDate.toISOString().split('T')[0]);
+      // Создаем дату правильно
+      const formattedDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      console.log('Selected date:', formattedDate, 'Day:', day, 'Month:', month);
+      setSelectedDate(formattedDate);
     }
   };
 
-  const changeMonth = (increment) => {
+  const changeMonth = async (increment) => {
+    if (calendarLoading) return;
+    
     setIsLoading(true);
     const newDate = new Date(currentDate);
     newDate.setMonth(newDate.getMonth() + increment);
     setCurrentDate(newDate);
     setSelectedDate(null);
+    
     setTimeout(() => setIsLoading(false), 300);
   };
 
@@ -77,8 +120,33 @@ const MoodCalendar = () => {
     return dailyData[day] || null;
   };
 
-  const selectedDayData = selectedDate ? 
-    calendarData.find(day => day.date === selectedDate) : null;
+  const isToday = (day) => {
+    if (!day) return false;
+    const cellDate = new Date(year, month, day);
+    return cellDate.toDateString() === today.toDateString();
+  };
+
+  const isSelected = (day) => {
+    if (!day || !selectedDate) return false;
+    try {
+      // Сравниваем только день, месяц и год
+      const cellDate = new Date(year, month, day);
+      const selected = new Date(selectedDate);
+      
+      return cellDate.getDate() === selected.getDate() &&
+             cellDate.getMonth() === selected.getMonth() &&
+             cellDate.getFullYear() === selected.getFullYear();
+    } catch (error) {
+      console.error('Error comparing dates:', error);
+      return false;
+    }
+  };
+
+  // Используем детальные данные, если они есть, иначе данные из списка
+  const selectedDayData = selectedDayDetail || 
+    (selectedDate ? calendarData.find(day => day.date === selectedDate) : null);
+
+  const isLoadingOverall = calendarLoading || isLoading;
 
   return (
     <div className="calendar-wrapper">
@@ -93,7 +161,7 @@ const MoodCalendar = () => {
             onClick={() => changeMonth(-1)}
             className="nav-button"
             aria-label={t("calendar.previousMonth")}
-            disabled={calendarLoading}
+            disabled={isLoadingOverall}
           >
             <FaChevronLeft />
           </button>
@@ -104,7 +172,7 @@ const MoodCalendar = () => {
             onClick={() => changeMonth(1)}
             className="nav-button"
             aria-label={t("calendar.nextMonth")}
-            disabled={calendarLoading}
+            disabled={isLoadingOverall}
           >
             <FaChevronRight />
           </button>
@@ -119,18 +187,27 @@ const MoodCalendar = () => {
         ))}
       </div>
 
-      <div className={`days-grid ${isLoading || calendarLoading ? "loading" : ""}`}>
+      <div className={`days-grid ${isLoadingOverall ? "loading" : ""}`}>
         {calendarDays.map((day, index) =>
-          isLoading || calendarLoading ? (
+          isLoadingOverall ? (
             <div key={index} className="day-cell loading-skeleton" />
           ) : (
             <div
               key={index}
-              className={`day-cell ${selectedDate && day === new Date(selectedDate).getDate() ? "selected" : ""} ${
-                getDayData(day)?.hasRecords ? "has-note" : ""
-              } ${day === today.getDate() && month === today.getMonth() + 1 && year === today.getFullYear() ? "today" : ""}`}
+              className={`day-cell 
+                ${isSelected(day) ? "selected" : ""}
+                ${getDayData(day)?.hasRecords ? "has-note" : ""}
+                ${isToday(day) ? "today" : ""}`}
               onClick={() => handleDayClick(day)}
+              onKeyDown={(e) => e.key === 'Enter' && handleDayClick(day)}
               tabIndex={day ? 0 : -1}
+              role="button"
+              aria-label={day ? 
+                getDayData(day)?.hasRecords ? 
+                  `${t('calendar.dayWithRecords', { day })}. ${t('calendar.mood')}: ${getDayData(day).mood}` : 
+                  `${t('calendar.dayWithoutRecords', { day })}` : 
+                t('calendar.emptyDay')
+              }
             >
               {day && <span className="day-number">{day}</span>}
               {getDayData(day)?.hasRecords ? (
@@ -149,6 +226,7 @@ const MoodCalendar = () => {
         selectedDate={selectedDate}
         dayData={selectedDayData}
         onClose={() => setSelectedDate(null)}
+        isLoading={dayDetailLoading}
       />
     </div>
   );
