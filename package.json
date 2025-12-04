@@ -40,9 +40,10 @@
     "webpack-dev-server": "^5.2.2"
   },
   "scripts": {
-    "start": "brojs server --port 8099 --with-open-browser",
+    "build": "cross-env NODE_ENV=production brojs build",
+    "build:dev": "cross-env NODE_ENV=development brojs build",
+    "start": "cross-env NODE_ENV=development brojs server --port 8099 --with-open-browser",
     "dev": "brojs server --port 8099 --with-open-browser",
-    "build": "brojs build",
     "build:prod": "npm run build",
     "test": "react-scripts test --watchAll=false",
     "test:watch": "react-scripts test --watchAll",
