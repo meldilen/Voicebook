@@ -1,26 +1,23 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import App from './App.jsx';
-import './i18n';
-
-console.log('=== BROJS APP STARTING ===');
-console.log('Document body:', document.body.innerHTML.substring(0, 500));
+import React from "react";
+import ReactDOM from "react-dom/client";
+import App from "./App.jsx";
+import "./i18n";
 
 function startApp() {
-  let rootElement = document.getElementById('root');
-  
+  let rootElement = document.getElementById("root");
+
   if (!rootElement) {
-    console.warn('Element #root not found, checking alternatives...');
-    
+    console.warn("Element #root not found, checking alternatives...");
+
     const possibleSelectors = [
-      '#root',
-      '#app',
-      '#main',
-      '[data-app]',
-      '.app-container',
-      'body > div:first-child'
+      "#root",
+      "#app",
+      "#main",
+      "[data-app]",
+      ".app-container",
+      "body > div:first-child",
     ];
-    
+
     for (const selector of possibleSelectors) {
       const el = document.querySelector(selector);
       if (el) {
@@ -29,25 +26,26 @@ function startApp() {
         break;
       }
     }
-    
+
     if (!rootElement) {
-      console.warn('No root element found, creating one...');
-      rootElement = document.createElement('div');
-      rootElement.id = 'root';
-      
-      const container = document.querySelector('body') || document.documentElement;
+      console.warn("No root element found, creating one...");
+      rootElement = document.createElement("div");
+      rootElement.id = "root";
+
+      const container =
+        document.querySelector("body") || document.documentElement;
       if (container) {
         container.appendChild(rootElement);
-        console.log('Created root element');
+        console.log("Created root element");
       } else {
-        console.error('No container found for root!');
+        console.error("No container found for root!");
         return;
       }
     }
   }
-  
-  console.log('Mounting React to:', rootElement);
-  
+
+  console.log("Mounting React to:", rootElement);
+
   try {
     const root = ReactDOM.createRoot(rootElement);
     root.render(
@@ -55,9 +53,9 @@ function startApp() {
         <App />
       </React.StrictMode>
     );
-    console.log('✅ React app mounted successfully!');
+    console.log("✅ React app mounted successfully!");
   } catch (error) {
-    console.error('❌ Failed to mount React:', error);
+    console.error("❌ Failed to mount React:", error);
   }
 }
 
@@ -65,8 +63,8 @@ setTimeout(() => {
   if (document.body) {
     startApp();
   } else {
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener("DOMContentLoaded", () => {
       setTimeout(startApp, 100);
     });
   }
-}, 300); // Увеличиваем задержку
+}, 300);

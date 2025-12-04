@@ -1,32 +1,43 @@
-const pkg = require('./package.json')
-const webpack = require('webpack')
-const path = require('path')
-
 module.exports = {
-  apiPath: 'stubs/api',
-  webpackConfig: {
-    output: {
-      publicPath: `/static/${pkg.name}/${process.env.VERSION || pkg.version}/`
+  entry: {
+    main: "./src/index.js",
+  },
+  output: {
+    path: __dirname + "/dist",
+    publicPath: "/voice-book/",
+    filename: "[name].js",
+  },
+  module: {
+    rules: [
+      {
+        test: /\.(js|jsx)$/,
+        exclude: /node_modules/,
+        use: {
+          loader: "babel-loader",
+          options: {
+            presets: ["@babel/preset-env", "@babel/preset-react"]
+          }
+        },
+      },
+      {
+        test: /\.css$/,
+        use: ["style-loader", "css-loader"],
+      },
+    ],
+  },
+  devServer: {
+    static: {
+      directory: __dirname + "/public",
+      publicPath: "/",
     },
-    resolve: {
-      alias: {
-        '@': path.resolve(__dirname, 'src')
-      }
-    }
-  },
-  navigations: {
-    'voice-book.main': '/voice-book',
-    'voice-book.home': '/voice-book/home',
-    'voice-book.profile': '/voice-book/profile'
-  },
-  features: {
-    'voice-book': {
-      'analytics': { value: 'enabled' },
-      'voice-recording': { value: 'enabled' }
+    historyApiFallback: {
+      rewrites: [
+        { from: /^\/voice-book/, to: '/voice-book/index.html' }
+      ]
     },
+    open: true,
   },
-  config: {
-    'voice-book.api': '/api',
-    'voice-book.ws': '/ws'
-  }
-}
+  resolve: {
+    extensions: [".js", ".jsx"],
+  },
+};
