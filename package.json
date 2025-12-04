@@ -43,6 +43,7 @@
     "start": "brojs server --port 8099 --with-open-browser",
     "dev": "brojs server --port 8099 --with-open-browser",
     "build": "brojs build",
+    "build:prod": "npm run build",
     "test": "react-scripts test --watchAll=false",
     "test:watch": "react-scripts test --watchAll",
     "test:ci": "CI=true react-scripts test --watchAll=false",
