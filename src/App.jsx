@@ -15,7 +15,7 @@ import AchievementsPage from "./pages/AchievementsPage";
 export default function App() {
   const [globalError, setGlobalError] = useState(null);
 
-return (
+  return (
     <Provider store={store}>
       <Router basename="/">
         <InitializeAuth />
@@ -29,21 +29,61 @@ return (
                 </button>
               </div>
             )}
+            
             <Routes>
+              {/* Публичные роуты */}
               <Route path="/" element={<Navigate to="/onboarding" replace />} />
-              <Route path="/homepage" element={<HomePage />} />
               <Route path="/onboarding" element={<OnboardingPage />} />
               <Route path="/login" element={<AuthPage />} />
               <Route path="/signup" element={<AuthPage />} />
-              <Route path="/achievements" element={<AchievementsPage />} />
               
-              <Route element={<ProtectedRoute />}>
-                <Route path="/homepage" element={<HomePage />} />
-                <Route path="/profile" element={<ProfilePage />} />
-                <Route path="/profile/settings" element={<SettingsPage />} />
-                <Route path="/journal" element={<JournalPage />} />
-              </Route>
+              {/* Защищенные роуты через ProtectedRoute */}
+              <Route 
+                path="/homepage" 
+                element={
+                  <ProtectedRoute>
+                    <HomePage />
+                  </ProtectedRoute>
+                } 
+              />
+              
+              <Route 
+                path="/profile" 
+                element={
+                  <ProtectedRoute>
+                    <ProfilePage />
+                  </ProtectedRoute>
+                } 
+              />
+              
+              <Route 
+                path="/profile/settings" 
+                element={
+                  <ProtectedRoute>
+                    <SettingsPage />
+                  </ProtectedRoute>
+                } 
+              />
+              
+              <Route 
+                path="/journal" 
+                element={
+                  <ProtectedRoute>
+                    <JournalPage />
+                  </ProtectedRoute>
+                } 
+              />
+              
+              <Route 
+                path="/achievements" 
+                element={
+                  <ProtectedRoute>
+                    <AchievementsPage />
+                  </ProtectedRoute>
+                } 
+              />
 
+              {/* 404 */}
               <Route path="*" element={
                 <Navigate to="/onboarding" replace state={{ from: '404-redirect' }} />
               } />
