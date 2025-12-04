@@ -1,3 +1,4 @@
+import React from "react";
 import "./AchievementCard.css";
 import { useState } from "react";
 

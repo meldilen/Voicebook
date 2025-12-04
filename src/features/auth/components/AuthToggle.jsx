@@ -1,3 +1,4 @@
+import React from "react";
 import "./Auth.css";
 import { useTranslation } from "react-i18next";
 

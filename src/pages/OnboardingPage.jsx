@@ -1,3 +1,4 @@
+import React from "react";
 import { useState, useEffect } from "react";
 import AudioRecorder from "../features/recordings/components/AudioRecorder";
 import WaveAnimation from "../features/recordings/components/WaveAnimation";

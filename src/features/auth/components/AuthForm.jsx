@@ -1,3 +1,4 @@
+import React from "react";
 import { useState, useEffect, useCallback } from "react";
 import "./Auth.css";
 import ErrorIcon from "./ErrorIcon";

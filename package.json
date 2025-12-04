@@ -2,6 +2,10 @@
   "name": "voice-book",
   "version": "1.0.0",
   "main": "src/index.js",
+  "entryPoint": "./src/index.js",
+  "brojs": {
+    "entry": "./src/index.js"
+  },
   "private": true,
   "proxy": "http://localhost:8000",
   "dependencies": {
@@ -43,7 +47,6 @@
     "start": "cross-env NODE_ENV=development brojs server --port 8099 --with-open-browser",
     "build": "cross-env NODE_ENV=production brojs build",
     "build:dev": "cross-env NODE_ENV=development brojs build",
-    "dev": "brojs server --port 8099 --with-open-browser",
     "build:prod": "npm run build",
     "test": "react-scripts test --watchAll=false",
     "test:watch": "react-scripts test --watchAll",
