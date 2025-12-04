@@ -1,12 +1,11 @@
 module.exports = {
-  projectName: "voice-book",
   entry: {
     main: "./src/index.js",
   },
   output: {
     path: __dirname + "/dist",
-    publicPath: "/",
-    filename: "[name].js", // Используем [name] вместо bundle.js
+    publicPath: "/voice-book/",
+    filename: "[name].js",
   },
   module: {
     rules: [
@@ -15,6 +14,9 @@ module.exports = {
         exclude: /node_modules/,
         use: {
           loader: "babel-loader",
+          options: {
+            presets: ["@babel/preset-env", "@babel/preset-react"]
+          }
         },
       },
       {
@@ -28,8 +30,15 @@ module.exports = {
       directory: __dirname + "/public",
       publicPath: "/",
     },
-    historyApiFallback: true,
+    historyApiFallback: {
+      rewrites: [
+        { from: /^\/voice-book/, to: '/voice-book/index.html' }
+      ]
+    },
     port: 8099,
     open: true,
+  },
+  resolve: {
+    extensions: [".js", ".jsx"],
   },
 };

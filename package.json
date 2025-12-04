@@ -40,18 +40,16 @@
     "webpack-dev-server": "^5.2.2"
   },
   "scripts": {
+    "start": "cross-env NODE_ENV=development brojs server --port 8099 --with-open-browser",
     "build": "cross-env NODE_ENV=production brojs build",
     "build:dev": "cross-env NODE_ENV=development brojs build",
-    "start": "cross-env NODE_ENV=development brojs server --port 8099 --with-open-browser",
     "dev": "brojs server --port 8099 --with-open-browser",
     "build:prod": "npm run build",
     "test": "react-scripts test --watchAll=false",
     "test:watch": "react-scripts test --watchAll",
     "test:ci": "CI=true react-scripts test --watchAll=false",
     "test:once": "react-scripts test --watchAll=false",
-    "eject": "react-scripts eject",
-    "brojs:dev": "brojs server",
-    "brojs:build": "brojs build"
+    "eject": "react-scripts eject"
   },
   "eslintConfig": {
     "extends": [
