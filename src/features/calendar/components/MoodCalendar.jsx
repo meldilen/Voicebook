@@ -2,9 +2,9 @@ import React from "react";
 import { useState, useMemo } from "react";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import "./MoodCalendar.css";
-import DayPopup from "./DayPopup";
-import { MoodIcon } from "./MoodIcon";
-import { useGetCalendarMonthQuery, useGetCalendarDayQuery } from "../calendarApi";
+import DayPopup from "./DayPopup.jsx";
+import { MoodIcon } from "./MoodIcon.jsx";
+import { useGetCalendarMonthQuery, useGetCalendarDayQuery } from "../calendarApi.js";
 import { useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
 

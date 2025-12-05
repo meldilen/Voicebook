@@ -1,9 +1,9 @@
 import React from "react";
 import { useState, useEffect, useCallback } from "react";
 import "./Auth.css";
-import ErrorIcon from "./ErrorIcon";
-import HintIcon from "./HintIcon";
-import PasswordInput from "./PasswordInput";
+import ErrorIcon from "./ErrorIcon.jsx";
+import HintIcon from "./HintIcon.jsx";
+import PasswordInput from "./PasswordInput.jsx";
 import { useTranslation } from "react-i18next";
 
 const AuthForm = ({ isLogin, onSubmit, authError }) => {

@@ -1,6 +1,7 @@
+import React from "react";
 import { createApi } from "@reduxjs/toolkit/query/react";
-import { API_CONFIG } from "../../config";
-import { baseQueryWithReauth } from "../auth/authApi";
+import { API_CONFIG } from "../../config.js";
+import { baseQueryWithReauth } from "../auth/authApi.js";
 
 export const achievementsApi = createApi({
   reducerPath: "achievementsApi",

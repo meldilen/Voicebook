@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import Calendar from '../calendar/components/MoodCalendar';
+import Calendar from '../calendar/components/MoodCalendar.jsx';
 import './BottomSheetNavigator.css';
-import AchievementsTab from '../../pages/AchievementsTab';
-import JournalTab from '../../pages/JournalTab';
+import AchievementsTab from '../../pages/AchievementsTab.jsx';
+import JournalTab from '../../pages/JournalTab.jsx';
 import { useTranslation } from "react-i18next";
 
 const BottomSheetNavigator = () => {

@@ -1,11 +1,10 @@
-import React from "react";
-import { useState, useCallback } from "react";
+import React, { useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
-import { useGetRecordingsQuery } from "../features/recordings/recordingsApi";
+import { useGetRecordingsQuery } from "../features/recordings/recordingsApi.js";
 import { useSelector } from "react-redux";
 import "./JournalTab.css";
-import FilterControls from "../features/journal/components/FilterControls";
-import RecordingsList from "../features/recordings/components/RecordingsList";
+import FilterControls from "../features/journal/components/FilterControls.jsx";
+import RecordingsList from "../features/recordings/components/RecordingsList.jsx";
 
 function JournalTab() {
   const { t } = useTranslation();

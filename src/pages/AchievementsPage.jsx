@@ -1,19 +1,18 @@
-import React from "react";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useTranslation } from "react-i18next";
-import AchievementCard from "../features/achievements/components/AchievementCard";
+import AchievementCard from "../features/achievements/components/AchievementCard.jsx";
 import "./AchievementsPage.css";
-import Header from "../features/Header/Header";
+import Header from "../features/Header/Header.jsx";
 import {
   useGetMyAchievementsQuery,
   useGetAchievementStatsQuery,
-} from "../features/achievements/achievementsApi";
+} from "../features/achievements/achievementsApi.js";
 import {
   selectUserAchievements,
   setUserAchievements,
   setStats,
-} from "../features/achievements/achievementsSlice";
+} from "../features/achievements/achievementsSlice.js";
 
 function AchievementsPage() {
   const [filter, setFilter] = useState("all");

@@ -1,6 +1,7 @@
+import React from "react";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { API_CONFIG } from "../../config";
-import { logout, setToken, setCredentials } from "./authSlice";
+import { API_CONFIG } from "../../config.js";
+import { logout, setToken, setCredentials } from "./authSlice.js";
 
 
 const baseQuery = fetchBaseQuery({

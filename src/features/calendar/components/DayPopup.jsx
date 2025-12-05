@@ -2,7 +2,7 @@ import React from "react";
 import './DayPopup.css';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from "react-i18next";
-import { useGetCalendarDayQuery } from '../calendarApi';
+import { useGetCalendarDayQuery } from '../calendarApi.js';
 
 const DayPopup = ({ selectedDate, dayData, onClose }) => {
   const navigate = useNavigate();

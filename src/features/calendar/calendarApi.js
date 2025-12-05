@@ -1,5 +1,6 @@
+import React from "react";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { API_CONFIG } from "../../config";
+import { API_CONFIG } from "../../config.js";
 
 export const calendarApi = createApi({
   reducerPath: "calendarApi",

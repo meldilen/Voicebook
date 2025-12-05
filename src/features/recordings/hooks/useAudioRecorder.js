@@ -1,6 +1,6 @@
 import React from "react";
 import { useState, useRef, useEffect, useCallback } from "react";
-import { useUploadRecordingMutation } from "../recordingsApi";
+import { useUploadRecordingMutation } from "../recordingsApi.js";
 
 const useAudioRecorder = ({ setIsRecording, onRecordingStart, onResult }) => {
   const [isRecording, setRecording] = useState(false);

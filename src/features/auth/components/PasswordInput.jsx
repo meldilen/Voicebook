@@ -1,5 +1,5 @@
 import React from "react";
-import PasswordVisibilityIcon from './VisibilityIcon';
+import PasswordVisibilityIcon from './VisibilityIcon.jsx';
 import './Auth.css'
 
 const PasswordInput = ({

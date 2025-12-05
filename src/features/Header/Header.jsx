@@ -12,12 +12,12 @@ import {
 } from "react-icons/fa";
 import "./Header.css";
 import { useNavigate } from "react-router-dom";
-import { selectCurrentUser } from "../auth/authSlice";
+import { selectCurrentUser } from "../auth/authSlice.js";
 import { useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
 import { useEffect, useState } from "react";
-import { useGetRecordingLimitQuery } from "../recordings/recordingsApi";
-import LanguageSwitcher from "../../app/LanguageSwitcher";
+import { useGetRecordingLimitQuery } from "../recordings/recordingsApi.js";
+import LanguageSwitcher from "../../app/LanguageSwitcher.jsx";
 
 function Header({
   onCalendarToggle,

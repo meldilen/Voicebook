@@ -1,7 +1,7 @@
 import React from "react";
 import { memo } from "react";
 import { useTranslation } from "react-i18next";
-import RecordingListItem from "./RecordingListItem";
+import RecordingListItem from "./RecordingListItem.jsx";
 
 const RecordingsList = memo(({ recordings, expandedRecord, toggleExpandRecord }) => {
   const { t } = useTranslation();

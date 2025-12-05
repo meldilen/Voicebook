@@ -1,3 +1,5 @@
+import React from 'react';
+
 const ErrorIcon = () => (
   <svg
     width="16"

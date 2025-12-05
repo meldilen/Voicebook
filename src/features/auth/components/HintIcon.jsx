@@ -1,3 +1,5 @@
+import React from 'react';
+
 const HintIcon = () => (
   <svg
     width="16"

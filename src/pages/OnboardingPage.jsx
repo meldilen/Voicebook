@@ -1,10 +1,9 @@
-import React from "react";
-import { useState, useEffect } from "react";
-import AudioRecorder from "../features/recordings/components/AudioRecorder";
-import WaveAnimation from "../features/recordings/components/WaveAnimation";
-import Header from "../features/Header/Header";
+import React, { useState, useEffect } from "react";
+import AudioRecorder from "../features/recordings/components/AudioRecorder.jsx";
+import WaveAnimation from "../features/recordings/components/WaveAnimation.jsx";
+import Header from "../features/Header/Header.jsx";
 import "./OnboardingPage.css";
-import RecordingCard from "../features/recordings/components/RecordingCard";
+import RecordingCard from "../features/recordings/components/RecordingCard.jsx";
 import { useTranslation } from "react-i18next";
 
 function OnboardingPage() {

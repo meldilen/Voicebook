@@ -1,15 +1,14 @@
-import React from "react";
-import { useState, useEffect, useRef } from "react";
-import AudioRecorder from "../features/recordings/components/AudioRecorder";
-import WaveAnimation from "../features/recordings/components/WaveAnimation";
-import RecordingCard from "../features/recordings/components/RecordingCard";
-import FeedbackWidget from "../features/recordings/components/FeedbackWidget";
-import Calendar from "../features/calendar/components/MoodCalendar";
-import Header from "../features/Header/Header";
-import BottomSheet from "../features/BottomSheet/BottomSheet";
-import BottomSheetNavigator from "../features/BottomSheet/BottomSheetNavigator";
+import React, { useState, useEffect, useRef } from "react";
+import AudioRecorder from "../features/recordings/components/AudioRecorder.jsx";
+import WaveAnimation from "../features/recordings/components/WaveAnimation.jsx";
+import RecordingCard from "../features/recordings/components/RecordingCard.jsx";
+import FeedbackWidget from "../features/recordings/components/FeedbackWidget.jsx";
+import Calendar from "../features/calendar/components/MoodCalendar.jsx";
+import Header from "../features/Header/Header.jsx";
+import BottomSheet from "../features/BottomSheet/BottomSheet.jsx";
+import BottomSheetNavigator from "../features/BottomSheet/BottomSheetNavigator.jsx";
 import "./HomePage.css";
-import { useSetRecordingFeedbackMutation } from "../features/recordings/recordingsApi";
+import { useSetRecordingFeedbackMutation } from "../features/recordings/recordingsApi.js";
 import { useTranslation } from "react-i18next";
 
 function HomePage() {

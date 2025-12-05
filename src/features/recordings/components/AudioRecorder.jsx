@@ -10,7 +10,7 @@ import {
   FaPlay,
 } from "react-icons/fa";
 import "./AudioRecorder.css";
-import useAudioRecorder from "../hooks/useAudioRecorder";
+import useAudioRecorder from "../hooks/useAudioRecorder.js";
 import { useTranslation } from "react-i18next";
 
 const AudioRecorder = ({ setIsRecording, onRecordingStart, onResult }) => {

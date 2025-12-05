@@ -7,9 +7,9 @@ import {
   useGetMeQuery,
   useDeleteAccountMutation,
   useGetUserSessionsQuery,
-} from "../features/auth/authApi";
-import { logout, selectCurrentUser } from "../features/auth/authSlice";
-import Calendar from "../features/calendar/components/MoodCalendar";
+} from "../features/auth/authApi.js";
+import { logout, selectCurrentUser } from "../features/auth/authSlice.js";
+import Calendar from "../features/calendar/components/MoodCalendar.jsx";
 import "./ProfilePage.css";
 import { useState } from "react";
 import { format } from "date-fns";

@@ -1,16 +1,15 @@
-import React from "react";
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   useRegisterMutation,
   useLoginMutation,
   useGetMeQuery,
-} from "../features/auth/authApi";
+} from "../features/auth/authApi.js";
 import { useDispatch, useSelector } from "react-redux";
-import { setCredentials, setError } from "../features/auth/authSlice";
+import { setCredentials, setError } from "../features/auth/authSlice.js";
 import "./AuthPage.css";
-import AuthForm from "../features/auth/components/AuthForm";
-import AuthToggle from "../features/auth/components/AuthToggle";
+import AuthForm from "../features/auth/components/AuthForm.jsx";
+import AuthToggle from "../features/auth/components/AuthToggle.jsx";
 import { useTranslation } from "react-i18next";
 
 function AuthPage() {

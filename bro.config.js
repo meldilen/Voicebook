@@ -1,15 +1,11 @@
-const path = require("path");
-const HtmlWebpackPlugin = require("html-webpack-plugin");
-
 module.exports = {
   entry: {
     main: "./src/index.js",
   },
   output: {
-    path: path.resolve(__dirname, "dist"),
-    publicPath: "/",
-    filename: "[name].[contenthash].js",
-    clean: true,
+    path: __dirname + "/dist",
+    publicPath: "/voice-book/",
+    filename: "[name].js",
   },
   module: {
     rules: [
@@ -29,18 +25,16 @@ module.exports = {
       },
     ],
   },
-  plugins: [
-    new HtmlWebpackPlugin({
-      template: path.resolve(__dirname, "public/index.html"),
-      filename: "index.html",
-      inject: "body",
-    }),
-  ],
   devServer: {
     static: {
-      directory: path.resolve(__dirname, "public"),
+      directory: __dirname + "/public",
+      publicPath: "/",
     },
-    historyApiFallback: true,
+    historyApiFallback: {
+      rewrites: [
+        { from: /^\/voice-book/, to: '/voice-book/index.html' }
+      ]
+    },
     port: 8099,
     open: true,
   },

@@ -1,15 +1,14 @@
-import React from "react";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { selectCurrentUser } from "../features/auth/authSlice";
+import { selectCurrentUser } from "../features/auth/authSlice.js";
 import {
   useUpdateProfileMutation,
   useGetMeQuery,
-} from "../features/auth/authApi";
+} from "../features/auth/authApi.js";
 import "./SettingsPage.css";
-import PasswordVisibilityIcon from "../features/auth/components/VisibilityIcon";
+import PasswordVisibilityIcon from "../features/auth/components/VisibilityIcon.jsx";
 
 const SettingsPage = () => {
   const { t } = useTranslation();

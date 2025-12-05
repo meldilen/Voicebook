@@ -4,8 +4,8 @@ import { useTranslation } from "react-i18next";
 import { format, parseISO } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
 import "./RecordingListItem.css";
-import { useDeleteRecordingMutation } from "../recordingsApi";
-import { useGenerateCalendarDayMutation } from "../../calendar/calendarApi";
+import { useDeleteRecordingMutation } from "../recordingsApi.js";
+import { useGenerateCalendarDayMutation } from "../../calendar/calendarApi.js";
 
 function RecordingListItem({ recording, isExpanded, onToggleExpand }) {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);

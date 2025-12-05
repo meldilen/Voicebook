@@ -1,8 +1,8 @@
 import React from "react";
 import { useEffect } from "react";
-import { useGetMeQuery } from "./authApi";
+import { useGetMeQuery } from "./authApi.js";
 import { useDispatch } from "react-redux";
-import { setCredentials, logout } from "./authSlice";
+import { setCredentials, logout } from "./authSlice.js";
 
 const InitializeAuth = () => {
   const { data, error} = useGetMeQuery();
