@@ -1,44 +1,21 @@
+const pkg = require('./package')
+
 module.exports = {
-  entry: {
-    main: "./src/index.js",
-  },
-  output: {
-    path: __dirname + "/dist",
-    publicPath: "/voice-book/",
-    filename: "[name].js",
-  },
-  module: {
-    rules: [
-      {
-        test: /\.(js|jsx)$/,
-        exclude: /node_modules/,
-        use: {
-          loader: "babel-loader",
-          options: {
-            presets: ["@babel/preset-env", "@babel/preset-react"]
-          }
+    pageTitle: 'AI Bridge',
+    webpackConfig: {
+        output: {
+            publicPath: `/static/${pkg.name}/${process.env.VERSION || pkg.version}/`
+        }
+    },
+    navigations: {
+        'voice-book.main': '/',
+    },
+    features: {
+        'voice-book': {
+            // add your features here in the format [featureName]: { value: string }
         },
-      },
-      {
-        test: /\.css$/,
-        use: ["style-loader", "css-loader"],
-      },
-    ],
-  },
-  devServer: {
-    static: {
-      directory: __dirname + "/public",
-      publicPath: "/",
     },
-    historyApiFallback: {
-      rewrites: [
-        { from: /^\/voice-book/, to: '/voice-book/index.html' }
-      ]
-    },
-    port: 8099,
-    open: true,
-  },
-  resolve: {
-    extensions: [".js", ".jsx"],
-  },
-};
+    config: {
+        'voice-book.api': "/api/v1",
+    }
+}

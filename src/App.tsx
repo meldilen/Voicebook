@@ -5,7 +5,7 @@ import {
   Navigate,
 } from "react-router-dom";
 import { Provider } from "react-redux";
-import { store } from "./app/store";
+import { store } from "./app/store.js";
 import { useState } from "react";
 
 import OnboardingPage from "./pages/OnboardingPage.jsx";

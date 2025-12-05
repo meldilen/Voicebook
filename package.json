@@ -1,7 +1,7 @@
 {
   "name": "voice-book",
   "version": "1.0.0",
-  "main": "src/index.js",
+  "main": "src/index.jsx",
   "private": true,
   "proxy": "http://localhost:8000",
   "dependencies": {
