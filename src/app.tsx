@@ -67,7 +67,7 @@ const router = createHashRouter([
     element: <Navigate to="/onboarding" replace />,
   },
 ], {
-  basename: '/voice-book'
+  // basename: '/voice-book'
 });
 
 export default function App() {
