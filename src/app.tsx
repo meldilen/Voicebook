@@ -1,6 +1,6 @@
 import React from "react";
 import {
-  createBrowserRouter,
+  createHashRouter,
   RouterProvider,
   Navigate,
 } from "react-router-dom";
@@ -20,10 +20,7 @@ import InitializeAuth from "./features/auth/InitializeAuth.jsx";
 import { I18nextProvider } from "react-i18next";
 import i18n from "./i18n.js";
 
-console.log("=== FINAL TEST - STATIC IMPORTS ===");
-
-// Создаем router
-const router = createBrowserRouter([
+const router = createHashRouter([
   {
     path: "/",
     element: <Navigate to="/onboarding" replace />,
@@ -40,7 +37,6 @@ const router = createBrowserRouter([
     path: "/signup",
     element: <AuthPage />,
   },
-  // Защищенные роуты
   {
     element: <ProtectedRoute />,
     children: [
@@ -70,7 +66,9 @@ const router = createBrowserRouter([
     path: "*",
     element: <Navigate to="/onboarding" replace />,
   },
-]);
+], {
+  basename: '/voice-book'
+});
 
 export default function App() {
   const [globalError, setGlobalError] = useState(null);

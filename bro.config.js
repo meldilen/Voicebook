@@ -8,7 +8,7 @@ module.exports = {
         }
     },
     navigations: {
-        'voice-book.main': '/',
+        'voice-book.main': '/voice-book',
     },
     features: {
         'voice-book': {

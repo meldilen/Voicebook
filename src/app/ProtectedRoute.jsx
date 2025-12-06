@@ -19,7 +19,6 @@ const ProtectedRoute = () => {
     );
   }
 
-  // В v7 ProtectedRoute должен возвращать Outlet для дочерних роутов
   return <Outlet />;
 };
 
