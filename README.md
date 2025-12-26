@@ -100,3 +100,9 @@ Configure `.env` file with:
 - Mobile applications
 - Integration with health platforms
 - Advanced analytics and reporting
+
+<img src="./images/image3.png" alt="Example of Microphone Disclaimer" width="400">
+<img src="./images/image2.png" alt="Example of Achievements" width="400">
+<img src="./images/image4.png" alt="Example of Microphone Usage" width="400">
+
+<img src="./images/image1.png" alt="Example of Emotional Portrait" width="400">
